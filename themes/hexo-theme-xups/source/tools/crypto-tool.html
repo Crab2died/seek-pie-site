@@ -1,0 +1,1234 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>加解密工具</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            font-weight: 300;
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .crypto-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            border-bottom: 2px solid #e1e5e9;
+            padding-bottom: 10px;
+        }
+
+        .crypto-tab {
+            padding: 12px 24px;
+            background: #f8f9fa;
+            border: 2px solid #e1e5e9;
+            border-radius: 10px 10px 0 0;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            color: #666;
+        }
+
+        .crypto-tab:hover {
+            background: #e9ecef;
+        }
+
+        .crypto-tab.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-color: #667eea;
+        }
+
+        .crypto-content {
+            display: none;
+        }
+
+        .crypto-content.active {
+            display: block;
+        }
+
+        .input-group {
+            margin-bottom: 25px;
+        }
+
+        .input-group label {
+            display: block;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+        }
+
+        .textarea-wrapper {
+            position: relative;
+        }
+
+        textarea {
+            width: 100%;
+            min-height: 150px;
+            padding: 15px;
+            border: 2px solid #e1e5e9;
+            border-radius: 10px;
+            font-size: 1em;
+            font-family: 'Consolas', 'Monaco', monospace;
+            resize: vertical;
+            transition: all 0.3s ease;
+            background: #f8f9fa;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        input[type="text"],
+        input[type="password"],
+        input[type="number"],
+        select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e1e5e9;
+            border-radius: 10px;
+            font-size: 1em;
+            transition: all 0.3s ease;
+            background: #f8f9fa;
+        }
+
+        input[type="text"]:focus,
+        input[type="password"]:focus,
+        input[type="number"]:focus,
+        select:focus {
+            outline: none;
+            border-color: #667eea;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .char-count {
+            position: absolute;
+            bottom: 10px;
+            right: 15px;
+            font-size: 0.9em;
+            color: #999;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 2px 8px;
+            border-radius: 5px;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-bottom: 25px;
+        }
+
+        .btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+            transform: translateY(-2px);
+        }
+
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #218838;
+            transform: translateY(-2px);
+        }
+
+        .btn-warning {
+            background: #ffc107;
+            color: #333;
+        }
+
+        .btn-warning:hover {
+            background: #e0a800;
+            transform: translateY(-2px);
+        }
+
+        .btn-info {
+            background: #17a2b8;
+            color: white;
+        }
+
+        .btn-info:hover {
+            background: #138496;
+            transform: translateY(-2px);
+        }
+
+        .result-box {
+            background: #f8f9fa;
+            border: 2px solid #e1e5e9;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+            position: relative;
+        }
+
+        .result-box h3 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+        }
+
+        .result-content {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: 'Consolas', 'Monaco', monospace;
+            word-break: break-all;
+            max-height: 300px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+        }
+
+        .copy-btn {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            padding: 8px 16px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: all 0.3s ease;
+        }
+
+        .copy-btn:hover {
+            background: #5a67d8;
+            transform: scale(1.05);
+        }
+
+        .alert {
+            padding: 15px 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-weight: 500;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert-danger {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .info-box {
+            background: #e7f3ff;
+            border-left: 4px solid #2196F3;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+
+        .info-box h4 {
+            color: #1976D2;
+            margin-bottom: 8px;
+        }
+
+        .info-box p {
+            color: #666;
+            line-height: 1.6;
+        }
+
+        .password-toggle {
+            position: relative;
+        }
+
+        .password-toggle input {
+            padding-right: 45px;
+        }
+
+        .toggle-password-btn {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1.2em;
+            color: #666;
+            padding: 5px;
+        }
+
+        .toggle-password-btn:hover {
+            color: #667eea;
+        }
+
+        .key-display {
+            background: white;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            padding: 10px;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 0.9em;
+            word-break: break-all;
+            max-height: 200px;
+            overflow-y: auto;
+            margin-top: 10px;
+        }
+
+        /* 移动端优化 */
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+
+            .content {
+                padding: 20px 15px;
+            }
+
+            .header {
+                padding: 20px 15px;
+            }
+
+            .header h1 {
+                font-size: 1.8em;
+            }
+
+            .header p {
+                font-size: 0.95em;
+            }
+
+            .crypto-tabs {
+                flex-direction: column;
+                gap: 8px;
+                border-bottom: none;
+                padding-bottom: 0;
+            }
+
+            .crypto-tab {
+                width: 100%;
+                text-align: center;
+                border-radius: 8px;
+            }
+
+            .button-group {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .header h1 {
+                font-size: 1.5em;
+            }
+
+            .content {
+                padding: 15px 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔐 加解密工具</h1>
+            <p>支持对称加密、非对称加密、HMAC等多种加密算法，保护您的数据安全</p>
+        </div>
+
+        <div class="content">
+            <div class="crypto-tabs">
+                <div class="crypto-tab active" onclick="switchTab('aes')">AES加密</div>
+                <div class="crypto-tab" onclick="switchTab('des')">DES加密</div>
+                <div class="crypto-tab" onclick="switchTab('tripledes')">3DES加密</div>
+                <div class="crypto-tab" onclick="switchTab('rc4')">RC4加密</div>
+                <div class="crypto-tab" onclick="switchTab('rabbit')">Rabbit加密</div>
+                <div class="crypto-tab" onclick="switchTab('rsa')">RSA非对称加密</div>
+                <div class="crypto-tab" onclick="switchTab('hmac')">HMAC签名</div>
+            </div>
+
+            <!-- AES 加密 -->
+            <div id="aes" class="crypto-content active">
+                <div class="info-box">
+                    <h4>📘 AES加密说明</h4>
+                    <p>AES（高级加密标准）是目前最安全、最广泛使用的对称加密算法之一。支持128、192和256位密钥长度，具有极高的安全性和加密效率。适用于文件加密、数据传输加密等场景。</p>
+                </div>
+
+                <div class="input-group">
+                    <label>输入文本</label>
+                    <div class="textarea-wrapper">
+                        <textarea id="aesInput" placeholder="请输入要加密/解密的文本..."></textarea>
+                        <span class="char-count" id="aesCount">0 字符</span>
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label>密码/密钥</label>
+                    <div class="password-toggle">
+                        <input type="password" id="aesPassword" placeholder="请输入加密密码（建议至少8位）">
+                        <button class="toggle-password-btn" onclick="togglePassword('aesPassword')" title="显示/隐藏密码">👁️</button>
+                    </div>
+                </div>
+
+                <div class="button-group">
+                    <button class="btn btn-primary" onclick="encryptAES()">🔒 AES 加密</button>
+                    <button class="btn btn-secondary" onclick="decryptAES()">🔓 AES 解密</button>
+                    <button class="btn btn-warning" onclick="clearInput('aes')">🗑️ 清空</button>
+                </div>
+
+                <div id="aesResult"></div>
+            </div>
+
+            <!-- DES 加密 -->
+            <div id="des" class="crypto-content">
+                <div class="info-box">
+                    <h4>📘 DES加密说明</h4>
+                    <p>DES（数据加密标准）是一种经典的对称加密算法，使用56位密钥。虽然现在被认为安全性较低，但在某些旧系统中仍在使用。建议在非敏感数据场景下使用，或考虑升级到3DES或AES。</p>
+                </div>
+
+                <div class="input-group">
+                    <label>输入文本</label>
+                    <div class="textarea-wrapper">
+                        <textarea id="desInput" placeholder="请输入要加密/解密的文本..."></textarea>
+                        <span class="char-count" id="desCount">0 字符</span>
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label>密码/密钥</label>
+                    <div class="password-toggle">
+                        <input type="password" id="desPassword" placeholder="请输入加密密码">
+                        <button class="toggle-password-btn" onclick="togglePassword('desPassword')" title="显示/隐藏密码">👁️</button>
+                    </div>
+                </div>
+
+                <div class="button-group">
+                    <button class="btn btn-primary" onclick="encryptDES()">🔒 DES 加密</button>
+                    <button class="btn btn-secondary" onclick="decryptDES()">🔓 DES 解密</button>
+                    <button class="btn btn-warning" onclick="clearInput('des')">🗑️ 清空</button>
+                </div>
+
+                <div id="desResult"></div>
+            </div>
+
+            <!-- TripleDES 加密 -->
+            <div id="tripledes" class="crypto-content">
+                <div class="info-box">
+                    <h4>📘 3DES加密说明</h4>
+                    <p>3DES（三重数据加密算法）是DES的增强版本，对数据进行三次DES加密，大大提高了安全性。使用168位密钥（实际有效密钥长度112位），是DES的安全替代方案，但速度较慢。</p>
+                </div>
+
+                <div class="input-group">
+                    <label>输入文本</label>
+                    <div class="textarea-wrapper">
+                        <textarea id="tripledesInput" placeholder="请输入要加密/解密的文本..."></textarea>
+                        <span class="char-count" id="tripledesCount">0 字符</span>
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label>密码/密钥</label>
+                    <div class="password-toggle">
+                        <input type="password" id="tripledesPassword" placeholder="请输入加密密码">
+                        <button class="toggle-password-btn" onclick="togglePassword('tripledesPassword')" title="显示/隐藏密码">👁️</button>
+                    </div>
+                </div>
+
+                <div class="button-group">
+                    <button class="btn btn-primary" onclick="encryptTripleDES()">🔒 3DES 加密</button>
+                    <button class="btn btn-secondary" onclick="decryptTripleDES()">🔓 3DES 解密</button>
+                    <button class="btn btn-warning" onclick="clearInput('tripledes')">🗑️ 清空</button>
+                </div>
+
+                <div id="tripledesResult"></div>
+            </div>
+
+            <!-- RC4 加密 -->
+            <div id="rc4" class="crypto-content">
+                <div class="info-box">
+                    <h4>📘 RC4加密说明</h4>
+                    <p>RC4是一种流加密算法，以其简单性和速度著称。曾广泛应用于SSL/TLS和WEP等协议中。但由于发现了一些安全漏洞，现已不推荐用于新系统。可用于非关键数据的快速加密。</p>
+                </div>
+
+                <div class="input-group">
+                    <label>输入文本</label>
+                    <div class="textarea-wrapper">
+                        <textarea id="rc4Input" placeholder="请输入要加密/解密的文本..."></textarea>
+                        <span class="char-count" id="rc4Count">0 字符</span>
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label>密码/密钥</label>
+                    <div class="password-toggle">
+                        <input type="password" id="rc4Password" placeholder="请输入加密密码">
+                        <button class="toggle-password-btn" onclick="togglePassword('rc4Password')" title="显示/隐藏密码">👁️</button>
+                    </div>
+                </div>
+
+                <div class="button-group">
+                    <button class="btn btn-primary" onclick="encryptRC4()">🔒 RC4 加密</button>
+                    <button class="btn btn-secondary" onclick="decryptRC4()">🔓 RC4 解密</button>
+                    <button class="btn btn-warning" onclick="clearInput('rc4')">🗑️ 清空</button>
+                </div>
+
+                <div id="rc4Result"></div>
+            </div>
+
+            <!-- Rabbit 加密 -->
+            <div id="rabbit" class="crypto-content">
+                <div class="info-box">
+                    <h4>📘 Rabbit加密说明</h4>
+                    <p>Rabbit是一种高速流加密算法，由欧洲eSTREAM项目选定。具有优秀的性能和安全性，加密速度非常快。适用于需要高性能加密的场景，如实时通信、视频流加密等。</p>
+                </div>
+
+                <div class="input-group">
+                    <label>输入文本</label>
+                    <div class="textarea-wrapper">
+                        <textarea id="rabbitInput" placeholder="请输入要加密/解密的文本..."></textarea>
+                        <span class="char-count" id="rabbitCount">0 字符</span>
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label>密码/密钥</label>
+                    <div class="password-toggle">
+                        <input type="password" id="rabbitPassword" placeholder="请输入加密密码">
+                        <button class="toggle-password-btn" onclick="togglePassword('rabbitPassword')" title="显示/隐藏密码">👁️</button>
+                    </div>
+                </div>
+
+                <div class="button-group">
+                    <button class="btn btn-primary" onclick="encryptRabbit()">🔒 Rabbit 加密</button>
+                    <button class="btn btn-secondary" onclick="decryptRabbit()">🔓 Rabbit 解密</button>
+                    <button class="btn btn-warning" onclick="clearInput('rabbit')">🗑️ 清空</button>
+                </div>
+
+                <div id="rabbitResult"></div>
+            </div>
+
+            <!-- RSA 非对称加密 -->
+            <div id="rsa" class="crypto-content">
+                <div class="info-box">
+                    <h4>📘 RSA非对称加密说明</h4>
+                    <p>RSA是一种非对称加密算法，使用公钥加密、私钥解密（或私钥签名、公钥验证）。密钥长度支持512、1024、2048、4096位。适用于数字签名、密钥交换、身份认证等场景。注意：RSA加密有数据长度限制，通常用于加密对称密钥或小数据。</p>
+                </div>
+
+                <div class="input-group">
+                    <label>密钥长度</label>
+                    <select id="rsaKeySize">
+                        <option value="512">512位（快速，不够安全）</option>
+                        <option value="1024" selected>1024位（较快，一般安全）</option>
+                        <option value="2048">2048位（推荐，安全）</option>
+                        <option value="4096">4096位（慢速，高度安全）</option>
+                    </select>
+                </div>
+
+                <div class="button-group">
+                    <button class="btn btn-info" onclick="generateRSAKeys()">🔑 生成密钥对</button>
+                </div>
+
+                <div id="rsaKeysDisplay" style="display: none; margin-bottom: 20px;">
+                    <div class="input-group">
+                        <label>公钥（用于加密）</label>
+                        <div class="key-display" id="rsaPublicKeyDisplay"></div>
+                    </div>
+                    <div class="input-group">
+                        <label>私钥（用于解密，请妥善保管）</label>
+                        <div class="key-display" id="rsaPrivateKeyDisplay"></div>
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label>输入文本</label>
+                    <div class="textarea-wrapper">
+                        <textarea id="rsaInput" placeholder="请输入要加密/解密的文本（注意：RSA加密有长度限制）..."></textarea>
+                        <span class="char-count" id="rsaCount">0 字符</span>
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label>公钥（用于加密）</label>
+                    <textarea id="rsaPublicKey" placeholder="请输入或生成公钥"></textarea>
+                </div>
+
+                <div class="input-group">
+                    <label>私钥（用于解密）</label>
+                    <textarea id="rsaPrivateKey" placeholder="请输入或生成私钥"></textarea>
+                </div>
+
+                <div class="button-group">
+                    <button class="btn btn-primary" onclick="encryptRSA()">🔒 RSA 加密（使用公钥）</button>
+                    <button class="btn btn-secondary" onclick="decryptRSA()">🔓 RSA 解密（使用私钥）</button>
+                    <button class="btn btn-warning" onclick="clearInput('rsa')">🗑️ 清空</button>
+                </div>
+
+                <div id="rsaResult"></div>
+            </div>
+
+            <!-- HMAC 签名 -->
+            <div id="hmac" class="crypto-content">
+                <div class="info-box">
+                    <h4>📘 HMAC签名说明</h4>
+                    <p>HMAC（Hash-based Message Authentication Code）是一种基于哈希函数的消息认证码算法。用于验证消息的完整性和真实性，常用于API签名、消息验证等场景。支持MD5、SHA-1、SHA-256、SHA-512等哈希算法。</p>
+                </div>
+
+                <div class="input-group">
+                    <label>输入文本</label>
+                    <div class="textarea-wrapper">
+                        <textarea id="hmacInput" placeholder="请输入要签名的文本..."></textarea>
+                        <span class="char-count" id="hmacCount">0 字符</span>
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label>密钥</label>
+                    <div class="password-toggle">
+                        <input type="password" id="hmacKey" placeholder="请输入HMAC密钥">
+                        <button class="toggle-password-btn" onclick="togglePassword('hmacKey')" title="显示/隐藏密钥">👁️</button>
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label>哈希算法</label>
+                    <select id="hmacAlgo">
+                        <option value="MD5">HMAC-MD5</option>
+                        <option value="SHA1">HMAC-SHA1</option>
+                        <option value="SHA256" selected>HMAC-SHA256（推荐）</option>
+                        <option value="SHA512">HMAC-SHA512</option>
+                        <option value="SHA3">HMAC-SHA3</option>
+                    </select>
+                </div>
+
+                <div class="button-group">
+                    <button class="btn btn-primary" onclick="generateHMAC()">🔐 生成HMAC签名</button>
+                    <button class="btn btn-success" onclick="verifyHMAC()">✅ 验证HMAC签名</button>
+                    <button class="btn btn-warning" onclick="clearInput('hmac')">🗑️ 清空</button>
+                </div>
+
+                <div id="hmacResult"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jsencrypt/3.3.2/jsencrypt.min.js"></script>
+    <script>
+        // 初始化字符计数
+        document.querySelectorAll('textarea').forEach(textarea => {
+            const countId = textarea.id + 'Count';
+            const countElement = document.getElementById(countId);
+            if (countElement) {
+                textarea.addEventListener('input', function() {
+                    countElement.textContent = this.value.length + ' 字符';
+                });
+            }
+        });
+
+        // 切换标签页
+        function switchTab(tabName) {
+            document.querySelectorAll('.crypto-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            document.querySelectorAll('.crypto-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        // 显示/隐藏密码
+        function togglePassword(inputId) {
+            const input = document.getElementById(inputId);
+            const button = event.target;
+            
+            if (input.type === 'password') {
+                input.type = 'text';
+                button.textContent = '🙈';
+            } else {
+                input.type = 'password';
+                button.textContent = '👁️';
+            }
+        }
+
+        // 显示结果
+        function showResult(containerId, result, isError = false) {
+            const container = document.getElementById(containerId);
+            if (isError) {
+                container.innerHTML = `
+                    <div class="alert alert-danger">
+                        ❌ ${result}
+                    </div>
+                `;
+            } else {
+                container.innerHTML = `
+                    <div class="result-box">
+                        <h3>结果：</h3>
+                        <button class="copy-btn" onclick="copyResult(this)">📋 复制</button>
+                        <div class="result-content">${result}</div>
+                    </div>
+                `;
+            }
+        }
+
+        function copyResult(button) {
+            const resultContent = button.parentElement.querySelector('.result-content');
+            const text = resultContent.textContent;
+            
+            navigator.clipboard.writeText(text).then(() => {
+                const originalText = button.textContent;
+                button.textContent = '✅ 已复制';
+                button.style.background = '#28a745';
+                
+                setTimeout(() => {
+                    button.textContent = originalText;
+                    button.style.background = '#667eea';
+                }, 2000);
+            }).catch(err => {
+                alert('复制失败：' + err);
+            });
+        }
+
+        function clearInput(type) {
+            const input = document.getElementById(type + 'Input');
+            if (input) input.value = '';
+            
+            const password = document.getElementById(type + 'Password');
+            if (password) password.value = '';
+            
+            const key = document.getElementById(type + 'Key');
+            if (key) key.value = '';
+            
+            const countElement = document.getElementById(type + 'Count');
+            if (countElement) {
+                countElement.textContent = '0 字符';
+            }
+            
+            // RSA特殊处理
+            if (type === 'rsa') {
+                const publicKey = document.getElementById('rsaPublicKey');
+                const privateKey = document.getElementById('rsaPrivateKey');
+                if (publicKey) publicKey.value = '';
+                if (privateKey) privateKey.value = '';
+            }
+        }
+
+        // ==================== AES 加密/解密 ====================
+        function encryptAES() {
+            const input = document.getElementById('aesInput').value;
+            const password = document.getElementById('aesPassword').value;
+            
+            if (!input) {
+                showResult('aesResult', '请输入要加密的文本', true);
+                return;
+            }
+            if (!password) {
+                showResult('aesResult', '请输入加密密码', true);
+                return;
+            }
+            
+            try {
+                const encrypted = CryptoJS.AES.encrypt(input, password).toString();
+                showResult('aesResult', encrypted);
+            } catch (error) {
+                showResult('aesResult', '加密失败：' + error.message, true);
+            }
+        }
+
+        function decryptAES() {
+            const input = document.getElementById('aesInput').value;
+            const password = document.getElementById('aesPassword').value;
+            
+            if (!input) {
+                showResult('aesResult', '请输入要解密的文本', true);
+                return;
+            }
+            if (!password) {
+                showResult('aesResult', '请输入解密密码', true);
+                return;
+            }
+            
+            try {
+                const decrypted = CryptoJS.AES.decrypt(input, password);
+                const decryptedText = decrypted.toString(CryptoJS.enc.Utf8);
+                
+                if (!decryptedText) {
+                    showResult('aesResult', '解密失败：密码错误或数据已损坏', true);
+                    return;
+                }
+                
+                showResult('aesResult', decryptedText);
+            } catch (error) {
+                showResult('aesResult', '解密失败：' + error.message, true);
+            }
+        }
+
+        // ==================== DES 加密/解密 ====================
+        function encryptDES() {
+            const input = document.getElementById('desInput').value;
+            const password = document.getElementById('desPassword').value;
+            
+            if (!input) {
+                showResult('desResult', '请输入要加密的文本', true);
+                return;
+            }
+            if (!password) {
+                showResult('desResult', '请输入加密密码', true);
+                return;
+            }
+            
+            try {
+                const encrypted = CryptoJS.DES.encrypt(input, password).toString();
+                showResult('desResult', encrypted);
+            } catch (error) {
+                showResult('desResult', '加密失败：' + error.message, true);
+            }
+        }
+
+        function decryptDES() {
+            const input = document.getElementById('desInput').value;
+            const password = document.getElementById('desPassword').value;
+            
+            if (!input) {
+                showResult('desResult', '请输入要解密的文本', true);
+                return;
+            }
+            if (!password) {
+                showResult('desResult', '请输入解密密码', true);
+                return;
+            }
+            
+            try {
+                const decrypted = CryptoJS.DES.decrypt(input, password);
+                const decryptedText = decrypted.toString(CryptoJS.enc.Utf8);
+                
+                if (!decryptedText) {
+                    showResult('desResult', '解密失败：密码错误或数据已损坏', true);
+                    return;
+                }
+                
+                showResult('desResult', decryptedText);
+            } catch (error) {
+                showResult('desResult', '解密失败：' + error.message, true);
+            }
+        }
+
+        // ==================== TripleDES 加密/解密 ====================
+        function encryptTripleDES() {
+            const input = document.getElementById('tripledesInput').value;
+            const password = document.getElementById('tripledesPassword').value;
+            
+            if (!input) {
+                showResult('tripledesResult', '请输入要加密的文本', true);
+                return;
+            }
+            if (!password) {
+                showResult('tripledesResult', '请输入加密密码', true);
+                return;
+            }
+            
+            try {
+                const encrypted = CryptoJS.TripleDES.encrypt(input, password).toString();
+                showResult('tripledesResult', encrypted);
+            } catch (error) {
+                showResult('tripledesResult', '加密失败：' + error.message, true);
+            }
+        }
+
+        function decryptTripleDES() {
+            const input = document.getElementById('tripledesInput').value;
+            const password = document.getElementById('tripledesPassword').value;
+            
+            if (!input) {
+                showResult('tripledesResult', '请输入要解密的文本', true);
+                return;
+            }
+            if (!password) {
+                showResult('tripledesResult', '请输入解密密码', true);
+                return;
+            }
+            
+            try {
+                const decrypted = CryptoJS.TripleDES.decrypt(input, password);
+                const decryptedText = decrypted.toString(CryptoJS.enc.Utf8);
+                
+                if (!decryptedText) {
+                    showResult('tripledesResult', '解密失败：密码错误或数据已损坏', true);
+                    return;
+                }
+                
+                showResult('tripledesResult', decryptedText);
+            } catch (error) {
+                showResult('tripledesResult', '解密失败：' + error.message, true);
+            }
+        }
+
+        // ==================== RC4 加密/解密 ====================
+        function encryptRC4() {
+            const input = document.getElementById('rc4Input').value;
+            const password = document.getElementById('rc4Password').value;
+            
+            if (!input) {
+                showResult('rc4Result', '请输入要加密的文本', true);
+                return;
+            }
+            if (!password) {
+                showResult('rc4Result', '请输入加密密码', true);
+                return;
+            }
+            
+            try {
+                const encrypted = CryptoJS.RC4.encrypt(input, password).toString();
+                showResult('rc4Result', encrypted);
+            } catch (error) {
+                showResult('rc4Result', '加密失败：' + error.message, true);
+            }
+        }
+
+        function decryptRC4() {
+            const input = document.getElementById('rc4Input').value;
+            const password = document.getElementById('rc4Password').value;
+            
+            if (!input) {
+                showResult('rc4Result', '请输入要解密的文本', true);
+                return;
+            }
+            if (!password) {
+                showResult('rc4Result', '请输入解密密码', true);
+                return;
+            }
+            
+            try {
+                const decrypted = CryptoJS.RC4.decrypt(input, password);
+                const decryptedText = decrypted.toString(CryptoJS.enc.Utf8);
+                
+                if (!decryptedText) {
+                    showResult('rc4Result', '解密失败：密码错误或数据已损坏', true);
+                    return;
+                }
+                
+                showResult('rc4Result', decryptedText);
+            } catch (error) {
+                showResult('rc4Result', '解密失败：' + error.message, true);
+            }
+        }
+
+        // ==================== Rabbit 加密/解密 ====================
+        function encryptRabbit() {
+            const input = document.getElementById('rabbitInput').value;
+            const password = document.getElementById('rabbitPassword').value;
+            
+            if (!input) {
+                showResult('rabbitResult', '请输入要加密的文本', true);
+                return;
+            }
+            if (!password) {
+                showResult('rabbitResult', '请输入加密密码', true);
+                return;
+            }
+            
+            try {
+                const encrypted = CryptoJS.Rabbit.encrypt(input, password).toString();
+                showResult('rabbitResult', encrypted);
+            } catch (error) {
+                showResult('rabbitResult', '加密失败：' + error.message, true);
+            }
+        }
+
+        function decryptRabbit() {
+            const input = document.getElementById('rabbitInput').value;
+            const password = document.getElementById('rabbitPassword').value;
+            
+            if (!input) {
+                showResult('rabbitResult', '请输入要解密的文本', true);
+                return;
+            }
+            if (!password) {
+                showResult('rabbitResult', '请输入解密密码', true);
+                return;
+            }
+            
+            try {
+                const decrypted = CryptoJS.Rabbit.decrypt(input, password);
+                const decryptedText = decrypted.toString(CryptoJS.enc.Utf8);
+                
+                if (!decryptedText) {
+                    showResult('rabbitResult', '解密失败：密码错误或数据已损坏', true);
+                    return;
+                }
+                
+                showResult('rabbitResult', decryptedText);
+            } catch (error) {
+                showResult('rabbitResult', '解密失败：' + error.message, true);
+            }
+        }
+
+        // ==================== RSA 非对称加密 ====================
+        let currentRSAKeys = null;
+
+        function generateRSAKeys() {
+            const keySize = document.getElementById('rsaKeySize').value;
+            
+            showResult('rsaResult', '正在生成密钥对，请稍候...（密钥长度越大，生成时间越长）', false);
+            
+            // 使用setTimeout让UI有时间更新
+            setTimeout(() => {
+                try {
+                    const crypt = new JSEncrypt({default_key_size: keySize});
+                    
+                    // 生成密钥对
+                    const privateKey = crypt.getPrivateKey();
+                    const publicKey = crypt.getPublicKey();
+                    
+                    // 保存当前密钥对
+                    currentRSAKeys = { publicKey, privateKey };
+                    
+                    // 显示密钥
+                    document.getElementById('rsaPublicKey').value = publicKey;
+                    document.getElementById('rsaPrivateKey').value = privateKey;
+                    
+                    // 在显示区域也显示
+                    document.getElementById('rsaPublicKeyDisplay').textContent = publicKey;
+                    document.getElementById('rsaPrivateKeyDisplay').textContent = privateKey;
+                    document.getElementById('rsaKeysDisplay').style.display = 'block';
+                    
+                    showResult('rsaResult', `✅ 密钥对生成成功！密钥长度：${keySize}位\n\n请妥善保管您的私钥，公钥可以公开分享。`, false);
+                } catch (error) {
+                    showResult('rsaResult', '密钥生成失败：' + error.message, true);
+                }
+            }, 100);
+        }
+
+        function encryptRSA() {
+            const input = document.getElementById('rsaInput').value;
+            const publicKey = document.getElementById('rsaPublicKey').value;
+            
+            if (!input) {
+                showResult('rsaResult', '请输入要加密的文本', true);
+                return;
+            }
+            if (!publicKey) {
+                showResult('rsaResult', '请输入公钥或先生成密钥对', true);
+                return;
+            }
+            
+            try {
+                const encrypt = new JSEncrypt();
+                encrypt.setPublicKey(publicKey);
+                
+                // RSA加密有长度限制，根据密钥长度计算最大长度
+                // 对于1024位密钥，最大加密长度约为117字节
+                // 对于2048位密钥，最大加密长度约为245字节
+                const encrypted = encrypt.encrypt(input);
+                
+                if (!encrypted) {
+                    showResult('rsaResult', '加密失败：数据可能过长。RSA加密有长度限制，请减少输入内容或使用更长的密钥。', true);
+                    return;
+                }
+                
+                showResult('rsaResult', encrypted);
+            } catch (error) {
+                showResult('rsaResult', '加密失败：' + error.message, true);
+            }
+        }
+
+        function decryptRSA() {
+            const input = document.getElementById('rsaInput').value;
+            const privateKey = document.getElementById('rsaPrivateKey').value;
+            
+            if (!input) {
+                showResult('rsaResult', '请输入要解密的文本', true);
+                return;
+            }
+            if (!privateKey) {
+                showResult('rsaResult', '请输入私钥或先生成密钥对', true);
+                return;
+            }
+            
+            try {
+                const decrypt = new JSEncrypt();
+                decrypt.setPrivateKey(privateKey);
+                
+                const decrypted = decrypt.decrypt(input);
+                
+                if (!decrypted) {
+                    showResult('rsaResult', '解密失败：私钥错误或数据已损坏', true);
+                    return;
+                }
+                
+                showResult('rsaResult', decrypted);
+            } catch (error) {
+                showResult('rsaResult', '解密失败：' + error.message, true);
+            }
+        }
+
+        // ==================== HMAC 签名 ====================
+        function generateHMAC() {
+            const input = document.getElementById('hmacInput').value;
+            const key = document.getElementById('hmacKey').value;
+            const algo = document.getElementById('hmacAlgo').value;
+            
+            if (!input) {
+                showResult('hmacResult', '请输入要签名的文本', true);
+                return;
+            }
+            if (!key) {
+                showResult('hmacResult', '请输入HMAC密钥', true);
+                return;
+            }
+            
+            try {
+                let hmac;
+                switch(algo) {
+                    case 'MD5':
+                        hmac = CryptoJS.HmacMD5(input, key).toString();
+                        break;
+                    case 'SHA1':
+                        hmac = CryptoJS.HmacSHA1(input, key).toString();
+                        break;
+                    case 'SHA256':
+                        hmac = CryptoJS.HmacSHA256(input, key).toString();
+                        break;
+                    case 'SHA512':
+                        hmac = CryptoJS.HmacSHA512(input, key).toString();
+                        break;
+                    case 'SHA3':
+                        hmac = CryptoJS.HmacSHA3(input, key).toString();
+                        break;
+                    default:
+                        hmac = CryptoJS.HmacSHA256(input, key).toString();
+                }
+                
+                showResult('hmacResult', `HMAC-${algo} 签名：\n${hmac}`);
+            } catch (error) {
+                showResult('hmacResult', '签名生成失败：' + error.message, true);
+            }
+        }
+
+        function verifyHMAC() {
+            const input = document.getElementById('hmacInput').value;
+            const key = document.getElementById('hmacKey').value;
+            const algo = document.getElementById('hmacAlgo').value;
+            
+            if (!input) {
+                showResult('hmacResult', '请输入要验证的文本和签名（格式：原文本）', true);
+                return;
+            }
+            if (!key) {
+                showResult('hmacResult', '请输入HMAC密钥', true);
+                return;
+            }
+            
+            const expectedSignature = prompt('请输入要验证的HMAC签名：');
+            if (!expectedSignature) {
+                return;
+            }
+            
+            try {
+                let computedHmac;
+                switch(algo) {
+                    case 'MD5':
+                        computedHmac = CryptoJS.HmacMD5(input, key).toString();
+                        break;
+                    case 'SHA1':
+                        computedHmac = CryptoJS.HmacSHA1(input, key).toString();
+                        break;
+                    case 'SHA256':
+                        computedHmac = CryptoJS.HmacSHA256(input, key).toString();
+                        break;
+                    case 'SHA512':
+                        computedHmac = CryptoJS.HmacSHA512(input, key).toString();
+                        break;
+                    case 'SHA3':
+                        computedHmac = CryptoJS.HmacSHA3(input, key).toString();
+                        break;
+                    default:
+                        computedHmac = CryptoJS.HmacSHA256(input, key).toString();
+                }
+                
+                const isValid = computedHmac === expectedSignature.trim();
+                
+                if (isValid) {
+                    showResult('hmacResult', `✅ HMAC验证成功！\n\n计算的签名：${computedHmac}\n提供的签名：${expectedSignature}\n\n签名匹配，消息完整性已验证。`);
+                } else {
+                    showResult('hmacResult', `❌ HMAC验证失败！\n\n计算的签名：${computedHmac}\n提供的签名：${expectedSignature}\n\n签名不匹配，消息可能已被篡改或密钥不正确。`, true);
+                }
+            } catch (error) {
+                showResult('hmacResult', '验证失败：' + error.message, true);
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,2387 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cron表达式生成工具</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            font-weight: 300;
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .section {
+            margin-bottom: 30px;
+        }
+
+        .section-title {
+            font-size: 1.3em;
+            color: #333;
+            margin-bottom: 15px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .result-box {
+            background: #f8f9fa;
+            border: 2px solid #e1e5e9;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+
+        .cron-display {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 1.8em;
+            font-weight: 600;
+            text-align: center;
+            color: #667eea;
+            letter-spacing: 2px;
+            word-break: break-all;
+            margin-bottom: 15px;
+            cursor: text;
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .cron-display:hover {
+            border-color: #4facfe;
+            background: #f8fcff;
+        }
+
+        .cron-display:focus {
+            outline: none;
+            border-color: #667eea;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .cron-description {
+            background: #e7f3ff;
+            padding: 15px;
+            border-radius: 8px;
+            color: #1976D2;
+            margin-top: 15px;
+            line-height: 1.6;
+        }
+
+        .cron-builder {
+            display: grid;
+            gap: 20px;
+        }
+
+        .cron-field {
+            background: white;
+            border: 2px solid #e1e5e9;
+            border-radius: 10px;
+            padding: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .cron-field:hover {
+            border-color: #4facfe;
+            box-shadow: 0 2px 8px rgba(79, 172, 254, 0.1);
+        }
+
+        .cron-field-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .cron-field-label {
+            font-weight: 600;
+            color: #333;
+            font-size: 1.1em;
+        }
+
+        .cron-field-value {
+            font-family: 'Consolas', 'Monaco', monospace;
+            background: #e7f3ff;
+            padding: 5px 12px;
+            border-radius: 5px;
+            color: #1976D2;
+            font-weight: 600;
+        }
+
+        .cron-field-type {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 15px;
+        }
+
+        .type-btn {
+            flex: 1;
+            min-width: 100px;
+            padding: 10px 15px;
+            border: 2px solid #e1e5e9;
+            background: #f8f9fa;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.95em;
+            font-weight: 500;
+            text-align: center;
+        }
+
+        .type-btn:hover {
+            border-color: #4facfe;
+            background: white;
+        }
+
+        .type-btn.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-color: #667eea;
+        }
+
+        .cron-field-config {
+            display: none;
+        }
+
+        .cron-field-config.active {
+            display: block;
+        }
+
+        .input-group {
+            margin-bottom: 15px;
+        }
+
+        .input-group label {
+            display: block;
+            font-weight: 500;
+            color: #555;
+            margin-bottom: 8px;
+            font-size: 0.95em;
+        }
+
+        input[type="number"], input[type="text"], select {
+            width: 100%;
+            padding: 10px 12px;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: all 0.3s ease;
+        }
+
+        input[type="number"]:focus, input[type="text"]:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .range-inputs {
+            display: grid;
+            grid-template-columns: 1fr auto 1fr;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .range-separator {
+            text-align: center;
+            font-weight: 600;
+            color: #666;
+        }
+
+        .checkbox-group {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            padding: 8px 10px;
+            background: #f8f9fa;
+            border: 2px solid #e1e5e9;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .checkbox-item:hover {
+            border-color: #4facfe;
+            background: white;
+        }
+
+        .checkbox-item input[type="checkbox"]:checked + label {
+            font-weight: 600;
+        }
+
+        .checkbox-item.checked {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-color: #667eea;
+        }
+
+        .checkbox-item input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+            cursor: pointer;
+        }
+
+        .checkbox-item label {
+            cursor: pointer;
+            font-size: 0.9em;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-bottom: 25px;
+        }
+
+        .btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+            transform: translateY(-2px);
+        }
+
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #218838;
+            transform: translateY(-2px);
+        }
+
+        .templates-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .template-card {
+            background: white;
+            border: 2px solid #e1e5e9;
+            border-radius: 10px;
+            padding: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .template-card:hover {
+            border-color: #667eea;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.2);
+        }
+
+        .template-card-title {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+            font-size: 1em;
+        }
+
+        .template-card-cron {
+            font-family: 'Consolas', 'Monaco', monospace;
+            color: #667eea;
+            font-size: 1.1em;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        .template-card-desc {
+            font-size: 0.9em;
+            color: #666;
+            line-height: 1.4;
+        }
+
+        .alert {
+            padding: 15px 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-weight: 500;
+        }
+
+        .alert-info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert-danger {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .next-runs {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+        }
+
+        .next-runs h4 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 1em;
+        }
+
+        .next-runs-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .next-run-item {
+            padding: 8px 12px;
+            background: #f8f9fa;
+            border-radius: 5px;
+            font-size: 0.95em;
+            color: #555;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .history-section {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 2px solid #e1e5e9;
+        }
+
+        .history-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .history-header h3 {
+            color: #333;
+            font-size: 1.2em;
+        }
+
+        .clear-history-btn {
+            padding: 8px 16px;
+            background: #dc3545;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: all 0.3s ease;
+        }
+
+        .clear-history-btn:hover {
+            background: #c82333;
+            transform: scale(1.05);
+        }
+
+        .history-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .history-item {
+            background: white;
+            border: 1px solid #e1e5e9;
+            border-radius: 8px;
+            padding: 15px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .history-item:hover {
+            border-color: #4facfe;
+            box-shadow: 0 2px 8px rgba(79, 172, 254, 0.1);
+        }
+
+        .history-item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .history-item-cron {
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-weight: 600;
+            color: #667eea;
+            font-size: 1.1em;
+        }
+
+        .history-item-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .history-item-date {
+            color: #666;
+            font-size: 0.85em;
+        }
+
+        .delete-history-btn {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 4px 8px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.8em;
+            transition: all 0.3s ease;
+            opacity: 0.7;
+        }
+
+        .delete-history-btn:hover {
+            background: #c82333;
+            opacity: 1;
+            transform: scale(1.05);
+        }
+
+        .history-item-desc {
+            color: #555;
+            font-size: 0.9em;
+        }
+
+        .empty-history {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+        }
+
+        .empty-history div {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+
+        /* 移动端优化 */
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+
+            .content {
+                padding: 20px 15px;
+            }
+
+            .header {
+                padding: 20px 15px;
+            }
+
+            .header h1 {
+                font-size: 1.8em;
+                margin-bottom: 8px;
+            }
+
+            .header p {
+                font-size: 0.95em;
+            }
+
+            .section-title {
+                font-size: 1.2em;
+            }
+
+            .cron-display {
+                font-size: 1.3em;
+                padding: 15px;
+                letter-spacing: 1px;
+                min-height: 60px;
+            }
+
+            .cron-display:empty:before {
+                content: '点击输入Cron表达式...';
+                color: #999;
+                font-size: 0.7em;
+            }
+
+            .templates-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .button-group {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+            }
+
+            .cron-field-type {
+                flex-direction: column;
+            }
+
+            .type-btn {
+                width: 100%;
+            }
+
+            .checkbox-group {
+                grid-template-columns: repeat(3, 1fr);
+            }
+
+            .history-section {
+                margin-top: 25px;
+                padding: 20px 15px;
+                background: #f8f9fa;
+                border-radius: 10px;
+                border-top: none;
+            }
+
+            .history-header {
+                flex-direction: column;
+                gap: 12px;
+                align-items: stretch;
+            }
+
+            .history-header h3 {
+                font-size: 1.3em;
+                text-align: center;
+            }
+
+            .clear-history-btn {
+                width: 100%;
+                padding: 10px 20px;
+                font-size: 1em;
+            }
+
+            .history-item {
+                padding: 12px;
+            }
+
+            .history-item-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 8px;
+            }
+
+            .history-item-actions {
+                width: 100%;
+                justify-content: space-between;
+            }
+
+            .history-item-cron {
+                font-size: 1em;
+            }
+        }
+
+        /* 小屏手机优化 */
+        @media (max-width: 480px) {
+            body {
+                padding: 8px;
+            }
+
+            .content {
+                padding: 15px 12px;
+            }
+
+            .header {
+                padding: 15px 12px;
+            }
+
+            .header h1 {
+                font-size: 1.5em;
+            }
+
+            .header p {
+                font-size: 0.9em;
+            }
+
+            .section-title {
+                font-size: 1.1em;
+            }
+
+            .cron-display {
+                font-size: 1.1em;
+                padding: 12px;
+                min-height: 55px;
+            }
+
+            .cron-display:empty:before {
+                content: '点击输入...';
+                color: #999;
+                font-size: 0.8em;
+            }
+
+            .cron-field {
+                padding: 15px 12px;
+            }
+
+            .btn {
+                padding: 10px 20px;
+                font-size: 0.95em;
+            }
+
+            .checkbox-group {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 8px;
+            }
+
+            .template-card {
+                padding: 12px;
+            }
+
+            .template-card-cron {
+                font-size: 1em;
+            }
+        }
+
+        /* 超小屏手机 */
+        @media (max-width: 360px) {
+            .header h1 {
+                font-size: 1.3em;
+            }
+
+            .header p {
+                font-size: 0.85em;
+            }
+
+            .section-title {
+                font-size: 1em;
+            }
+
+            .cron-display {
+                font-size: 1em;
+                padding: 10px;
+                min-height: 50px;
+            }
+
+            .cron-display:empty:before {
+                content: '输入表达式...';
+                color: #999;
+                font-size: 0.85em;
+            }
+
+            .btn {
+                font-size: 0.9em;
+                padding: 10px 16px;
+            }
+
+            .checkbox-group {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        /* 触摸设备优化 */
+        @media (hover: none) and (pointer: coarse) {
+            .btn, .template-card, .type-btn, .checkbox-item {
+                min-height: 44px;
+            }
+
+            .template-card:active {
+                transform: scale(0.98);
+            }
+
+            .btn:active {
+                transform: translateY(0) scale(0.98);
+            }
+
+            .type-btn:active {
+                transform: scale(0.95);
+            }
+
+            .result-box, .history-list {
+                -webkit-overflow-scrolling: touch;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>⏰ Cron表达式生成工具</h1>
+            <p>可视化配置定时任务，支持Quartz和Spring格式</p>
+        </div>
+
+        <div class="content">
+            <!-- Cron表达式显示 -->
+            <div class="section">
+                <div class="result-box">
+                    <div class="cron-display" id="cronDisplay" contenteditable="true" spellcheck="false" title="点击编辑Cron表达式，按回车键解析">* * * * * ?</div>
+                    <div class="cron-description" id="cronDescription">
+                        每秒执行一次
+                    </div>
+                    <div class="next-runs" id="nextRuns">
+                        <h4>📅 接下来5次执行时间：</h4>
+                        <div class="next-runs-list" id="nextRunsList"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 操作按钮 -->
+            <div class="button-group">
+                <button class="btn btn-primary" onclick="copyCron()">📋 复制表达式</button>
+                <button class="btn btn-success" onclick="parseCronInput()">🔄 解析表达式</button>
+                <button class="btn btn-success" onclick="saveCron()">💾 保存到历史</button>
+                <button class="btn btn-secondary" onclick="resetAll()">🔄 重置</button>
+            </div>
+
+            <!-- Cron构建器 -->
+            <div class="section">
+                <div class="section-title">🔧 配置Cron表达式</div>
+                <div class="cron-builder" id="cronBuilder">
+                    <!-- 秒 -->
+                    <div class="cron-field">
+                        <div class="cron-field-header">
+                            <span class="cron-field-label">秒 (Second)</span>
+                            <span class="cron-field-value" id="secondValue">*</span>
+                        </div>
+                        <div class="cron-field-type">
+                            <div class="type-btn active" onclick="setFieldType('second', 'every')">每秒</div>
+                            <div class="type-btn" onclick="setFieldType('second', 'interval')">间隔</div>
+                            <div class="type-btn" onclick="setFieldType('second', 'range')">范围</div>
+                            <div class="type-btn" onclick="setFieldType('second', 'specific')">指定</div>
+                        </div>
+                        <div class="cron-field-config" id="second-interval">
+                            <div class="input-group">
+                                <label>从第几秒开始（可选，留空表示从0开始）</label>
+                                <input type="number" id="secondIntervalStart" min="0" max="59" value="" placeholder="留空表示从0开始" onchange="updateCron()">
+                            </div>
+                            <div class="input-group">
+                                <label>每隔多少秒</label>
+                                <input type="number" id="secondIntervalValue" min="1" max="59" value="5" onchange="updateCron()">
+                            </div>
+                        </div>
+                        <div class="cron-field-config" id="second-range">
+                            <label>秒数范围</label>
+                            <div class="range-inputs">
+                                <input type="number" id="secondRangeStart" min="0" max="59" value="0" onchange="updateCron()">
+                                <span class="range-separator">-</span>
+                                <input type="number" id="secondRangeEnd" min="0" max="59" value="30" onchange="updateCron()">
+                            </div>
+                        </div>
+                        <div class="cron-field-config" id="second-specific">
+                            <label>选择秒数（可多选）</label>
+                            <div class="checkbox-group" id="secondCheckboxes"></div>
+                        </div>
+                    </div>
+
+                    <!-- 分钟 -->
+                    <div class="cron-field">
+                        <div class="cron-field-header">
+                            <span class="cron-field-label">分钟 (Minute)</span>
+                            <span class="cron-field-value" id="minuteValue">*</span>
+                        </div>
+                        <div class="cron-field-type">
+                            <div class="type-btn active" onclick="setFieldType('minute', 'every')">每分钟</div>
+                            <div class="type-btn" onclick="setFieldType('minute', 'interval')">间隔</div>
+                            <div class="type-btn" onclick="setFieldType('minute', 'range')">范围</div>
+                            <div class="type-btn" onclick="setFieldType('minute', 'specific')">指定</div>
+                        </div>
+                        <div class="cron-field-config" id="minute-interval">
+                            <div class="input-group">
+                                <label>从第几分钟开始（可选，留空表示从0开始）</label>
+                                <input type="number" id="minuteIntervalStart" min="0" max="59" value="" placeholder="留空表示从0开始" onchange="updateCron()">
+                            </div>
+                            <div class="input-group">
+                                <label>每隔多少分钟</label>
+                                <input type="number" id="minuteIntervalValue" min="1" max="59" value="5" onchange="updateCron()">
+                            </div>
+                        </div>
+                        <div class="cron-field-config" id="minute-range">
+                            <label>分钟范围</label>
+                            <div class="range-inputs">
+                                <input type="number" id="minuteRangeStart" min="0" max="59" value="0" onchange="updateCron()">
+                                <span class="range-separator">-</span>
+                                <input type="number" id="minuteRangeEnd" min="0" max="59" value="30" onchange="updateCron()">
+                            </div>
+                        </div>
+                        <div class="cron-field-config" id="minute-specific">
+                            <label>选择分钟（可多选）</label>
+                            <div class="checkbox-group" id="minuteCheckboxes"></div>
+                        </div>
+                    </div>
+
+                    <!-- 小时 -->
+                    <div class="cron-field">
+                        <div class="cron-field-header">
+                            <span class="cron-field-label">小时 (Hour)</span>
+                            <span class="cron-field-value" id="hourValue">*</span>
+                        </div>
+                        <div class="cron-field-type">
+                            <div class="type-btn active" onclick="setFieldType('hour', 'every')">每小时</div>
+                            <div class="type-btn" onclick="setFieldType('hour', 'interval')">间隔</div>
+                            <div class="type-btn" onclick="setFieldType('hour', 'range')">范围</div>
+                            <div class="type-btn" onclick="setFieldType('hour', 'specific')">指定</div>
+                        </div>
+                        <div class="cron-field-config" id="hour-interval">
+                            <div class="input-group">
+                                <label>从第几小时开始（可选，留空表示从0开始）</label>
+                                <input type="number" id="hourIntervalStart" min="0" max="23" value="" placeholder="留空表示从0开始" onchange="updateCron()">
+                            </div>
+                            <div class="input-group">
+                                <label>每隔多少小时</label>
+                                <input type="number" id="hourIntervalValue" min="1" max="23" value="1" onchange="updateCron()">
+                            </div>
+                        </div>
+                        <div class="cron-field-config" id="hour-range">
+                            <label>小时范围</label>
+                            <div class="range-inputs">
+                                <input type="number" id="hourRangeStart" min="0" max="23" value="9" onchange="updateCron()">
+                                <span class="range-separator">-</span>
+                                <input type="number" id="hourRangeEnd" min="0" max="23" value="18" onchange="updateCron()">
+                            </div>
+                        </div>
+                        <div class="cron-field-config" id="hour-specific">
+                            <label>选择小时（可多选）</label>
+                            <div class="checkbox-group" id="hourCheckboxes"></div>
+                        </div>
+                    </div>
+
+                    <!-- 日期 -->
+                    <div class="cron-field">
+                        <div class="cron-field-header">
+                            <span class="cron-field-label">日期 (Day)</span>
+                            <span class="cron-field-value" id="dayValue">*</span>
+                        </div>
+                        <div class="cron-field-type">
+                            <div class="type-btn active" onclick="setFieldType('day', 'every')">每天</div>
+                            <div class="type-btn" onclick="setFieldType('day', 'interval')">间隔</div>
+                            <div class="type-btn" onclick="setFieldType('day', 'range')">范围</div>
+                            <div class="type-btn" onclick="setFieldType('day', 'specific')">指定</div>
+                            <div class="type-btn" onclick="setFieldType('day', 'workday')">工作日</div>
+                            <div class="type-btn" onclick="setFieldType('day', 'last')">最后一天</div>
+                        </div>
+                        <div class="cron-field-config" id="day-interval">
+                            <div class="input-group">
+                                <label>从第几天开始（可选，留空表示从1开始）</label>
+                                <input type="number" id="dayIntervalStart" min="1" max="31" value="" placeholder="留空表示从1开始" onchange="updateCron()">
+                            </div>
+                            <div class="input-group">
+                                <label>每隔多少天</label>
+                                <input type="number" id="dayIntervalValue" min="1" max="31" value="1" onchange="updateCron()">
+                            </div>
+                        </div>
+                        <div class="cron-field-config" id="day-range">
+                            <label>日期范围</label>
+                            <div class="range-inputs">
+                                <input type="number" id="dayRangeStart" min="1" max="31" value="1" onchange="updateCron()">
+                                <span class="range-separator">-</span>
+                                <input type="number" id="dayRangeEnd" min="1" max="31" value="15" onchange="updateCron()">
+                            </div>
+                        </div>
+                        <div class="cron-field-config" id="day-specific">
+                            <label>选择日期（可多选）</label>
+                            <div class="checkbox-group" id="dayCheckboxes"></div>
+                        </div>
+                    </div>
+
+                    <!-- 月份 -->
+                    <div class="cron-field">
+                        <div class="cron-field-header">
+                            <span class="cron-field-label">月份 (Month)</span>
+                            <span class="cron-field-value" id="monthValue">*</span>
+                        </div>
+                        <div class="cron-field-type">
+                            <div class="type-btn active" onclick="setFieldType('month', 'every')">每月</div>
+                            <div class="type-btn" onclick="setFieldType('month', 'interval')">间隔</div>
+                            <div class="type-btn" onclick="setFieldType('month', 'range')">范围</div>
+                            <div class="type-btn" onclick="setFieldType('month', 'specific')">指定</div>
+                        </div>
+                        <div class="cron-field-config" id="month-interval">
+                            <div class="input-group">
+                                <label>从第几月开始（可选，留空表示从1月开始）</label>
+                                <input type="number" id="monthIntervalStart" min="1" max="12" value="" placeholder="留空表示从1月开始" onchange="updateCron()">
+                            </div>
+                            <div class="input-group">
+                                <label>每隔多少月</label>
+                                <input type="number" id="monthIntervalValue" min="1" max="12" value="1" onchange="updateCron()">
+                            </div>
+                        </div>
+                        <div class="cron-field-config" id="month-range">
+                            <label>月份范围</label>
+                            <div class="range-inputs">
+                                <input type="number" id="monthRangeStart" min="1" max="12" value="1" onchange="updateCron()">
+                                <span class="range-separator">-</span>
+                                <input type="number" id="monthRangeEnd" min="1" max="12" value="6" onchange="updateCron()">
+                            </div>
+                        </div>
+                        <div class="cron-field-config" id="month-specific">
+                            <label>选择月份（可多选）</label>
+                            <div class="checkbox-group" id="monthCheckboxes"></div>
+                        </div>
+                    </div>
+
+                    <!-- 星期 -->
+                    <div class="cron-field">
+                        <div class="cron-field-header">
+                            <span class="cron-field-label">星期 (Week)</span>
+                            <span class="cron-field-value" id="weekValue">?</span>
+                        </div>
+                        <div class="cron-field-type">
+                            <div class="type-btn active" onclick="setFieldType('week', 'any')">不指定</div>
+                            <div class="type-btn" onclick="setFieldType('week', 'every')">每天</div>
+                            <div class="type-btn" onclick="setFieldType('week', 'interval')">间隔</div>
+                            <div class="type-btn" onclick="setFieldType('week', 'range')">范围</div>
+                            <div class="type-btn" onclick="setFieldType('week', 'specific')">指定</div>
+                            <div class="type-btn" onclick="setFieldType('week', 'last')">最后</div>
+                        </div>
+                        <div class="cron-field-config" id="week-interval">
+                            <div class="input-group">
+                                <label>从星期几开始（可选，留空表示从周日开始）</label>
+                                <select id="weekIntervalStart" onchange="updateCron()">
+                                    <option value="">留空（从周日开始）</option>
+                                    <option value="1">周日</option>
+                                    <option value="2">周一</option>
+                                    <option value="3">周二</option>
+                                    <option value="4">周三</option>
+                                    <option value="5">周四</option>
+                                    <option value="6">周五</option>
+                                    <option value="7">周六</option>
+                                </select>
+                            </div>
+                            <div class="input-group">
+                                <label>每隔多少周</label>
+                                <input type="number" id="weekIntervalValue" min="1" max="7" value="1" onchange="updateCron()">
+                            </div>
+                        </div>
+                        <div class="cron-field-config" id="week-range">
+                            <label>星期范围</label>
+                            <div class="range-inputs">
+                                <select id="weekRangeStart" onchange="updateCron()">
+                                    <option value="1">周日</option>
+                                    <option value="2" selected>周一</option>
+                                    <option value="3">周二</option>
+                                    <option value="4">周三</option>
+                                    <option value="5">周四</option>
+                                    <option value="6">周五</option>
+                                    <option value="7">周六</option>
+                                </select>
+                                <span class="range-separator">-</span>
+                                <select id="weekRangeEnd" onchange="updateCron()">
+                                    <option value="1">周日</option>
+                                    <option value="2">周一</option>
+                                    <option value="3">周二</option>
+                                    <option value="4">周三</option>
+                                    <option value="5">周四</option>
+                                    <option value="6" selected>周五</option>
+                                    <option value="7">周六</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="cron-field-config" id="week-specific">
+                            <label>选择星期（可多选）</label>
+                            <div class="checkbox-group" id="weekCheckboxes"></div>
+                        </div>
+                        <div class="cron-field-config" id="week-last">
+                            <div class="input-group">
+                                <label>选择星期</label>
+                                <select id="weekLastValue" onchange="updateCron()">
+                                    <option value="1">周日</option>
+                                    <option value="2">周一</option>
+                                    <option value="3">周二</option>
+                                    <option value="4">周三</option>
+                                    <option value="5">周四</option>
+                                    <option value="6">周五</option>
+                                    <option value="7">周六</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 常用模板 -->
+            <div class="section">
+                <div class="section-title">📚 常用Cron表达式模板</div>
+                <div class="templates-grid">
+                    <div class="template-card" onclick="loadTemplate('everySecond')">
+                        <div class="template-card-title">⏱️ 每秒执行</div>
+                        <div class="template-card-cron">* * * * * ?</div>
+                        <div class="template-card-desc">每秒执行一次任务</div>
+                    </div>
+                    <div class="template-card" onclick="loadTemplate('everyMinute')">
+                        <div class="template-card-title">⏰ 每分钟执行</div>
+                        <div class="template-card-cron">0 * * * * ?</div>
+                        <div class="template-card-desc">每分钟整点执行</div>
+                    </div>
+                    <div class="template-card" onclick="loadTemplate('everyHour')">
+                        <div class="template-card-title">🕐 每小时执行</div>
+                        <div class="template-card-cron">0 0 * * * ?</div>
+                        <div class="template-card-desc">每小时整点执行</div>
+                    </div>
+                    <div class="template-card" onclick="loadTemplate('everyDay')">
+                        <div class="template-card-title">📅 每天执行</div>
+                        <div class="template-card-cron">0 0 0 * * ?</div>
+                        <div class="template-card-desc">每天凌晨0点执行</div>
+                    </div>
+                    <div class="template-card" onclick="loadTemplate('workday')">
+                        <div class="template-card-title">💼 工作日执行</div>
+                        <div class="template-card-cron">0 0 9 ? * MON-FRI</div>
+                        <div class="template-card-desc">周一至周五上午9点执行</div>
+                    </div>
+                    <div class="template-card" onclick="loadTemplate('weekend')">
+                        <div class="template-card-title">🎉 周末执行</div>
+                        <div class="template-card-cron">0 0 10 ? * SAT,SUN</div>
+                        <div class="template-card-desc">周六周日上午10点执行</div>
+                    </div>
+                    <div class="template-card" onclick="loadTemplate('monthly')">
+                        <div class="template-card-title">📆 每月执行</div>
+                        <div class="template-card-cron">0 0 0 1 * ?</div>
+                        <div class="template-card-desc">每月1号凌晨0点执行</div>
+                    </div>
+                    <div class="template-card" onclick="loadTemplate('quarterly')">
+                        <div class="template-card-title">📊 每季度执行</div>
+                        <div class="template-card-cron">0 0 0 1 1,4,7,10 ?</div>
+                        <div class="template-card-desc">每季度第一天执行</div>
+                    </div>
+                    <div class="template-card" onclick="loadTemplate('yearly')">
+                        <div class="template-card-title">🎆 每年执行</div>
+                        <div class="template-card-cron">0 0 0 1 1 ?</div>
+                        <div class="template-card-desc">每年1月1日凌晨0点执行</div>
+                    </div>
+                    <div class="template-card" onclick="loadTemplate('interval5m')">
+                        <div class="template-card-title">⏲️ 每5分钟</div>
+                        <div class="template-card-cron">0 */5 * * * ?</div>
+                        <div class="template-card-desc">每5分钟执行一次</div>
+                    </div>
+                    <div class="template-card" onclick="loadTemplate('interval30m')">
+                        <div class="template-card-title">⏳ 每30分钟</div>
+                        <div class="template-card-cron">0 */30 * * * ?</div>
+                        <div class="template-card-desc">每30分钟执行一次</div>
+                    </div>
+                    <div class="template-card" onclick="loadTemplate('businessHours')">
+                        <div class="template-card-title">🏢 工作时间</div>
+                        <div class="template-card-cron">0 0 9-18 ? * MON-FRI</div>
+                        <div class="template-card-desc">工作日9-18点每小时执行</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 历史记录 -->
+            <div class="history-section">
+                <div class="history-header">
+                    <h3>📜 历史记录</h3>
+                    <button class="clear-history-btn" onclick="clearHistory()">清空历史</button>
+                </div>
+                <div id="historyList" class="history-list">
+                    <div class="empty-history">
+                        <div>📭</div>
+                        <p>暂无历史记录</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const MAX_HISTORY = 20;
+        const cronState = {
+            second: { type: 'every', value: '*' },
+            minute: { type: 'every', value: '*' },
+            hour: { type: 'every', value: '*' },
+            day: { type: 'every', value: '*' },
+            month: { type: 'every', value: '*' },
+            week: { type: 'any', value: '?' }
+        };
+
+        const weekNames = {
+            '1': 'SUN', '2': 'MON', '3': 'TUE', '4': 'WED',
+            '5': 'THU', '6': 'FRI', '7': 'SAT'
+        };
+
+        const weekNamesZh = {
+            '1': '周日', '2': '周一', '3': '周二', '4': '周三',
+            '5': '周四', '6': '周五', '7': '周六'
+        };
+
+        // 星期名称反向映射
+        const weekNamesReverse = {
+            'SUN': '1', 'MON': '2', 'TUE': '3', 'WED': '4',
+            'THU': '5', 'FRI': '6', 'SAT': '7'
+        };
+
+        // 初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            initCheckboxes();
+            updateCron();
+            loadHistory();
+            initCronDisplayInput();
+        });
+
+        // 初始化Cron表达式输入框
+        function initCronDisplayInput() {
+            const cronDisplay = document.getElementById('cronDisplay');
+            
+            // 监听回车键
+            cronDisplay.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    parseCronInput();
+                    cronDisplay.blur(); // 取消焦点
+                }
+            });
+            
+            // 监听失去焦点（可选：自动解析）
+            cronDisplay.addEventListener('blur', function() {
+                const currentCron = cronDisplay.textContent.trim();
+                const parts = currentCron.split(/\s+/);
+                // 只在格式正确时才自动解析
+                if (parts.length === 6) {
+                    // 不自动解析，避免干扰用户
+                    // parseCronInput();
+                }
+            });
+        }
+
+        // 解析用户输入的Cron表达式
+        function parseCronInput() {
+            const cronDisplay = document.getElementById('cronDisplay');
+            const inputCron = cronDisplay.textContent.trim();
+            
+            if (!inputCron) {
+                showAlert('❌ 请输入Cron表达式', 'danger');
+                return;
+            }
+            
+            const parts = inputCron.split(/\s+/);
+            if (parts.length !== 6) {
+                showAlert('❌ Cron表达式格式错误，应包含6个字段（秒 分 时 日 月 周）', 'danger');
+                return;
+            }
+            
+            try {
+                parseCron(inputCron);
+                showAlert('✅ 已成功解析并加载配置', 'success');
+            } catch (error) {
+                showAlert('❌ 解析失败：' + error.message, 'danger');
+            }
+        }
+
+        // 初始化复选框
+        function initCheckboxes() {
+            // 秒
+            const secondCheckboxes = document.getElementById('secondCheckboxes');
+            for (let i = 0; i < 60; i += 5) {
+                secondCheckboxes.innerHTML += createCheckbox('second', i);
+            }
+
+            // 分钟
+            const minuteCheckboxes = document.getElementById('minuteCheckboxes');
+            for (let i = 0; i < 60; i += 5) {
+                minuteCheckboxes.innerHTML += createCheckbox('minute', i);
+            }
+
+            // 小时
+            const hourCheckboxes = document.getElementById('hourCheckboxes');
+            for (let i = 0; i < 24; i++) {
+                hourCheckboxes.innerHTML += createCheckbox('hour', i);
+            }
+
+            // 日期
+            const dayCheckboxes = document.getElementById('dayCheckboxes');
+            for (let i = 1; i <= 31; i++) {
+                dayCheckboxes.innerHTML += createCheckbox('day', i);
+            }
+
+            // 月份
+            const monthCheckboxes = document.getElementById('monthCheckboxes');
+            const months = ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月'];
+            for (let i = 1; i <= 12; i++) {
+                monthCheckboxes.innerHTML += createCheckbox('month', i, months[i-1]);
+            }
+
+            // 星期
+            const weekCheckboxes = document.getElementById('weekCheckboxes');
+            const weeks = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
+            for (let i = 1; i <= 7; i++) {
+                weekCheckboxes.innerHTML += createCheckbox('week', i, weeks[i-1]);
+            }
+        }
+
+        // 创建复选框
+        function createCheckbox(field, value, label) {
+            const displayLabel = label || value;
+            return `
+                <div class="checkbox-item" onclick="toggleCheckbox(this, '${field}')">
+                    <input type="checkbox" value="${value}" onchange="updateCron()">
+                    <label>${displayLabel}</label>
+                </div>
+            `;
+        }
+
+        // 切换复选框
+        function toggleCheckbox(element, field) {
+            const checkbox = element.querySelector('input[type="checkbox"]');
+            checkbox.checked = !checkbox.checked;
+            element.classList.toggle('checked', checkbox.checked);
+            updateCron();
+        }
+
+        // 设置字段类型
+        function setFieldType(field, type) {
+            cronState[field].type = type;
+
+            // 更新按钮状态
+            const fieldElement = event.target.closest('.cron-field');
+            fieldElement.querySelectorAll('.type-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+
+            // 隐藏所有配置
+            fieldElement.querySelectorAll('.cron-field-config').forEach(config => {
+                config.classList.remove('active');
+            });
+
+            // 显示对应配置
+            if (type !== 'every' && type !== 'any' && type !== 'workday' && type !== 'last') {
+                const configElement = document.getElementById(`${field}-${type}`);
+                if (configElement) {
+                    configElement.classList.add('active');
+                }
+            }
+
+            // 如果选择了day的非any类型，week自动设为?
+            if (field === 'day' && type !== 'every' && type !== 'any') {
+                cronState.week.value = '?';
+                document.getElementById('weekValue').textContent = '?';
+            }
+
+            // 如果选择了week的非any类型，day自动设为?
+            if (field === 'week' && type !== 'any' && type !== 'every') {
+                cronState.day.value = '?';
+                document.getElementById('dayValue').textContent = '?';
+            }
+
+            updateCron();
+        }
+
+        // 更新Cron表达式
+        function updateCron() {
+            // 更新各字段的值
+            updateFieldValue('second');
+            updateFieldValue('minute');
+            updateFieldValue('hour');
+            updateFieldValue('day');
+            updateFieldValue('month');
+            updateFieldValue('week');
+
+            // 生成完整的cron表达式
+            const cron = `${cronState.second.value} ${cronState.minute.value} ${cronState.hour.value} ${cronState.day.value} ${cronState.month.value} ${cronState.week.value}`;
+            document.getElementById('cronDisplay').textContent = cron;
+
+            // 更新描述和下次执行时间
+            updateDescription(cron);
+            updateNextRuns(cron);
+        }
+
+        // 更新字段值
+        function updateFieldValue(field) {
+            const state = cronState[field];
+            let value = '*';
+
+            switch (state.type) {
+                case 'every':
+                    value = '*';
+                    break;
+                case 'any':
+                    value = '?';
+                    break;
+                case 'interval':
+                    const intervalStart = document.getElementById(`${field}IntervalStart`);
+                    const intervalValue = document.getElementById(`${field}IntervalValue`).value;
+                    
+                    // 如果有起始值，使用 X/Y 格式，否则使用 */Y 格式
+                    if (intervalStart && intervalStart.value) {
+                        value = `${intervalStart.value}/${intervalValue}`;
+                    } else {
+                        value = `*/${intervalValue}`;
+                    }
+                    break;
+                case 'range':
+                    const rangeStart = document.getElementById(`${field}RangeStart`).value;
+                    const rangeEnd = document.getElementById(`${field}RangeEnd`).value;
+                    value = `${rangeStart}-${rangeEnd}`;
+                    break;
+                case 'specific':
+                    const checkboxes = document.querySelectorAll(`#${field}Checkboxes input[type="checkbox"]:checked`);
+                    const values = Array.from(checkboxes).map(cb => {
+                        if (field === 'week') {
+                            return weekNames[cb.value];
+                        }
+                        return cb.value;
+                    });
+                    value = values.length > 0 ? values.join(',') : '*';
+                    break;
+                case 'workday':
+                    value = 'W';
+                    break;
+                case 'last':
+                    if (field === 'day') {
+                        value = 'L';
+                    } else if (field === 'week') {
+                        const lastWeek = document.getElementById('weekLastValue').value;
+                        value = weekNames[lastWeek] + 'L';
+                    }
+                    break;
+            }
+
+            state.value = value;
+            document.getElementById(`${field}Value`).textContent = value;
+        }
+
+        // 更新描述
+        function updateDescription(cron) {
+            const parts = cron.split(' ');
+            const desc = [];
+
+            // 解析秒
+            if (parts[0] === '*') {
+                desc.push('每秒');
+            } else if (parts[0].includes('/')) {
+                const [base, interval] = parts[0].split('/');
+                if (base === '*') {
+                    desc.push(`每${interval}秒`);
+                } else {
+                    desc.push(`从第${base}秒开始每${interval}秒`);
+                }
+            } else if (parts[0].includes('-')) {
+                const [start, end] = parts[0].split('-');
+                desc.push(`第${start}-${end}秒`);
+            } else if (parts[0] !== '0' && parts[0] !== '?') {
+                desc.push(`第${parts[0]}秒`);
+            }
+
+            // 解析分钟
+            if (parts[1] === '*') {
+                desc.push('每分钟');
+            } else if (parts[1].includes('/')) {
+                const [base, interval] = parts[1].split('/');
+                if (base === '*') {
+                    desc.push(`每${interval}分钟`);
+                } else {
+                    desc.push(`从第${base}分钟开始每${interval}分钟`);
+                }
+            } else if (parts[1].includes('-')) {
+                const [start, end] = parts[1].split('-');
+                desc.push(`第${start}-${end}分钟`);
+            } else if (parts[1] !== '0' && parts[1] !== '?') {
+                desc.push(`第${parts[1]}分钟`);
+            }
+
+            // 解析小时
+            if (parts[2] === '*') {
+                desc.push('每小时');
+            } else if (parts[2].includes('/')) {
+                const [base, interval] = parts[2].split('/');
+                if (base === '*') {
+                    desc.push(`每${interval}小时`);
+                } else {
+                    desc.push(`从${base}点开始每${interval}小时`);
+                }
+            } else if (parts[2].includes('-')) {
+                const [start, end] = parts[2].split('-');
+                desc.push(`${start}-${end}点`);
+            } else if (parts[2] !== '0' && parts[2] !== '?') {
+                desc.push(`${parts[2]}点`);
+            }
+
+            // 解析日期
+            if (parts[3] === '*') {
+                desc.push('每天');
+            } else if (parts[3] === '?') {
+                // 不指定
+            } else if (parts[3] === 'L') {
+                desc.push('每月最后一天');
+            } else if (parts[3] === 'W') {
+                desc.push('工作日');
+            } else if (parts[3].includes('/')) {
+                const [base, interval] = parts[3].split('/');
+                if (base === '*') {
+                    desc.push(`每${interval}天`);
+                } else {
+                    desc.push(`从${base}号开始每${interval}天`);
+                }
+            } else if (parts[3].includes('-')) {
+                const [start, end] = parts[3].split('-');
+                desc.push(`${start}-${end}号`);
+            } else {
+                desc.push(`${parts[3]}号`);
+            }
+
+            // 解析月份
+            if (parts[4] === '*') {
+                desc.push('每月');
+            } else if (parts[4].includes('/')) {
+                const [base, interval] = parts[4].split('/');
+                if (base === '*') {
+                    desc.push(`每${interval}个月`);
+                } else {
+                    desc.push(`从${base}月开始每${interval}个月`);
+                }
+            } else if (parts[4].includes('-')) {
+                const [start, end] = parts[4].split('-');
+                desc.push(`${start}-${end}月`);
+            } else if (parts[4] !== '?') {
+                desc.push(`${parts[4]}月`);
+            }
+
+            // 解析星期
+            if (parts[5] === '*') {
+                desc.push('每周');
+            } else if (parts[5] === '?') {
+                // 不指定
+            } else if (parts[5].includes('L')) {
+                const day = parts[5].replace('L', '');
+                const weekMap = { 'SUN': '周日', 'MON': '周一', 'TUE': '周二', 'WED': '周三', 'THU': '周四', 'FRI': '周五', 'SAT': '周六' };
+                desc.push(`每月最后一个${weekMap[day] || day}`);
+            } else if (parts[5].includes('-')) {
+                const [start, end] = parts[5].split('-');
+                const weekMap = { 'SUN': '周日', 'MON': '周一', 'TUE': '周二', 'WED': '周三', 'THU': '周四', 'FRI': '周五', 'SAT': '周六' };
+                desc.push(`${weekMap[start] || start}至${weekMap[end] || end}`);
+            } else if (parts[5].includes(',')) {
+                const days = parts[5].split(',');
+                const weekMap = { 'SUN': '周日', 'MON': '周一', 'TUE': '周二', 'WED': '周三', 'THU': '周四', 'FRI': '周五', 'SAT': '周六' };
+                const daysText = days.map(d => weekMap[d] || d).join('、');
+                desc.push(daysText);
+            } else if (parts[5] !== '?') {
+                const weekMap = { 'SUN': '周日', 'MON': '周一', 'TUE': '周二', 'WED': '周三', 'THU': '周四', 'FRI': '周五', 'SAT': '周六' };
+                desc.push(weekMap[parts[5]] || parts[5]);
+            }
+
+            let description = desc.join(' ');
+            if (description === '') {
+                description = '自定义Cron表达式';
+            } else {
+                description += ' 执行';
+            }
+
+            document.getElementById('cronDescription').textContent = description;
+        }
+
+        // 计算下次执行时间（改进版）
+        function updateNextRuns(cron) {
+            const nextRunsList = document.getElementById('nextRunsList');
+            const runs = [];
+            
+            try {
+                const now = new Date();
+                let current = new Date(now.getTime());
+                
+                for (let i = 0; i < 5 && runs.length < 5; i++) {
+                    current = getNextRun(cron, current);
+                    if (current) {
+                        runs.push(formatDateTime(current));
+                        current = new Date(current.getTime() + 1000);
+                    } else {
+                        break;
+                    }
+                }
+            } catch (e) {
+                console.error('计算执行时间出错:', e);
+                runs.push('无法计算执行时间');
+            }
+
+            if (runs.length === 0) {
+                nextRunsList.innerHTML = '<div class="next-run-item">⚠️ 无法计算下次执行时间</div>';
+            } else {
+                nextRunsList.innerHTML = runs.map((run, idx) => 
+                    `<div class="next-run-item">⏰ 第${idx + 1}次: ${run}</div>`
+                ).join('');
+            }
+        }
+
+        // 改进的下次运行时间计算
+        function getNextRun(cron, from) {
+            const parts = cron.split(' ');
+            const current = new Date(from.getTime());
+            
+            // 向前推进到下一秒
+            current.setSeconds(current.getSeconds() + 1);
+            current.setMilliseconds(0);
+
+            // 获取每个字段的可能值
+            const secondValues = getPossibleValues(parts[0], 0, 59);
+            const minuteValues = getPossibleValues(parts[1], 0, 59);
+            const hourValues = getPossibleValues(parts[2], 0, 23);
+            const monthValues = getPossibleValues(parts[4], 1, 12);
+
+            // 最多向前搜索2年
+            const maxDate = new Date(current.getTime() + 2 * 365 * 24 * 60 * 60 * 1000);
+            let iterations = 0;
+            const maxIterations = 100000;
+
+            while (current < maxDate && iterations < maxIterations) {
+                iterations++;
+                
+                if (matchesCron(current, parts)) {
+                    return new Date(current.getTime());
+                }
+                
+                // 智能推进：跳到下一个可能的时间点
+                if (!secondValues.includes(current.getSeconds())) {
+                    // 秒不匹配，跳到下一个匹配的秒
+                    const nextSecond = findNextValue(current.getSeconds(), secondValues, 60);
+                    if (nextSecond > current.getSeconds()) {
+                        current.setSeconds(nextSecond);
+                    } else {
+                        current.setMinutes(current.getMinutes() + 1);
+                        current.setSeconds(nextSecond);
+                    }
+                    continue;
+                }
+                
+                if (!minuteValues.includes(current.getMinutes())) {
+                    // 分钟不匹配，跳到下一个匹配的分钟
+                    const nextMinute = findNextValue(current.getMinutes(), minuteValues, 60);
+                    if (nextMinute > current.getMinutes()) {
+                        current.setMinutes(nextMinute);
+                        current.setSeconds(secondValues[0]);
+                    } else {
+                        current.setHours(current.getHours() + 1);
+                        current.setMinutes(nextMinute);
+                        current.setSeconds(secondValues[0]);
+                    }
+                    continue;
+                }
+                
+                if (!hourValues.includes(current.getHours())) {
+                    // 小时不匹配，跳到下一个匹配的小时
+                    const nextHour = findNextValue(current.getHours(), hourValues, 24);
+                    if (nextHour > current.getHours()) {
+                        current.setHours(nextHour);
+                        current.setMinutes(minuteValues[0]);
+                        current.setSeconds(secondValues[0]);
+                    } else {
+                        current.setDate(current.getDate() + 1);
+                        current.setHours(nextHour);
+                        current.setMinutes(minuteValues[0]);
+                        current.setSeconds(secondValues[0]);
+                    }
+                    continue;
+                }
+                
+                if (!monthValues.includes(current.getMonth() + 1)) {
+                    // 月份不匹配，跳到下一个匹配的月份
+                    const nextMonth = findNextValue(current.getMonth() + 1, monthValues, 13);
+                    if (nextMonth > current.getMonth() + 1) {
+                        current.setMonth(nextMonth - 1);
+                        current.setDate(1);
+                        current.setHours(hourValues[0]);
+                        current.setMinutes(minuteValues[0]);
+                        current.setSeconds(secondValues[0]);
+                    } else {
+                        current.setFullYear(current.getFullYear() + 1);
+                        current.setMonth(nextMonth - 1);
+                        current.setDate(1);
+                        current.setHours(hourValues[0]);
+                        current.setMinutes(minuteValues[0]);
+                        current.setSeconds(secondValues[0]);
+                    }
+                    continue;
+                }
+                
+                // 如果所有字段都匹配但整体不匹配，推进一秒
+                current.setSeconds(current.getSeconds() + 1);
+            }
+            
+            return null;
+        }
+
+        // 获取字段的所有可能值
+        function getPossibleValues(pattern, min, max) {
+            if (pattern === '*' || pattern === '?') {
+                const values = [];
+                for (let i = min; i <= max; i++) {
+                    values.push(i);
+                }
+                return values;
+            }
+
+            // 处理间隔 */n 或 n/m
+            if (pattern.includes('/')) {
+                const [base, interval] = pattern.split('/');
+                const intervalNum = parseInt(interval);
+                const values = [];
+                
+                if (base === '*') {
+                    // */n 表示从min开始每隔n
+                    for (let i = min; i <= max; i += intervalNum) {
+                        values.push(i);
+                    }
+                } else {
+                    // n/m 表示从n开始每隔m
+                    const startNum = parseInt(base);
+                    for (let i = startNum; i <= max; i += intervalNum) {
+                        values.push(i);
+                    }
+                }
+                
+                return values;
+            }
+
+            // 处理范围 n-m
+            if (pattern.includes('-') && !pattern.includes(',')) {
+                const [start, end] = pattern.split('-').map(Number);
+                const values = [];
+                for (let i = start; i <= end; i++) {
+                    values.push(i);
+                }
+                return values;
+            }
+
+            // 处理列表 n,m,o
+            if (pattern.includes(',')) {
+                return pattern.split(',').map(v => {
+                    if (isNaN(v)) return 0;
+                    return parseInt(v);
+                }).filter(v => v >= min && v <= max);
+            }
+
+            // 处理具体值
+            const value = parseInt(pattern);
+            if (!isNaN(value) && value >= min && value <= max) {
+                return [value];
+            }
+
+            // 其他情况返回所有可能值
+            const values = [];
+            for (let i = min; i <= max; i++) {
+                values.push(i);
+            }
+            return values;
+        }
+
+        // 查找下一个匹配的值
+        function findNextValue(current, possibleValues, max) {
+            for (let value of possibleValues) {
+                if (value > current) {
+                    return value;
+                }
+            }
+            // 如果没有更大的值，返回第一个值（表示需要进位）
+            return possibleValues[0];
+        }
+
+        // 检查时间是否匹配cron表达式
+        function matchesCron(date, parts) {
+            const second = date.getSeconds();
+            const minute = date.getMinutes();
+            const hour = date.getHours();
+            const day = date.getDate();
+            const month = date.getMonth() + 1;
+            const dayOfWeek = date.getDay() + 1; // JavaScript: 0=Sunday, Cron: 1=Sunday
+
+            // 检查秒、分、时、月
+            if (!matchesPart(second, parts[0], 0, 59)) return false;
+            if (!matchesPart(minute, parts[1], 0, 59)) return false;
+            if (!matchesPart(hour, parts[2], 0, 23)) return false;
+            if (!matchesPart(month, parts[4], 1, 12)) return false;
+
+            // 日期和星期的处理比较特殊
+            // 在Quartz中，当day和week都不是?时，满足其中一个即可（OR关系）
+            // 当其中一个是?时，只检查另一个
+            const dayPattern = parts[3];
+            const weekPattern = parts[5];
+
+            if (dayPattern === '?' && weekPattern === '?') {
+                // 两个都是?，任何日期都匹配
+                return true;
+            } else if (dayPattern === '?') {
+                // 只检查星期
+                return matchesWeekPart(dayOfWeek, weekPattern, date);
+            } else if (weekPattern === '?') {
+                // 只检查日期
+                return matchesDayPart(date, dayPattern);
+            } else {
+                // 两个都有指定值，满足其中一个即可（OR关系）
+                return matchesDayPart(date, dayPattern) || matchesWeekPart(dayOfWeek, weekPattern, date);
+            }
+        }
+
+        // 匹配日期字段（支持特殊字符）
+        function matchesDayPart(date, pattern) {
+            const day = date.getDate();
+            
+            if (pattern === '*' || pattern === '?') return true;
+            
+            // L - 最后一天
+            if (pattern === 'L') {
+                const lastDay = getLastDayOfMonth(date);
+                return day === lastDay;
+            }
+            
+            // W - 最近的工作日
+            if (pattern === 'W') {
+                return isWeekday(date);
+            }
+            
+            // LW - 最后一个工作日
+            if (pattern === 'LW') {
+                const lastDay = getLastDayOfMonth(date);
+                const lastDate = new Date(date.getFullYear(), date.getMonth(), lastDay);
+                const lastWeekday = getLastWeekdayOfMonth(date);
+                return day === lastWeekday;
+            }
+            
+            // nW - 最接近n号的工作日
+            if (pattern.includes('W')) {
+                const targetDay = parseInt(pattern.replace('W', ''));
+                const nearestWeekday = getNearestWeekday(date.getFullYear(), date.getMonth(), targetDay);
+                return day === nearestWeekday;
+            }
+            
+            return matchesPart(day, pattern, 1, 31);
+        }
+
+        // 判断是否是工作日
+        function isWeekday(date) {
+            const dayOfWeek = date.getDay(); // 0=Sunday, 6=Saturday
+            return dayOfWeek >= 1 && dayOfWeek <= 5;
+        }
+
+        // 获取月份最后一天
+        function getLastDayOfMonth(date) {
+            const nextMonth = new Date(date.getFullYear(), date.getMonth() + 1, 0);
+            return nextMonth.getDate();
+        }
+
+        // 获取月份最后一个工作日
+        function getLastWeekdayOfMonth(date) {
+            const lastDay = getLastDayOfMonth(date);
+            let lastDate = new Date(date.getFullYear(), date.getMonth(), lastDay);
+            
+            while (!isWeekday(lastDate)) {
+                lastDate.setDate(lastDate.getDate() - 1);
+            }
+            
+            return lastDate.getDate();
+        }
+
+        // 获取最接近指定日期的工作日
+        function getNearestWeekday(year, month, day) {
+            let targetDate = new Date(year, month, day);
+            
+            // 如果目标日期就是工作日，直接返回
+            if (isWeekday(targetDate)) {
+                return day;
+            }
+            
+            // 如果是周六，找前一个工作日（除非是1号）
+            if (targetDate.getDay() === 6) {
+                if (day === 1) {
+                    return 3; // 周一
+                }
+                return day - 1;
+            }
+            
+            // 如果是周日，找后一个工作日（除非是月末）
+            if (targetDate.getDay() === 0) {
+                const lastDay = getLastDayOfMonth(targetDate);
+                if (day === lastDay) {
+                    return day - 2; // 周五
+                }
+                return day + 1;
+            }
+            
+            return day;
+        }
+
+        // 匹配单个字段
+        function matchesPart(value, pattern, min, max) {
+            if (pattern === '*' || pattern === '?') return true;
+
+            // 处理间隔 */n 或 n/m
+            if (pattern.includes('/')) {
+                const [base, interval] = pattern.split('/');
+                const intervalNum = parseInt(interval);
+                
+                if (base === '*') {
+                    // */n 表示从min开始每隔n
+                    return (value - min) % intervalNum === 0;
+                } else {
+                    // n/m 表示从n开始每隔m
+                    const startNum = parseInt(base);
+                    if (value < startNum) return false;
+                    return (value - startNum) % intervalNum === 0;
+                }
+            }
+
+            // 处理范围 n-m
+            if (pattern.includes('-') && !pattern.includes(',')) {
+                const [start, end] = pattern.split('-').map(Number);
+                return value >= start && value <= end;
+            }
+
+            // 处理列表 n,m,o
+            if (pattern.includes(',')) {
+                const values = pattern.split(',').map(Number);
+                return values.includes(value);
+            }
+
+            // 处理具体值
+            const num = parseInt(pattern);
+            if (!isNaN(num)) {
+                return value === num;
+            }
+            
+            return false;
+        }
+
+        // 匹配星期字段
+        function matchesWeekPart(dayOfWeek, pattern, date) {
+            if (pattern === '*' || pattern === '?') return true;
+
+            // 转换星期名称
+            const weekMap = { 'SUN': 1, 'MON': 2, 'TUE': 3, 'WED': 4, 'THU': 5, 'FRI': 6, 'SAT': 7 };
+            
+            // 处理"最后一个星期X"（如MONL表示最后一个周一）
+            if (pattern.includes('L')) {
+                const weekDay = pattern.replace('L', '');
+                const targetWeekNum = weekMap[weekDay] || parseInt(weekDay);
+                
+                // 检查当前日期是否是该月最后一个指定星期
+                if (dayOfWeek !== targetWeekNum) {
+                    return false;
+                }
+                
+                // 检查是否是最后一个
+                const currentDate = date || new Date();
+                const nextWeek = new Date(currentDate);
+                nextWeek.setDate(nextWeek.getDate() + 7);
+                
+                // 如果加7天后还在同一个月，说明不是最后一个
+                return nextWeek.getMonth() !== currentDate.getMonth();
+            }
+            
+            // 处理范围 MON-FRI
+            if (pattern.includes('-') && !pattern.includes(',')) {
+                const [start, end] = pattern.split('-');
+                const startNum = weekMap[start] || parseInt(start);
+                const endNum = weekMap[end] || parseInt(end);
+                return dayOfWeek >= startNum && dayOfWeek <= endNum;
+            }
+
+            // 处理列表 MON,WED,FRI
+            if (pattern.includes(',')) {
+                const values = pattern.split(',').map(v => weekMap[v] || parseInt(v));
+                return values.includes(dayOfWeek);
+            }
+
+            // 处理具体值
+            const patternNum = weekMap[pattern] || parseInt(pattern);
+            return dayOfWeek === patternNum;
+        }
+
+        // 格式化日期时间
+        function formatDateTime(date) {
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            const hour = String(date.getHours()).padStart(2, '0');
+            const minute = String(date.getMinutes()).padStart(2, '0');
+            const second = String(date.getSeconds()).padStart(2, '0');
+            const weekDay = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'][date.getDay()];
+            
+            return `${year}-${month}-${day} ${hour}:${minute}:${second} ${weekDay}`;
+        }
+
+        // 复制Cron表达式
+        function copyCron() {
+            const cronText = document.getElementById('cronDisplay').textContent;
+            navigator.clipboard.writeText(cronText).then(() => {
+                showAlert('✅ Cron表达式已复制到剪贴板', 'success');
+            }).catch(() => {
+                showAlert('❌ 复制失败，请手动复制', 'danger');
+            });
+        }
+
+        // 保存到历史
+        function saveCron() {
+            const cron = document.getElementById('cronDisplay').textContent;
+            const desc = document.getElementById('cronDescription').textContent;
+            
+            const history = getHistory();
+            const record = {
+                id: Date.now(),
+                cron: cron,
+                description: desc,
+                timestamp: new Date().toLocaleString('zh-CN')
+            };
+
+            history.unshift(record);
+
+            if (history.length > MAX_HISTORY) {
+                history.pop();
+            }
+
+            localStorage.setItem('cron_history', JSON.stringify(history));
+            loadHistory();
+            showAlert('✅ 已保存到历史记录', 'success');
+        }
+
+        // 重置所有
+        function resetAll() {
+            if (confirm('确定要重置所有配置吗？')) {
+                // 重置状态
+                cronState.second = { type: 'every', value: '*' };
+                cronState.minute = { type: 'every', value: '*' };
+                cronState.hour = { type: 'every', value: '*' };
+                cronState.day = { type: 'every', value: '*' };
+                cronState.month = { type: 'every', value: '*' };
+                cronState.week = { type: 'any', value: '?' };
+
+                // 重置UI
+                document.querySelectorAll('.type-btn').forEach(btn => btn.classList.remove('active'));
+                document.querySelectorAll('.cron-field').forEach((field, idx) => {
+                    const firstBtn = field.querySelector('.type-btn');
+                    if (firstBtn) firstBtn.classList.add('active');
+                });
+                document.querySelectorAll('.cron-field-config').forEach(config => {
+                    config.classList.remove('active');
+                });
+                document.querySelectorAll('.checkbox-item').forEach(item => {
+                    item.classList.remove('checked');
+                    item.querySelector('input[type="checkbox"]').checked = false;
+                });
+
+                updateCron();
+            }
+        }
+
+        // 加载模板
+        function loadTemplate(templateName) {
+            const templates = {
+                everySecond: { cron: '* * * * * ?' },
+                everyMinute: { cron: '0 * * * * ?' },
+                everyHour: { cron: '0 0 * * * ?' },
+                everyDay: { cron: '0 0 0 * * ?' },
+                workday: { cron: '0 0 9 ? * MON-FRI' },
+                weekend: { cron: '0 0 10 ? * SAT,SUN' },
+                monthly: { cron: '0 0 0 1 * ?' },
+                quarterly: { cron: '0 0 0 1 1,4,7,10 ?' },
+                yearly: { cron: '0 0 0 1 1 ?' },
+                interval5m: { cron: '0 */5 * * * ?' },
+                interval30m: { cron: '0 */30 * * * ?' },
+                businessHours: { cron: '0 0 9-18 ? * MON-FRI' }
+            };
+
+            const template = templates[templateName];
+            if (template) {
+                parseCron(template.cron);
+                showAlert('✅ 已加载模板', 'success');
+            }
+        }
+
+        // 解析Cron表达式（完整版）
+        function parseCron(cron) {
+            const parts = cron.trim().split(/\s+/);
+            if (parts.length !== 6) {
+                showAlert('❌ 无效的Cron表达式格式', 'danger');
+                return;
+            }
+
+            // 先重置所有状态
+            resetAllState();
+
+            // 解析每个字段
+            parseField('second', parts[0], 0, 59);
+            parseField('minute', parts[1], 0, 59);
+            parseField('hour', parts[2], 0, 23);
+            parseField('day', parts[3], 1, 31);
+            parseField('month', parts[4], 1, 12);
+            parseField('week', parts[5], 1, 7);
+
+            // 更新显示
+            updateCron();
+            
+            // 滚动到顶部
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // 重置所有状态（不弹出确认）
+        function resetAllState() {
+            // 重置状态
+            cronState.second = { type: 'every', value: '*' };
+            cronState.minute = { type: 'every', value: '*' };
+            cronState.hour = { type: 'every', value: '*' };
+            cronState.day = { type: 'every', value: '*' };
+            cronState.month = { type: 'every', value: '*' };
+            cronState.week = { type: 'any', value: '?' };
+
+            // 重置UI
+            document.querySelectorAll('.type-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.cron-field-config').forEach(config => {
+                config.classList.remove('active');
+            });
+            document.querySelectorAll('.checkbox-item').forEach(item => {
+                item.classList.remove('checked');
+                item.querySelector('input[type="checkbox"]').checked = false;
+            });
+        }
+
+        // 解析单个字段
+        function parseField(field, value, min, max) {
+            if (value === '*') {
+                // 每...（但week字段的*表示每天）
+                if (field === 'week') {
+                    setFieldTypeProgram(field, 'every');
+                } else {
+                    setFieldTypeProgram(field, 'every');
+                }
+            } else if (value === '?') {
+                // 不指定
+                setFieldTypeProgram(field, 'any');
+            } else if (value === 'L') {
+                // 最后一天
+                setFieldTypeProgram(field, 'last');
+            } else if (value === 'W') {
+                // 工作日
+                setFieldTypeProgram(field, 'workday');
+            } else if (value.includes('L')) {
+                // 最后一个星期X
+                setFieldTypeProgram(field, 'last');
+                const weekDay = value.replace('L', '');
+                const weekNum = weekNamesReverse[weekDay];
+                if (weekNum && document.getElementById('weekLastValue')) {
+                    document.getElementById('weekLastValue').value = weekNum;
+                }
+            } else if (value.includes('/')) {
+                // 间隔：支持 */n 和 x/n 两种格式
+                const parts = value.split('/');
+                const base = parts[0];
+                const interval = parts[1];
+                
+                setFieldTypeProgram(field, 'interval');
+                
+                // 设置间隔值
+                const inputElement = document.getElementById(`${field}IntervalValue`);
+                if (inputElement) {
+                    inputElement.value = interval;
+                }
+                
+                // 设置起始值（如果不是*的话）
+                const startElement = document.getElementById(`${field}IntervalStart`);
+                if (startElement) {
+                    if (base !== '*') {
+                        startElement.value = base;
+                    } else {
+                        startElement.value = '';
+                    }
+                }
+            } else if (value.includes('-') && !value.includes(',')) {
+                // 范围
+                const parts = value.split('-');
+                let start = parts[0];
+                let end = parts[1];
+                
+                // 处理星期名称
+                if (field === 'week') {
+                    start = weekNamesReverse[start] || start;
+                    end = weekNamesReverse[end] || end;
+                }
+                
+                setFieldTypeProgram(field, 'range');
+                const startElement = document.getElementById(`${field}RangeStart`);
+                const endElement = document.getElementById(`${field}RangeEnd`);
+                if (startElement && endElement) {
+                    startElement.value = start;
+                    endElement.value = end;
+                }
+            } else {
+                // 指定值（列表或单个值）
+                // 可能是数字、数字列表或星期名称
+                const isWeekName = field === 'week' && weekNamesReverse[value];
+                const isNumber = !isNaN(value) && value !== '*' && value !== '?';
+                const isList = value.includes(',');
+                
+                if (isList || isNumber || isWeekName) {
+                    setFieldTypeProgram(field, 'specific');
+                    const values = value.split(',');
+                    
+                    // 转换星期名称
+                    const numericValues = values.map(v => {
+                        if (field === 'week' && weekNamesReverse[v]) {
+                            return weekNamesReverse[v];
+                        }
+                        return v;
+                    });
+                    
+                    // 勾选对应的复选框
+                    const checkboxContainer = document.getElementById(`${field}Checkboxes`);
+                    if (checkboxContainer) {
+                        const checkboxItems = checkboxContainer.querySelectorAll('.checkbox-item');
+                        checkboxItems.forEach(item => {
+                            const checkbox = item.querySelector('input[type="checkbox"]');
+                            if (numericValues.includes(checkbox.value)) {
+                                checkbox.checked = true;
+                                item.classList.add('checked');
+                            }
+                        });
+                    }
+                }
+            }
+        }
+
+        // 程序化设置字段类型（不依赖event对象）
+        function setFieldTypeProgram(field, type) {
+            cronState[field].type = type;
+
+            // 获取对应的cron-field元素
+            const allFields = document.querySelectorAll('.cron-field');
+            const fieldMap = {
+                'second': 0,
+                'minute': 1,
+                'hour': 2,
+                'day': 3,
+                'month': 4,
+                'week': 5
+            };
+            const fieldElement = allFields[fieldMap[field]];
+            
+            if (!fieldElement) return;
+
+            // 更新按钮状态
+            fieldElement.querySelectorAll('.type-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // 找到对应类型的按钮并激活
+            const typeButtons = fieldElement.querySelectorAll('.type-btn');
+            typeButtons.forEach(btn => {
+                const btnText = btn.textContent.trim();
+                let shouldActivate = false;
+                
+                switch(type) {
+                    case 'every':
+                        if (field === 'week') {
+                            shouldActivate = btnText.includes('每天');
+                        } else {
+                            shouldActivate = btnText.includes('每') && !btnText.includes('隔');
+                        }
+                        break;
+                    case 'any':
+                        shouldActivate = btnText.includes('不指定');
+                        break;
+                    case 'interval':
+                        shouldActivate = btnText.includes('间隔');
+                        break;
+                    case 'range':
+                        shouldActivate = btnText.includes('范围');
+                        break;
+                    case 'specific':
+                        shouldActivate = btnText.includes('指定') && !btnText.includes('不指定');
+                        break;
+                    case 'workday':
+                        shouldActivate = btnText.includes('工作日');
+                        break;
+                    case 'last':
+                        shouldActivate = btnText.includes('最后');
+                        break;
+                }
+                
+                if (shouldActivate) {
+                    btn.classList.add('active');
+                }
+            });
+
+            // 隐藏所有配置
+            fieldElement.querySelectorAll('.cron-field-config').forEach(config => {
+                config.classList.remove('active');
+            });
+
+            // 显示对应配置
+            if (type !== 'every' && type !== 'any' && type !== 'workday') {
+                const configElement = document.getElementById(`${field}-${type}`);
+                if (configElement) {
+                    configElement.classList.add('active');
+                }
+            }
+        }
+
+        // 显示提示
+        function showAlert(message, type = 'info') {
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type}`;
+            alertDiv.textContent = message;
+            alertDiv.style.position = 'fixed';
+            alertDiv.style.top = '20%';
+            alertDiv.style.left = '50%';
+            alertDiv.style.transform = 'translate(-50%, -20px)';
+            alertDiv.style.zIndex = '9999';
+            alertDiv.style.minWidth = '300px';
+            alertDiv.style.maxWidth = '90vw';
+            alertDiv.style.textAlign = 'center';
+            alertDiv.style.opacity = '0';
+            alertDiv.style.transition = 'all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)';
+            
+            // 添加半透明背景遮罩
+            const backdrop = document.createElement('div');
+            backdrop.style.position = 'fixed';
+            backdrop.style.top = '0';
+            backdrop.style.left = '0';
+            backdrop.style.width = '100%';
+            backdrop.style.height = '100%';
+            backdrop.style.backgroundColor = 'rgba(0, 0, 0, 0.3)';
+            backdrop.style.zIndex = '9998';
+            backdrop.style.opacity = '0';
+            backdrop.style.transition = 'opacity 0.3s';
+            backdrop.style.backdropFilter = 'blur(3px)';
+            
+            document.body.appendChild(backdrop);
+            document.body.appendChild(alertDiv);
+            
+            // 触发动画
+            requestAnimationFrame(() => {
+                backdrop.style.opacity = '1';
+                alertDiv.style.opacity = '1';
+                alertDiv.style.transform = 'translate(-50%, 0)';
+            });
+            
+            setTimeout(() => {
+                alertDiv.style.opacity = '0';
+                alertDiv.style.transform = 'translate(-50%, -20px)';
+                backdrop.style.opacity = '0';
+                setTimeout(() => {
+                    alertDiv.remove();
+                    backdrop.remove();
+                }, 300);
+            }, 2000);
+        }
+
+        // 获取历史记录
+        function getHistory() {
+            const historyStr = localStorage.getItem('cron_history');
+            return historyStr ? JSON.parse(historyStr) : [];
+        }
+
+        // 加载历史记录
+        function loadHistory() {
+            const history = getHistory();
+            const historyList = document.getElementById('historyList');
+
+            if (history.length === 0) {
+                historyList.innerHTML = `
+                    <div class="empty-history">
+                        <div>📭</div>
+                        <p>暂无历史记录</p>
+                    </div>
+                `;
+                return;
+            }
+
+            historyList.innerHTML = history.map(record => `
+                <div class="history-item" onclick="loadFromHistory(${record.id})">
+                    <div class="history-item-header">
+                        <div class="history-item-cron">${record.cron}</div>
+                        <div class="history-item-actions">
+                            <div class="history-item-date">${record.timestamp}</div>
+                            <button class="delete-history-btn" onclick="deleteHistoryItem(${record.id}, event)" title="删除此记录">删除</button>
+                        </div>
+                    </div>
+                    <div class="history-item-desc">${record.description}</div>
+                </div>
+            `).join('');
+        }
+
+        // 从历史加载
+        function loadFromHistory(id) {
+            const history = getHistory();
+            const record = history.find(r => r.id === id);
+            if (record) {
+                parseCron(record.cron);
+                showAlert('✅ 已从历史记录加载配置', 'success');
+            }
+        }
+
+        // 删除历史记录项
+        function deleteHistoryItem(recordId, event) {
+            event.stopPropagation();
+            
+            if (confirm('确定要删除这条历史记录吗？')) {
+                let history = getHistory();
+                history = history.filter(r => r.id !== recordId);
+                localStorage.setItem('cron_history', JSON.stringify(history));
+                loadHistory();
+            }
+        }
+
+        // 清空历史记录
+        function clearHistory() {
+            if (confirm('确定要清空所有历史记录吗？此操作不可恢复。')) {
+                localStorage.removeItem('cron_history');
+                loadHistory();
+            }
+        }
+    </script>
+</body>
+</html>
+

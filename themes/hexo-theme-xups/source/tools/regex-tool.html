@@ -1,0 +1,1560 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>正则表达式工具</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            font-weight: 300;
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .section {
+            margin-bottom: 30px;
+            margin-top: 30px;
+        }
+
+        .section-title {
+            font-size: 1.3em;
+            color: #333;
+            margin-bottom: 15px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        .input-group label {
+            display: block;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 1em;
+        }
+
+        .regex-input-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .regex-input-container {
+            flex: 1;
+            position: relative;
+        }
+
+        input[type="text"], textarea {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e1e5e9;
+            border-radius: 10px;
+            font-size: 1em;
+            font-family: 'Consolas', 'Monaco', monospace;
+            transition: all 0.3s ease;
+            background: #f8f9fa;
+        }
+
+        input[type="text"]:focus, textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        textarea {
+            min-height: 150px;
+            resize: vertical;
+        }
+
+        .flags-label {
+            display: block;
+            margin-top: 15px;
+            margin-bottom: 8px;
+            font-size: 0.95em;
+            color: #666;
+            font-weight: 500;
+        }
+        
+        .flags-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 10px;
+            padding: 5px 0;
+        }
+
+        .flag-option {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+            padding: 10px 12px;
+            background: #f8f9fa;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            user-select: none;
+            min-height: 44px;
+            font-weight: 500;
+        }
+
+        .flag-option:hover {
+            border-color: #667eea;
+            background: #f0f4ff;
+        }
+
+        .flag-option.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-color: #667eea;
+            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+        }
+        
+        .flag-option.active span {
+            font-weight: 600;
+        }
+
+        .flag-option input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+            cursor: pointer;
+            margin: 0;
+        }
+        
+        .flag-option span {
+            font-size: 0.95em;
+            white-space: nowrap;
+            font-weight: 500;
+        }
+        
+        .flag-option span span {
+            font-weight: 700;
+            font-size: 1.1em;
+            margin-right: 4px;
+            color: inherit;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-bottom: 25px;
+        }
+
+        .btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+            transform: translateY(-2px);
+        }
+
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #218838;
+            transform: translateY(-2px);
+        }
+
+        .btn-warning {
+            background: #ffc107;
+            color: #333;
+        }
+
+        .btn-warning:hover {
+            background: #e0a800;
+            transform: translateY(-2px);
+        }
+
+        .result-box {
+            background: #f8f9fa;
+            border: 2px solid #e1e5e9;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+
+        .result-box h3 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+        }
+
+        .result-content {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: 'Consolas', 'Monaco', monospace;
+            word-break: break-all;
+            max-height: 400px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+        }
+
+        .match-item {
+            padding: 10px;
+            margin-bottom: 10px;
+            background: #e7f3ff;
+            border-left: 4px solid #2196F3;
+            border-radius: 5px;
+        }
+
+        .match-item strong {
+            color: #1976D2;
+        }
+
+        .match-highlight {
+            background: #ffeb3b;
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-weight: 600;
+        }
+
+        .alert {
+            padding: 15px 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-weight: 500;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert-danger {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .alert-info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+
+        .info-box {
+            background: #e7f3ff;
+            border-left: 4px solid #2196F3;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+
+        .info-box h4 {
+            color: #1976D2;
+            margin-bottom: 8px;
+        }
+
+        .info-box p {
+            color: #666;
+            line-height: 1.6;
+        }
+
+        .templates-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .template-card {
+            background: white;
+            border: 2px solid #e1e5e9;
+            border-radius: 10px;
+            padding: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .template-card:hover {
+            border-color: #667eea;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.2);
+        }
+
+        .template-card-title {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .template-card-regex {
+            font-family: 'Consolas', 'Monaco', monospace;
+            color: #667eea;
+            font-size: 0.9em;
+            margin-bottom: 5px;
+            word-break: break-all;
+        }
+
+        .template-card-desc {
+            font-size: 0.85em;
+            color: #666;
+        }
+
+        .history-section {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 2px solid #e1e5e9;
+        }
+
+        .history-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .history-header h3 {
+            color: #333;
+            font-size: 1.2em;
+        }
+
+        .clear-history-btn {
+            padding: 8px 16px;
+            background: #dc3545;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: all 0.3s ease;
+        }
+
+        .clear-history-btn:hover {
+            background: #c82333;
+            transform: scale(1.05);
+        }
+
+        .history-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .history-item {
+            background: white;
+            border: 1px solid #e1e5e9;
+            border-radius: 8px;
+            padding: 15px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .history-item:hover {
+            border-color: #4facfe;
+            box-shadow: 0 2px 8px rgba(79, 172, 254, 0.1);
+        }
+
+        .history-item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .history-item-regex {
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-weight: 600;
+            color: #667eea;
+            font-size: 1.1em;
+            word-break: break-all;
+        }
+
+        .history-item-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .history-item-date {
+            color: #666;
+            font-size: 0.85em;
+            white-space: nowrap;
+        }
+
+        .delete-history-btn {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 4px 8px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.8em;
+            transition: all 0.3s ease;
+            opacity: 0.7;
+        }
+
+        .delete-history-btn:hover {
+            background: #c82333;
+            opacity: 1;
+            transform: scale(1.05);
+        }
+
+        .history-item-desc {
+            color: #555;
+            font-size: 0.9em;
+            margin-top: 5px;
+        }
+
+        .empty-history {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+        }
+
+        .empty-history div {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+
+        .char-count {
+            position: absolute;
+            bottom: 10px;
+            right: 15px;
+            font-size: 0.9em;
+            color: #999;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 2px 8px;
+            border-radius: 5px;
+        }
+
+        .textarea-wrapper {
+            position: relative;
+        }
+
+        .back-to-home {
+            display: inline-block;
+            padding: 10px 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 10px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .back-to-home:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        /* 移动端优化 */
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+
+            .content {
+                padding: 20px 15px;
+            }
+
+            .header {
+                padding: 20px 15px;
+            }
+
+            .header h1 {
+                font-size: 1.8em;
+                margin-bottom: 8px;
+            }
+
+            .header p {
+                font-size: 0.95em;
+            }
+
+            .section-title {
+                font-size: 1.2em;
+            }
+
+            .templates-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .button-group {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+            }
+
+            .flags-label {
+                font-size: 1em;
+                margin-top: 18px;
+                margin-bottom: 10px;
+            }
+            
+            .flags-container {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 10px;
+            }
+
+            .flag-option {
+                padding: 12px 10px;
+                font-size: 1em;
+                flex-direction: column;
+                gap: 6px;
+                min-height: 58px;
+            }
+            
+            .flag-option span {
+                font-size: 1em;
+                line-height: 1.3;
+                text-align: center;
+                font-weight: 600;
+            }
+            
+            .flag-option span span {
+                font-size: 1.3em;
+                display: block;
+                margin: 0 0 4px 0;
+            }
+            
+            .flag-option input[type="checkbox"] {
+                width: 22px;
+                height: 22px;
+            }
+            
+            .result-content {
+                font-size: 0.9em;
+                max-height: 300px;
+            }
+            
+            .match-item {
+                padding: 8px;
+                font-size: 0.9em;
+            }
+
+            .history-section {
+                margin-top: 25px;
+                padding: 20px 15px;
+                background: #f8f9fa;
+                border-radius: 10px;
+                border-top: none;
+            }
+
+            .history-header {
+                flex-direction: column;
+                gap: 12px;
+                align-items: stretch;
+            }
+
+            .history-header h3 {
+                font-size: 1.3em;
+                text-align: center;
+            }
+
+            .clear-history-btn {
+                width: 100%;
+                padding: 10px 20px;
+                font-size: 1em;
+            }
+
+            .history-item {
+                padding: 12px;
+            }
+
+            .history-item-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 8px;
+            }
+
+            .history-item-actions {
+                width: 100%;
+                justify-content: space-between;
+            }
+
+            .history-item-regex {
+                font-size: 1em;
+            }
+        }
+
+        /* 小屏手机优化（保持2列） */
+        @media (max-width: 480px) and (min-width: 361px) {
+            body {
+                padding: 8px;
+            }
+
+            .content {
+                padding: 15px 12px;
+            }
+
+            .header {
+                padding: 15px 12px;
+            }
+
+            .header h1 {
+                font-size: 1.5em;
+            }
+
+            .header p {
+                font-size: 0.9em;
+            }
+
+            .section-title {
+                font-size: 1.1em;
+            }
+
+            input[type="text"], textarea {
+                padding: 10px 12px;
+                font-size: 0.95em;
+            }
+
+            textarea {
+                min-height: 120px;
+            }
+
+            .btn {
+                padding: 10px 20px;
+                font-size: 0.95em;
+            }
+
+            .template-card {
+                padding: 12px;
+            }
+
+            .flags-container {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 8px;
+            }
+
+            .flag-option {
+                padding: 10px 8px;
+                font-size: 0.95em;
+                min-height: 56px;
+            }
+            
+            .flag-option span {
+                font-size: 0.95em;
+                font-weight: 600;
+            }
+            
+            .flag-option span span {
+                font-size: 1.25em;
+                display: block;
+                margin-bottom: 3px;
+            }
+            
+            .flag-option input[type="checkbox"] {
+                width: 20px;
+                height: 20px;
+            }
+            
+            .template-card-regex {
+                font-size: 0.85em;
+                word-break: break-all;
+            }
+            
+            .back-to-home {
+                display: block;
+                text-align: center;
+                width: 100%;
+                padding: 12px 20px;
+            }
+            
+            .result-box {
+                padding: 15px 12px;
+            }
+            
+            .result-box h3 {
+                font-size: 1em;
+                margin-bottom: 12px;
+            }
+        }
+
+        /* 窄屏手机（单列布局） */
+        @media (max-width: 420px) {
+            .flags-container {
+                grid-template-columns: 1fr;
+                gap: 10px;
+            }
+            
+            .flag-option {
+                flex-direction: row;
+                justify-content: flex-start;
+                gap: 15px;
+                min-height: 48px;
+                padding: 12px 16px;
+                font-size: 1em;
+            }
+            
+            .flag-option span {
+                text-align: left;
+                font-size: 1.05em;
+                font-weight: 500;
+            }
+            
+            .flag-option span span {
+                font-weight: 700;
+                font-size: 1.15em;
+                display: inline;
+                margin-right: 6px;
+            }
+            
+            .flag-option input[type="checkbox"] {
+                flex-shrink: 0;
+                width: 20px;
+                height: 20px;
+            }
+        }
+        
+        /* 超小屏手机 */
+        @media (max-width: 360px) {
+            .header h1 {
+                font-size: 1.3em;
+            }
+
+            .header p {
+                font-size: 0.85em;
+            }
+
+            .section-title {
+                font-size: 1em;
+            }
+
+            input[type="text"], textarea {
+                font-size: 0.9em;
+                padding: 10px;
+            }
+
+            .btn {
+                font-size: 0.9em;
+                padding: 10px 16px;
+            }
+
+            .flags-container {
+                grid-template-columns: 1fr;
+                gap: 8px;
+            }
+            
+            .flag-option {
+                font-size: 0.95em;
+                padding: 10px 14px;
+                min-height: 46px;
+                flex-direction: row;
+                justify-content: flex-start;
+                gap: 12px;
+            }
+            
+            .flag-option span {
+                font-size: 1em;
+                text-align: left;
+                font-weight: 500;
+            }
+            
+            .flag-option span span {
+                font-weight: 700;
+                font-size: 1.1em;
+                display: inline;
+                margin-right: 5px;
+            }
+            
+            .flag-option input[type="checkbox"] {
+                width: 18px;
+                height: 18px;
+                flex-shrink: 0;
+            }
+            
+            .template-card-title {
+                font-size: 0.95em;
+            }
+            
+            .template-card-regex {
+                font-size: 0.8em;
+            }
+            
+            .template-card-desc {
+                font-size: 0.8em;
+            }
+            
+            .match-item {
+                padding: 8px;
+                font-size: 0.85em;
+            }
+            
+            .back-to-home {
+                font-size: 0.9em;
+                padding: 10px 16px;
+            }
+        }
+        
+        /* 触摸设备优化 */
+        @media (hover: none) and (pointer: coarse) {
+            .btn, .template-card, .flag-option {
+                min-height: 44px; /* 符合触摸目标最小尺寸标准 */
+            }
+            
+            .template-card:active {
+                transform: scale(0.98);
+            }
+            
+            .btn:active {
+                transform: translateY(0) scale(0.98);
+            }
+            
+            .flag-option:active {
+                transform: scale(0.95);
+            }
+            
+            /* 移除 hover 效果，避免触摸设备的粘滞问题 */
+            .template-card:hover,
+            .flag-option:hover {
+                transform: none;
+            }
+            
+            .flag-option:hover {
+                background: #f8f9fa;
+            }
+            
+            .flag-option.active:hover {
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            }
+            
+            /* 增大触摸区域 */
+            .flag-option {
+                padding: 12px 12px;
+                min-height: 44px;
+            }
+            
+            .flag-option span {
+                font-size: 1.05em;
+            }
+            
+            .flag-option input[type="checkbox"] {
+                width: 22px;
+                height: 22px;
+            }
+            
+            /* 优化滚动性能 */
+            .result-content, .history-list {
+                -webkit-overflow-scrolling: touch;
+            }
+        }
+
+        /* 横屏模式优化 */
+        @media (max-width: 768px) and (orientation: landscape) {
+            .header {
+                padding: 15px 20px;
+            }
+            
+            .header h1 {
+                font-size: 1.5em;
+            }
+            
+            .content {
+                padding: 20px;
+            }
+            
+            .templates-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .flags-container {
+                grid-template-columns: repeat(5, 1fr);
+                gap: 8px;
+            }
+            
+            .flag-option {
+                min-height: 54px;
+                padding: 10px 8px;
+                flex-direction: column;
+            }
+            
+            .flag-option span {
+                text-align: center;
+                font-size: 0.95em;
+                font-weight: 600;
+            }
+            
+            .flag-option input[type="checkbox"] {
+                width: 20px;
+                height: 20px;
+            }
+            
+            .result-content {
+                max-height: 250px;
+            }
+        }
+        
+        /* 性能优化 */
+        .btn, .template-card, .flag-option {
+            will-change: transform;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔍 正则表达式工具</h1>
+            <p>强大的正则表达式测试、匹配和替换工具</p>
+        </div>
+
+        <div class="content">
+            <!-- 返回主页按钮
+            <a href="tools.html" class="back-to-home">⬅️ 返回工具箱</a>
+             -->
+            <!-- 正则表达式输入 -->
+            <div class="section">
+                <div class="section-title">📝 正则表达式</div>
+                <div class="input-group">
+                    <label>正则表达式模式</label>
+                    <div class="regex-input-wrapper">
+                        <div class="regex-input-container">
+                            <input type="text" id="regexInput" placeholder="请输入正则表达式，例如：\d{3}-\d{4}" value="\w+@\w+\.\w+">
+                        </div>
+                    </div>
+                    
+                    <label class="flags-label">匹配标志：</label>
+                    <div class="flags-container">
+                        <label class="flag-option active" title="全局匹配 - 查找所有匹配项，而不是找到第一个就停止">
+                            <input type="checkbox" id="flagG" checked>
+                            <span><span>g</span> 全局</span>
+                        </label>
+                        <label class="flag-option" title="忽略大小写 - 匹配时不区分大小写字母">
+                            <input type="checkbox" id="flagI">
+                            <span><span>i</span> 忽略大小写</span>
+                        </label>
+                        <label class="flag-option" title="多行模式 - ^ 和 $ 匹配每行的开始和结束">
+                            <input type="checkbox" id="flagM">
+                            <span><span>m</span> 多行</span>
+                        </label>
+                        <label class="flag-option" title="单行模式 - . 可以匹配换行符">
+                            <input type="checkbox" id="flagS">
+                            <span><span>s</span> 单行</span>
+                        </label>
+                        <label class="flag-option" title="Unicode模式 - 启用完整的Unicode支持">
+                            <input type="checkbox" id="flagU">
+                            <span><span>u</span> Unicode</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 测试文本 -->
+            <div class="section">
+                <div class="section-title">📄 测试文本</div>
+                <div class="input-group">
+                    <div class="textarea-wrapper">
+                        <textarea id="testText" placeholder="请输入要测试的文本...">示例邮箱：test@example.com, admin@test.org, user123@domain.net</textarea>
+                        <span class="char-count" id="textCount">0 字符</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 替换文本 -->
+            <div class="section" id="replaceSection" style="display: none;">
+                <div class="section-title">🔄 替换文本</div>
+                <div class="input-group">
+                    <input type="text" id="replaceText" placeholder="请输入替换后的文本，支持 $1, $2 等分组引用">
+                </div>
+            </div>
+
+            <!-- 操作按钮 -->
+            <div class="button-group">
+                <button class="btn btn-primary" onclick="testRegex()">🔍 匹配测试</button>
+                <button class="btn btn-success" onclick="showReplace()">🔄 替换</button>
+                <button class="btn btn-secondary" onclick="validateRegex()">✓ 验证正则</button>
+                <button class="btn btn-warning" onclick="clearAll()">🗑️ 清空</button>
+            </div>
+
+            <!-- 结果显示 -->
+            <div id="resultContainer"></div>
+
+            <!-- 常用正则表达式模板 -->
+            <div class="section">
+                <div class="section-title">📚 常用正则表达式模板</div>
+                <div class="templates-grid">
+                    <div class="template-card" onclick="loadTemplate('email')">
+                        <div class="template-card-title">📧 电子邮箱</div>
+                        <div class="template-card-regex">[\w.-]+@[\w.-]+\.\w+</div>
+                        <div class="template-card-desc">匹配常见的电子邮箱地址</div>
+                    </div>
+                    
+                    <div class="template-card" onclick="loadTemplate('phone')">
+                        <div class="template-card-title">📱 手机号码</div>
+                        <div class="template-card-regex">1[3-9]\d{9}</div>
+                        <div class="template-card-desc">匹配中国大陆手机号码</div>
+                    </div>
+                    
+                    <div class="template-card" onclick="loadTemplate('url')">
+                        <div class="template-card-title">🌐 URL链接</div>
+                        <div class="template-card-regex">https?://[\w\-.]+(:\d+)?(/[\w\-._~:/?#[\]@!$&'()*+,;=]*)?</div>
+                        <div class="template-card-desc">匹配HTTP/HTTPS链接</div>
+                    </div>
+                    
+                    <div class="template-card" onclick="loadTemplate('ip')">
+                        <div class="template-card-title">🌍 IP地址</div>
+                        <div class="template-card-regex">((25[0-5]|2[0-4]\d|1\d{2}|[1-9]?\d)\.){3}(25[0-5]|2[0-4]\d|1\d{2}|[1-9]?\d)</div>
+                        <div class="template-card-desc">匹配IPv4地址</div>
+                    </div>
+                    
+                    <div class="template-card" onclick="loadTemplate('date')">
+                        <div class="template-card-title">📅 日期</div>
+                        <div class="template-card-regex">\d{4}[-/]\d{1,2}[-/]\d{1,2}</div>
+                        <div class="template-card-desc">匹配常见日期格式</div>
+                    </div>
+                    
+                    <div class="template-card" onclick="loadTemplate('idcard')">
+                        <div class="template-card-title">🆔 身份证号</div>
+                        <div class="template-card-regex">[1-9]\d{5}(18|19|20)\d{2}(0[1-9]|1[0-2])(0[1-9]|[12]\d|3[01])\d{3}[\dXx]</div>
+                        <div class="template-card-desc">匹配18位身份证号</div>
+                    </div>
+                    
+                    <div class="template-card" onclick="loadTemplate('chinese')">
+                        <div class="template-card-title">🇨🇳 中文字符</div>
+                        <div class="template-card-regex">[\u4e00-\u9fa5]+</div>
+                        <div class="template-card-desc">匹配中文字符</div>
+                    </div>
+                    
+                    <div class="template-card" onclick="loadTemplate('number')">
+                        <div class="template-card-title">🔢 数字</div>
+                        <div class="template-card-regex">-?\d+\.?\d*</div>
+                        <div class="template-card-desc">匹配整数和小数</div>
+                    </div>
+
+                    <div class="template-card" onclick="loadTemplate('hex')">
+                        <div class="template-card-title">🎨 十六进制颜色</div>
+                        <div class="template-card-regex">#[0-9A-Fa-f]{6}|#[0-9A-Fa-f]{3}</div>
+                        <div class="template-card-desc">匹配CSS颜色值</div>
+                    </div>
+
+                    <div class="template-card" onclick="loadTemplate('password')">
+                        <div class="template-card-title">🔒 强密码</div>
+                        <div class="template-card-regex">^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$</div>
+                        <div class="template-card-desc">至少8位，包含大小写字母、数字和特殊字符</div>
+                    </div>
+
+                    <div class="template-card" onclick="loadTemplate('html')">
+                        <div class="template-card-title">📝 HTML标签</div>
+                        <div class="template-card-regex"><[^>]+></div>
+                        <div class="template-card-desc">匹配HTML标签</div>
+                    </div>
+
+                    <div class="template-card" onclick="loadTemplate('zipcode')">
+                        <div class="template-card-title">📮 邮政编码</div>
+                        <div class="template-card-regex">[1-9]\d{5}</div>
+                        <div class="template-card-desc">匹配中国邮政编码</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 历史记录 -->
+            <div class="history-section">
+                <div class="history-header">
+                    <h3>📜 历史记录</h3>
+                    <button class="clear-history-btn" onclick="clearHistory()">清空历史</button>
+                </div>
+                <div id="historyList" class="history-list">
+                    <div class="empty-history">
+                        <div>📭</div>
+                        <p>暂无历史记录</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const MAX_HISTORY = 20;
+
+        // 初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            updateCharCount();
+            loadHistory();
+            
+            // 添加输入监听
+            document.getElementById('testText').addEventListener('input', updateCharCount);
+            
+            // 为flag选项添加点击事件
+            document.querySelectorAll('.flag-option').forEach(option => {
+                option.addEventListener('click', function(e) {
+                    if (e.target.tagName !== 'INPUT') {
+                        const checkbox = this.querySelector('input[type="checkbox"]');
+                        checkbox.checked = !checkbox.checked;
+                    }
+                    this.classList.toggle('active', this.querySelector('input[type="checkbox"]').checked);
+                });
+            });
+        });
+
+        // 更新字符计数
+        function updateCharCount() {
+            const text = document.getElementById('testText').value;
+            document.getElementById('textCount').textContent = text.length + ' 字符';
+        }
+
+        // 获取正则表达式对象
+        function getRegex() {
+            const pattern = document.getElementById('regexInput').value;
+            if (!pattern) {
+                throw new Error('请输入正则表达式');
+            }
+
+            let flags = '';
+            if (document.getElementById('flagG').checked) flags += 'g';
+            if (document.getElementById('flagI').checked) flags += 'i';
+            if (document.getElementById('flagM').checked) flags += 'm';
+            if (document.getElementById('flagS').checked) flags += 's';
+            if (document.getElementById('flagU').checked) flags += 'u';
+
+            try {
+                return new RegExp(pattern, flags);
+            } catch (error) {
+                throw new Error('正则表达式语法错误：' + error.message);
+            }
+        }
+
+        // 测试正则表达式
+        function testRegex() {
+            try {
+                const regex = getRegex();
+                const text = document.getElementById('testText').value;
+                
+                if (!text) {
+                    showResult('请输入测试文本', 'danger');
+                    return;
+                }
+
+                const matches = [...text.matchAll(regex)];
+                
+                if (matches.length === 0) {
+                    showResult('未找到匹配项', 'info');
+                    return;
+                }
+
+                let resultHTML = `<div class="result-box"><h3>✅ 找到 ${matches.length} 个匹配项</h3><div class="result-content">`;
+                
+                matches.forEach((match, index) => {
+                    resultHTML += `<div class="match-item">`;
+                    resultHTML += `<strong>匹配 ${index + 1}:</strong> <span class="match-highlight">${escapeHtml(match[0])}</span><br>`;
+                    resultHTML += `<strong>位置:</strong> ${match.index} - ${match.index + match[0].length}<br>`;
+                    
+                    if (match.length > 1) {
+                        resultHTML += `<strong>分组:</strong><br>`;
+                        for (let i = 1; i < match.length; i++) {
+                            if (match[i] !== undefined) {
+                                resultHTML += `&nbsp;&nbsp;$${i}: ${escapeHtml(match[i])}<br>`;
+                            }
+                        }
+                    }
+                    resultHTML += `</div>`;
+                });
+                
+                // 高亮显示匹配结果
+                let highlightedText = text;
+                let offset = 0;
+                matches.forEach(match => {
+                    const start = match.index + offset;
+                    const end = start + match[0].length;
+                    const highlighted = `<span class="match-highlight">${escapeHtml(match[0])}</span>`;
+                    highlightedText = highlightedText.substring(0, start) + highlighted + highlightedText.substring(end);
+                    offset += highlighted.length - match[0].length;
+                });
+                
+                resultHTML += `</div><h3>📄 高亮文本</h3><div class="result-content">${highlightedText}</div></div>`;
+                
+                document.getElementById('resultContainer').innerHTML = resultHTML;
+                
+                // 保存历史记录
+                saveHistory(
+                    document.getElementById('regexInput').value,
+                    regex.flags,
+                    `找到 ${matches.length} 个匹配项`,
+                    text.substring(0, 100)
+                );
+                
+            } catch (error) {
+                showResult(error.message, 'danger');
+            }
+        }
+
+        // 显示替换功能
+        function showReplace() {
+            const replaceSection = document.getElementById('replaceSection');
+            if (replaceSection.style.display === 'none') {
+                replaceSection.style.display = 'block';
+                performReplace();
+            } else {
+                replaceSection.style.display = 'none';
+            }
+        }
+
+        // 执行替换
+        function performReplace() {
+            try {
+                const regex = getRegex();
+                const text = document.getElementById('testText').value;
+                const replaceText = document.getElementById('replaceText').value;
+                
+                if (!text) {
+                    showResult('请输入测试文本', 'danger');
+                    return;
+                }
+
+                const result = text.replace(regex, replaceText);
+                const matches = text.match(regex);
+                const matchCount = matches ? matches.length : 0;
+                
+                let resultHTML = `<div class="result-box">`;
+                resultHTML += `<h3>🔄 替换结果 (替换了 ${matchCount} 处)</h3>`;
+                resultHTML += `<div class="result-content">${escapeHtml(result)}</div>`;
+                resultHTML += `</div>`;
+                
+                document.getElementById('resultContainer').innerHTML = resultHTML;
+                
+                // 保存历史记录
+                saveHistory(
+                    document.getElementById('regexInput').value,
+                    regex.flags,
+                    `替换了 ${matchCount} 处`,
+                    text.substring(0, 100)
+                );
+                
+            } catch (error) {
+                showResult(error.message, 'danger');
+            }
+        }
+
+        // 验证正则表达式
+        function validateRegex() {
+            try {
+                const regex = getRegex();
+                const pattern = document.getElementById('regexInput').value;
+                const flags = regex.flags;
+                
+                let resultHTML = `<div class="result-box">`;
+                resultHTML += `<h3>✅ 正则表达式有效</h3>`;
+                resultHTML += `<div class="result-content">`;
+                resultHTML += `<strong>模式:</strong> ${escapeHtml(pattern)}<br>`;
+                resultHTML += `<strong>标志:</strong> ${flags || '无'}<br>`;
+                resultHTML += `<strong>完整表达式:</strong> /${escapeHtml(pattern)}/${flags}`;
+                resultHTML += `</div></div>`;
+                
+                document.getElementById('resultContainer').innerHTML = resultHTML;
+                
+            } catch (error) {
+                showResult(error.message, 'danger');
+            }
+        }
+
+        // 显示结果
+        function showResult(message, type = 'info') {
+            const alertClass = `alert-${type}`;
+            let icon = '📝';
+            if (type === 'danger') icon = '❌';
+            if (type === 'success') icon = '✅';
+            if (type === 'info') icon = 'ℹ️';
+            
+            document.getElementById('resultContainer').innerHTML = `
+                <div class="alert ${alertClass}">
+                    ${icon} ${message}
+                </div>
+            `;
+        }
+
+        // 清空所有
+        function clearAll() {
+            document.getElementById('regexInput').value = '';
+            document.getElementById('testText').value = '';
+            document.getElementById('replaceText').value = '';
+            document.getElementById('resultContainer').innerHTML = '';
+            document.getElementById('replaceSection').style.display = 'none';
+            updateCharCount();
+        }
+
+        // 加载模板
+        function loadTemplate(templateName) {
+            const templates = {
+                email: {
+                    regex: '[\\w.-]+@[\\w.-]+\\.\\w+',
+                    text: '联系邮箱：test@example.com, admin@test.org, user_name123@domain.net',
+                    flags: { g: true, i: false, m: false, s: false, u: false }
+                },
+                phone: {
+                    regex: '1[3-9]\\d{9}',
+                    text: '手机号码：13812345678, 15987654321, 18611112222, 19900001111',
+                    flags: { g: true, i: false, m: false, s: false, u: false }
+                },
+                url: {
+                    regex: 'https?://[\\w\\-.]+(:\\d+)?(/[\\w\\-._~:/?#[\\]@!$&\'()*+,;=]*)?',
+                    text: '网址：https://www.example.com, http://test.org/path?query=value, https://api.domain.com:8080/v1/users',
+                    flags: { g: true, i: false, m: false, s: false, u: false }
+                },
+                ip: {
+                    regex: '((25[0-5]|2[0-4]\\d|1\\d{2}|[1-9]?\\d)\\.){3}(25[0-5]|2[0-4]\\d|1\\d{2}|[1-9]?\\d)',
+                    text: 'IP地址：192.168.1.1, 10.0.0.1, 172.16.0.254, 8.8.8.8',
+                    flags: { g: true, i: false, m: false, s: false, u: false }
+                },
+                date: {
+                    regex: '\\d{4}[-/]\\d{1,2}[-/]\\d{1,2}',
+                    text: '日期：2024-10-21, 2024/10/21, 2024-1-1, 2024/12/31',
+                    flags: { g: true, i: false, m: false, s: false, u: false }
+                },
+                idcard: {
+                    regex: '[1-9]\\d{5}(18|19|20)\\d{2}(0[1-9]|1[0-2])(0[1-9]|[12]\\d|3[01])\\d{3}[\\dXx]',
+                    text: '身份证号：110101199001011234, 310110198801015678',
+                    flags: { g: true, i: false, m: false, s: false, u: false }
+                },
+                chinese: {
+                    regex: '[\\u4e00-\\u9fa5]+',
+                    text: '测试文本：Hello 世界，这是一段中English文混合的text！',
+                    flags: { g: true, i: false, m: false, s: false, u: true }
+                },
+                number: {
+                    regex: '-?\\d+\\.?\\d*',
+                    text: '数字：123, -456, 78.9, -0.123, 3.14159',
+                    flags: { g: true, i: false, m: false, s: false, u: false }
+                },
+                hex: {
+                    regex: '#[0-9A-Fa-f]{6}|#[0-9A-Fa-f]{3}',
+                    text: '颜色值：#FF0000, #00ff00, #00F, #abc, #123456',
+                    flags: { g: true, i: false, m: false, s: false, u: false }
+                },
+                password: {
+                    regex: '^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,}$',
+                    text: '测试密码：\nPassword123!\nTest@456\nweak123\nStrong$Pass99',
+                    flags: { g: true, i: false, m: true, s: false, u: false }
+                },
+                html: {
+                    regex: '<[^>]+>',
+                    text: '代码：<div class="test">Hello</div>, <p>World</p>, <br/>',
+                    flags: { g: true, i: false, m: false, s: false, u: false }
+                },
+                zipcode: {
+                    regex: '[1-9]\\d{5}',
+                    text: '邮编：100000, 200000, 310000, 518000',
+                    flags: { g: true, i: false, m: false, s: false, u: false }
+                }
+            };
+
+            const template = templates[templateName];
+            if (template) {
+                document.getElementById('regexInput').value = template.regex;
+                document.getElementById('testText').value = template.text;
+                
+                // 设置标志
+                document.getElementById('flagG').checked = template.flags.g;
+                document.getElementById('flagI').checked = template.flags.i;
+                document.getElementById('flagM').checked = template.flags.m;
+                document.getElementById('flagS').checked = template.flags.s;
+                document.getElementById('flagU').checked = template.flags.u;
+                
+                // 更新标志显示
+                document.querySelectorAll('.flag-option').forEach(option => {
+                    option.classList.toggle('active', option.querySelector('input[type="checkbox"]').checked);
+                });
+                
+                updateCharCount();
+                
+                // 自动执行测试
+                setTimeout(() => testRegex(), 100);
+            }
+        }
+
+        // HTML转义
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // 获取历史记录
+        function getHistory() {
+            const historyStr = localStorage.getItem('regex_history');
+            return historyStr ? JSON.parse(historyStr) : [];
+        }
+
+        // 保存历史记录
+        function saveHistory(pattern, flags, description, testText) {
+            const history = getHistory();
+            
+            const record = {
+                id: Date.now(),
+                pattern: pattern,
+                flags: flags,
+                description: description,
+                testText: testText,
+                timestamp: new Date().toLocaleString('zh-CN')
+            };
+
+            history.unshift(record);
+
+            if (history.length > MAX_HISTORY) {
+                history.pop();
+            }
+
+            localStorage.setItem('regex_history', JSON.stringify(history));
+            loadHistory();
+        }
+
+        // 加载历史记录
+        function loadHistory() {
+            const history = getHistory();
+            const historyList = document.getElementById('historyList');
+
+            if (history.length === 0) {
+                historyList.innerHTML = `
+                    <div class="empty-history">
+                        <div>📭</div>
+                        <p>暂无历史记录</p>
+                    </div>
+                `;
+                return;
+            }
+
+            historyList.innerHTML = history.map(record => `
+                <div class="history-item" onclick="loadFromHistory(${record.id})">
+                    <div class="history-item-header">
+                        <div class="history-item-regex">/${escapeHtml(record.pattern)}/${record.flags || ''}</div>
+                        <div class="history-item-actions">
+                            <div class="history-item-date">${record.timestamp}</div>
+                            <button class="delete-history-btn" onclick="deleteHistoryItem(${record.id}, event)" title="删除此记录">删除</button>
+                        </div>
+                    </div>
+                    <div class="history-item-desc">${escapeHtml(record.description)}</div>
+                </div>
+            `).join('');
+        }
+
+        // 从历史加载
+        function loadFromHistory(id) {
+            const history = getHistory();
+            const record = history.find(r => r.id === id);
+            if (record) {
+                // 设置正则表达式
+                document.getElementById('regexInput').value = record.pattern;
+                
+                // 设置测试文本
+                document.getElementById('testText').value = record.testText;
+                
+                // 设置标志
+                const flags = record.flags || '';
+                document.getElementById('flagG').checked = flags.includes('g');
+                document.getElementById('flagI').checked = flags.includes('i');
+                document.getElementById('flagM').checked = flags.includes('m');
+                document.getElementById('flagS').checked = flags.includes('s');
+                document.getElementById('flagU').checked = flags.includes('u');
+                
+                // 更新标志显示
+                document.querySelectorAll('.flag-option').forEach(option => {
+                    option.classList.toggle('active', option.querySelector('input[type="checkbox"]').checked);
+                });
+                
+                updateCharCount();
+                
+                // 滚动到顶部
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+                
+                // 自动执行测试
+                setTimeout(() => testRegex(), 100);
+            }
+        }
+
+        // 删除历史记录项
+        function deleteHistoryItem(recordId, event) {
+            event.stopPropagation();
+            
+            if (confirm('确定要删除这条历史记录吗？')) {
+                let history = getHistory();
+                history = history.filter(r => r.id !== recordId);
+                localStorage.setItem('regex_history', JSON.stringify(history));
+                loadHistory();
+            }
+        }
+
+        // 清空历史记录
+        function clearHistory() {
+            if (confirm('确定要清空所有历史记录吗？此操作不可恢复。')) {
+                localStorage.removeItem('regex_history');
+                loadHistory();
+            }
+        }
+
+        // 添加替换文本输入的实时更新
+        document.getElementById('replaceText')?.addEventListener('input', function() {
+            if (document.getElementById('replaceSection').style.display !== 'none') {
+                performReplace();
+            }
+        });
+    </script>
+</body>
+</html>
+

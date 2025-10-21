@@ -11,9 +11,9 @@ menu:
     link: /archives/
     icon: fa fa-archive
   about:
-    name: 关于
-    link: /about/
-    icon: fa fa-user-circle-o
+    name: 工具
+    link: /tools/tools.html
+    icon: fa fa-wrench
   rss:
     name: RSS
     link: /atom.xml
@@ -55,13 +55,13 @@ weibo_show:
 # 访客地图
 #----------------------------
 revolvermaps:
-  enable: true
+  enable: false
 
 #----------------------------
 # Postcard
 #----------------------------
 postcard:
-  enable: true
+  enable: false
 
 # 是否开启google广告
 google_ads: true
@@ -84,7 +84,7 @@ ad_nav_bottom:
 bulletin:
   enable: true
   is_roll: true
-  content: ""
+  content: "工具内有很多实用工具，欢迎使用。"
 
 #----------------------------
 # 是否开启评论
@@ -107,27 +107,71 @@ comment:
 tagcloud: true
 toc: true
 #----------------------------
-# 友情链接
+# 实用工具
 #----------------------------
 friends:
   enable: true
   list:
     1:
-      name: 酷 壳
-      title: 酷 壳
-      link: https://coolshell.cn/
+      name: 🧮科学计算器
+      title: 🧮科学计算器
+      link: /tools/scientific-calculator.html
     2:
-      name: 思 否
-      title: SegmentFault
-      link: https://segmentfault.com/
+      name: ⏰时间转换工具
+      title: ⏰时间转换工具
+      link: /tools/time-converter.html
     3:
-      name: InfoQ
-      title: InfoQ
-      link: https://www.infoq.cn/
+      name: 💱汇率转换工具
+      title: 💱汇率转换工具
+      link: /tools/exchange-rate.html
     4:
-      name: 开源中国
-      title: 开源中国
-      link: https://www.oschina.net/
+      name: 🏦贷款计算器
+      title: 🏦贷款计算器
+      link: /tools/loan-calculator.html
+    7:
+      name: 💰个税计算器
+      title: 💰个税计算器
+      link: /tools/tax-calculator.html
+    8:
+      name: 🔢进制转换工具
+      title: 🔢进制转换工具
+      link: /tools/number-converter.html
+    9:
+      name: 🔐编解码工具
+      title: 🔐编解码工具
+      link: /tools/encoder-decoder.html
+    10:
+      name: 🔒加解密工具
+      title: 🔒加解密工具
+      link: /tools/crypto-tool.html
+    11:
+      name: 📏单位转换工具
+      title: 📏单位转换工具
+      link: /tools/unit-converter.html
+    12:
+      name: 🔍正则表达式工具
+      title: 🔍正则表达式工具
+      link: /tools/regex-tool.html
+    13:
+      name: ⏰Cron表达式生成工具
+      title: ⏰Cron表达式生成工具
+      link: /tools/cron-tool.html
+    14:
+      name: 📦解压缩工具
+      title: 📦解压缩工具
+      link: /tools/compression-tool.html
+    15:
+      name: ✨代码格式化工具
+      title: ✨代码格式化工具
+      link: /tools/formatter-tool.html
+    16:
+      name: 📊CSV展示工具
+      title: 📊CSV展示工具
+      link: /tools/csv-tool.html
+    17:
+      name: 📋JSON数组展示工具
+      title: 📋JSON数组展示工具
+      link: /tools/json-array-tool.html
 
 
 #----------------------------

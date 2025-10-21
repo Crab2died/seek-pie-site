@@ -1,0 +1,1708 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>代码格式化工具</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            font-weight: 300;
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .formatter-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            border-bottom: 2px solid #e1e5e9;
+            padding-bottom: 10px;
+        }
+
+        .formatter-tab {
+            padding: 12px 24px;
+            background: #f8f9fa;
+            border: 2px solid #e1e5e9;
+            border-radius: 10px 10px 0 0;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            color: #666;
+        }
+
+        .formatter-tab:hover {
+            background: #e9ecef;
+        }
+
+        .formatter-tab.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-color: #667eea;
+        }
+
+        .formatter-content {
+            display: none;
+        }
+
+        .formatter-content.active {
+            display: block;
+        }
+
+        .input-group {
+            margin-bottom: 25px;
+        }
+
+        .input-group label {
+            display: block;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+        }
+
+        .textarea-wrapper {
+            position: relative;
+        }
+
+        textarea {
+            width: 100%;
+            min-height: 300px;
+            padding: 15px;
+            border: 2px solid #e1e5e9;
+            border-radius: 10px;
+            font-size: 14px;
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            resize: vertical;
+            transition: all 0.3s ease;
+            background: #f8f9fa;
+            line-height: 1.6;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .char-count {
+            position: absolute;
+            bottom: 10px;
+            right: 15px;
+            font-size: 0.9em;
+            color: #999;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 2px 8px;
+            border-radius: 5px;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-bottom: 25px;
+        }
+
+        .btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(240, 147, 251, 0.4);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+            color: white;
+        }
+
+        .btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(67, 233, 123, 0.4);
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, #ffa751 0%, #ffe259 100%);
+            color: white;
+        }
+
+        .btn-warning:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 167, 81, 0.4);
+        }
+
+        .options-group {
+            background: #f8f9fa;
+            border: 2px solid #e1e5e9;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .options-group h4 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 1.1em;
+        }
+
+        .option-row {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .option-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .option-item label {
+            cursor: pointer;
+            user-select: none;
+            font-weight: 500;
+            color: #555;
+        }
+
+        .option-item input[type="checkbox"],
+        .option-item input[type="radio"] {
+            cursor: pointer;
+            width: 18px;
+            height: 18px;
+            accent-color: #667eea;
+        }
+
+        .option-item select,
+        .option-item input[type="number"] {
+            padding: 6px 12px;
+            border: 2px solid #e1e5e9;
+            border-radius: 6px;
+            font-size: 0.95em;
+            cursor: pointer;
+        }
+
+        .result-box {
+            background: #f8f9fa;
+            border: 2px solid #e1e5e9;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+            position: relative;
+        }
+
+        .result-box h3 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+        }
+
+        .result-content {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            word-break: break-all;
+            max-height: 400px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            line-height: 1.6;
+            font-size: 14px;
+        }
+
+        .copy-btn {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            padding: 8px 16px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: all 0.3s ease;
+        }
+
+        .copy-btn:hover {
+            background: #5a67d8;
+            transform: scale(1.05);
+        }
+
+        .alert {
+            padding: 15px 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-weight: 500;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert-danger {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .info-box {
+            background: #e7f3ff;
+            border-left: 4px solid #2196F3;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+
+        .info-box h4 {
+            color: #1976D2;
+            margin-bottom: 8px;
+        }
+
+        .info-box p {
+            color: #666;
+            line-height: 1.6;
+        }
+
+        /* 移动端优化 */
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+
+            .content {
+                padding: 20px 15px;
+            }
+
+            .header {
+                padding: 20px 15px;
+            }
+
+            .header h1 {
+                font-size: 1.8em;
+            }
+
+            .formatter-tabs {
+                flex-direction: column;
+                gap: 8px;
+                border-bottom: none;
+                padding-bottom: 0;
+            }
+
+            .formatter-tab {
+                width: 100%;
+                text-align: center;
+                border-radius: 8px;
+            }
+
+            textarea {
+                min-height: 200px;
+                font-size: 13px;
+            }
+
+            .button-group {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+            }
+
+            .option-row {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>✨ 代码格式化工具</h1>
+            <p>支持12种编程语言和数据格式的格式化、压缩和美化操作</p>
+        </div>
+
+        <div class="content">
+            <div class="formatter-tabs">
+                <div class="formatter-tab active" onclick="switchTab('json')">JSON</div>
+                <div class="formatter-tab" onclick="switchTab('xml')">XML</div>
+                <div class="formatter-tab" onclick="switchTab('html')">HTML</div>
+                <div class="formatter-tab" onclick="switchTab('css')">CSS</div>
+                <div class="formatter-tab" onclick="switchTab('javascript')">JavaScript</div>
+                <div class="formatter-tab" onclick="switchTab('typescript')">TypeScript</div>
+                <div class="formatter-tab" onclick="switchTab('sql')">SQL</div>
+                <div class="formatter-tab" onclick="switchTab('yaml')">YAML</div>
+                <div class="formatter-tab" onclick="switchTab('markdown')">Markdown</div>
+                <div class="formatter-tab" onclick="switchTab('python')">Python</div>
+                <div class="formatter-tab" onclick="switchTab('java')">Java</div>
+                <div class="formatter-tab" onclick="switchTab('cpp')">C/C++</div>
+            </div>
+
+            <!-- JSON 格式化 -->
+            <div id="json" class="formatter-content active">
+                <div class="info-box">
+                    <h4>📘 JSON 格式化说明</h4>
+                    <p>将压缩的JSON字符串格式化为易读的缩进格式，或将格式化的JSON压缩为单行。支持语法高亮和错误检测。</p>
+                </div>
+
+                <div class="input-group">
+                    <label>输入JSON代码</label>
+                    <div class="textarea-wrapper">
+                        <textarea id="jsonInput" placeholder='输入JSON字符串，例如：{"name":"张三","age":25,"city":"北京"}'></textarea>
+                        <span class="char-count" id="jsonCount">0 字符</span>
+                    </div>
+                </div>
+
+                <div class="options-group">
+                    <h4>⚙️ 格式化选项</h4>
+                    <div class="option-row">
+                        <div class="option-item">
+                            <label>缩进空格数：</label>
+                            <select id="jsonIndent">
+                                <option value="2" selected>2空格</option>
+                                <option value="4">4空格</option>
+                                <option value="tab">Tab</option>
+                            </select>
+                        </div>
+                        <div class="option-item">
+                            <input type="checkbox" id="jsonSortKeys">
+                            <label for="jsonSortKeys">按键名排序</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="button-group">
+                    <button class="btn btn-primary" onclick="formatJSON()">✨ 格式化</button>
+                    <button class="btn btn-secondary" onclick="compressJSON()">📦 压缩</button>
+                    <button class="btn btn-success" onclick="validateJSON()">✅ 验证</button>
+                    <button class="btn btn-warning" onclick="clearInput('jsonInput')">🗑️ 清空</button>
+                </div>
+
+                <div id="jsonResult"></div>
+            </div>
+
+            <!-- XML 格式化 -->
+            <div id="xml" class="formatter-content">
+                <div class="info-box">
+                    <h4>📘 XML 格式化说明</h4>
+                    <p>将压缩的XML字符串格式化为易读的缩进格式，或将格式化的XML压缩为单行。</p>
+                </div>
+
+                <div class="input-group">
+                    <label>输入XML代码</label>
+                    <div class="textarea-wrapper">
+                        <textarea id="xmlInput" placeholder='输入XML字符串，例如：<root><item>value</item></root>'></textarea>
+                        <span class="char-count" id="xmlCount">0 字符</span>
+                    </div>
+                </div>
+
+                <div class="options-group">
+                    <h4>⚙️ 格式化选项</h4>
+                    <div class="option-row">
+                        <div class="option-item">
+                            <label>缩进空格数：</label>
+                            <select id="xmlIndent">
+                                <option value="2" selected>2空格</option>
+                                <option value="4">4空格</option>
+                                <option value="tab">Tab</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="button-group">
+                    <button class="btn btn-primary" onclick="formatXML()">✨ 格式化</button>
+                    <button class="btn btn-secondary" onclick="compressXML()">📦 压缩</button>
+                    <button class="btn btn-warning" onclick="clearInput('xmlInput')">🗑️ 清空</button>
+                </div>
+
+                <div id="xmlResult"></div>
+            </div>
+
+            <!-- HTML 格式化 -->
+            <div id="html" class="formatter-content">
+                <div class="info-box">
+                    <h4>📘 HTML 格式化说明</h4>
+                    <p>将压缩的HTML代码格式化为易读的缩进格式，或将格式化的HTML压缩为单行。</p>
+                </div>
+
+                <div class="input-group">
+                    <label>输入HTML代码</label>
+                    <div class="textarea-wrapper">
+                        <textarea id="htmlInput" placeholder='输入HTML代码，例如：<div><p>Hello World</p></div>'></textarea>
+                        <span class="char-count" id="htmlCount">0 字符</span>
+                    </div>
+                </div>
+
+                <div class="options-group">
+                    <h4>⚙️ 格式化选项</h4>
+                    <div class="option-row">
+                        <div class="option-item">
+                            <label>缩进空格数：</label>
+                            <select id="htmlIndent">
+                                <option value="2" selected>2空格</option>
+                                <option value="4">4空格</option>
+                                <option value="tab">Tab</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="button-group">
+                    <button class="btn btn-primary" onclick="formatHTML()">✨ 格式化</button>
+                    <button class="btn btn-secondary" onclick="compressHTML()">📦 压缩</button>
+                    <button class="btn btn-warning" onclick="clearInput('htmlInput')">🗑️ 清空</button>
+                </div>
+
+                <div id="htmlResult"></div>
+            </div>
+
+            <!-- CSS 格式化 -->
+            <div id="css" class="formatter-content">
+                <div class="info-box">
+                    <h4>📘 CSS 格式化说明</h4>
+                    <p>将压缩的CSS代码格式化为易读的缩进格式，或将格式化的CSS压缩为单行。</p>
+                </div>
+
+                <div class="input-group">
+                    <label>输入CSS代码</label>
+                    <div class="textarea-wrapper">
+                        <textarea id="cssInput" placeholder='输入CSS代码，例如：body{margin:0;padding:0;}'></textarea>
+                        <span class="char-count" id="cssCount">0 字符</span>
+                    </div>
+                </div>
+
+                <div class="options-group">
+                    <h4>⚙️ 格式化选项</h4>
+                    <div class="option-row">
+                        <div class="option-item">
+                            <label>缩进空格数：</label>
+                            <select id="cssIndent">
+                                <option value="2" selected>2空格</option>
+                                <option value="4">4空格</option>
+                                <option value="tab">Tab</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="button-group">
+                    <button class="btn btn-primary" onclick="formatCSS()">✨ 格式化</button>
+                    <button class="btn btn-secondary" onclick="compressCSS()">📦 压缩</button>
+                    <button class="btn btn-warning" onclick="clearInput('cssInput')">🗑️ 清空</button>
+                </div>
+
+                <div id="cssResult"></div>
+            </div>
+
+            <!-- JavaScript 格式化 -->
+            <div id="javascript" class="formatter-content">
+                <div class="info-box">
+                    <h4>📘 JavaScript 格式化说明</h4>
+                    <p>将压缩的JavaScript代码格式化为易读的缩进格式，或将格式化的JavaScript压缩为单行。</p>
+                </div>
+
+                <div class="input-group">
+                    <label>输入JavaScript代码</label>
+                    <div class="textarea-wrapper">
+                        <textarea id="jsInput" placeholder='输入JavaScript代码，例如：function hello(){console.log("Hello");}'></textarea>
+                        <span class="char-count" id="jsCount">0 字符</span>
+                    </div>
+                </div>
+
+                <div class="options-group">
+                    <h4>⚙️ 格式化选项</h4>
+                    <div class="option-row">
+                        <div class="option-item">
+                            <label>缩进空格数：</label>
+                            <select id="jsIndent">
+                                <option value="2" selected>2空格</option>
+                                <option value="4">4空格</option>
+                                <option value="tab">Tab</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="button-group">
+                    <button class="btn btn-primary" onclick="formatJS()">✨ 格式化</button>
+                    <button class="btn btn-secondary" onclick="compressJS()">📦 压缩</button>
+                    <button class="btn btn-warning" onclick="clearInput('jsInput')">🗑️ 清空</button>
+                </div>
+
+                <div id="jsResult"></div>
+            </div>
+
+            <!-- SQL 格式化 -->
+            <div id="sql" class="formatter-content">
+                <div class="info-box">
+                    <h4>📘 SQL 格式化说明</h4>
+                    <p>将压缩的SQL语句格式化为易读的缩进格式，或将格式化的SQL压缩为单行。</p>
+                </div>
+
+                <div class="input-group">
+                    <label>输入SQL代码</label>
+                    <div class="textarea-wrapper">
+                        <textarea id="sqlInput" placeholder='输入SQL语句，例如：SELECT * FROM users WHERE age > 18;'></textarea>
+                        <span class="char-count" id="sqlCount">0 字符</span>
+                    </div>
+                </div>
+
+                <div class="options-group">
+                    <h4>⚙️ 格式化选项</h4>
+                    <div class="option-row">
+                        <div class="option-item">
+                            <label>缩进空格数：</label>
+                            <select id="sqlIndent">
+                                <option value="2" selected>2空格</option>
+                                <option value="4">4空格</option>
+                                <option value="tab">Tab</option>
+                            </select>
+                        </div>
+                        <div class="option-item">
+                            <input type="checkbox" id="sqlUppercase" checked>
+                            <label for="sqlUppercase">关键字大写</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="button-group">
+                    <button class="btn btn-primary" onclick="formatSQL()">✨ 格式化</button>
+                    <button class="btn btn-secondary" onclick="compressSQL()">📦 压缩</button>
+                    <button class="btn btn-warning" onclick="clearInput('sqlInput')">🗑️ 清空</button>
+                </div>
+
+                <div id="sqlResult"></div>
+            </div>
+
+            <!-- TypeScript 格式化 -->
+            <div id="typescript" class="formatter-content">
+                <div class="info-box">
+                    <h4>📘 TypeScript 格式化说明</h4>
+                    <p>将TypeScript代码格式化为易读的缩进格式，TypeScript是JavaScript的超集，添加了类型系统。</p>
+                </div>
+
+                <div class="input-group">
+                    <label>输入TypeScript代码</label>
+                    <div class="textarea-wrapper">
+                        <textarea id="tsInput" placeholder='输入TypeScript代码，例如：interface User{name:string;age:number;}'></textarea>
+                        <span class="char-count" id="tsCount">0 字符</span>
+                    </div>
+                </div>
+
+                <div class="options-group">
+                    <h4>⚙️ 格式化选项</h4>
+                    <div class="option-row">
+                        <div class="option-item">
+                            <label>缩进空格数：</label>
+                            <select id="tsIndent">
+                                <option value="2" selected>2空格</option>
+                                <option value="4">4空格</option>
+                                <option value="tab">Tab</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="button-group">
+                    <button class="btn btn-primary" onclick="formatTS()">✨ 格式化</button>
+                    <button class="btn btn-secondary" onclick="compressTS()">📦 压缩</button>
+                    <button class="btn btn-warning" onclick="clearInput('tsInput')">🗑️ 清空</button>
+                </div>
+
+                <div id="tsResult"></div>
+            </div>
+
+            <!-- YAML 格式化 -->
+            <div id="yaml" class="formatter-content">
+                <div class="info-box">
+                    <h4>📘 YAML 格式化说明</h4>
+                    <p>YAML是一种人类友好的数据序列化格式，常用于配置文件。支持格式化和JSON互转。</p>
+                </div>
+
+                <div class="input-group">
+                    <label>输入YAML或JSON代码</label>
+                    <div class="textarea-wrapper">
+                        <textarea id="yamlInput" placeholder='输入YAML或JSON代码，例如：name: 张三
+age: 25
+city: 北京'></textarea>
+                        <span class="char-count" id="yamlCount">0 字符</span>
+                    </div>
+                </div>
+
+                <div class="options-group">
+                    <h4>⚙️ 格式化选项</h4>
+                    <div class="option-row">
+                        <div class="option-item">
+                            <label>缩进空格数：</label>
+                            <select id="yamlIndent">
+                                <option value="2" selected>2空格</option>
+                                <option value="4">4空格</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="button-group">
+                    <button class="btn btn-primary" onclick="formatYAML()">✨ 格式化</button>
+                    <button class="btn btn-success" onclick="yamlToJSON()">🔄 转JSON</button>
+                    <button class="btn btn-success" onclick="jsonToYAML()">🔄 转YAML</button>
+                    <button class="btn btn-warning" onclick="clearInput('yamlInput')">🗑️ 清空</button>
+                </div>
+
+                <div id="yamlResult"></div>
+            </div>
+
+            <!-- Markdown 格式化 -->
+            <div id="markdown" class="formatter-content">
+                <div class="info-box">
+                    <h4>📘 Markdown 格式化说明</h4>
+                    <p>Markdown是一种轻量级标记语言，常用于编写文档。支持格式化和预览。</p>
+                </div>
+
+                <div class="input-group">
+                    <label>输入Markdown代码</label>
+                    <div class="textarea-wrapper">
+                        <textarea id="mdInput" placeholder='输入Markdown代码，例如：
+# 标题
+## 二级标题
+- 列表项1
+- 列表项2'></textarea>
+                        <span class="char-count" id="mdCount">0 字符</span>
+                    </div>
+                </div>
+
+                <div class="button-group">
+                    <button class="btn btn-primary" onclick="formatMarkdown()">✨ 格式化</button>
+                    <button class="btn btn-secondary" onclick="compressMarkdown()">📦 压缩</button>
+                    <button class="btn btn-warning" onclick="clearInput('mdInput')">🗑️ 清空</button>
+                </div>
+
+                <div id="mdResult"></div>
+            </div>
+
+            <!-- Python 格式化 -->
+            <div id="python" class="formatter-content">
+                <div class="info-box">
+                    <h4>📘 Python 格式化说明</h4>
+                    <p>Python代码格式化，按照PEP 8规范进行基本的格式化处理。</p>
+                </div>
+
+                <div class="input-group">
+                    <label>输入Python代码</label>
+                    <div class="textarea-wrapper">
+                        <textarea id="pythonInput" placeholder='输入Python代码，例如：
+def hello(name):print("Hello, "+name)'></textarea>
+                        <span class="char-count" id="pythonCount">0 字符</span>
+                    </div>
+                </div>
+
+                <div class="options-group">
+                    <h4>⚙️ 格式化选项</h4>
+                    <div class="option-row">
+                        <div class="option-item">
+                            <label>缩进空格数：</label>
+                            <select id="pythonIndent">
+                                <option value="2">2空格</option>
+                                <option value="4" selected>4空格</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="button-group">
+                    <button class="btn btn-primary" onclick="formatPython()">✨ 格式化</button>
+                    <button class="btn btn-secondary" onclick="compressPython()">📦 压缩</button>
+                    <button class="btn btn-warning" onclick="clearInput('pythonInput')">🗑️ 清空</button>
+                </div>
+
+                <div id="pythonResult"></div>
+            </div>
+
+            <!-- Java 格式化 -->
+            <div id="java" class="formatter-content">
+                <div class="info-box">
+                    <h4>📘 Java 格式化说明</h4>
+                    <p>Java代码格式化，支持类、方法、语句的基本格式化。</p>
+                </div>
+
+                <div class="input-group">
+                    <label>输入Java代码</label>
+                    <div class="textarea-wrapper">
+                        <textarea id="javaInput" placeholder='输入Java代码，例如：
+public class Hello{public static void main(String[] args){System.out.println("Hello");}}'></textarea>
+                        <span class="char-count" id="javaCount">0 字符</span>
+                    </div>
+                </div>
+
+                <div class="options-group">
+                    <h4>⚙️ 格式化选项</h4>
+                    <div class="option-row">
+                        <div class="option-item">
+                            <label>缩进空格数：</label>
+                            <select id="javaIndent">
+                                <option value="2">2空格</option>
+                                <option value="4" selected>4空格</option>
+                                <option value="tab">Tab</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="button-group">
+                    <button class="btn btn-primary" onclick="formatJava()">✨ 格式化</button>
+                    <button class="btn btn-secondary" onclick="compressJava()">📦 压缩</button>
+                    <button class="btn btn-warning" onclick="clearInput('javaInput')">🗑️ 清空</button>
+                </div>
+
+                <div id="javaResult"></div>
+            </div>
+
+            <!-- C/C++ 格式化 -->
+            <div id="cpp" class="formatter-content">
+                <div class="info-box">
+                    <h4>📘 C/C++ 格式化说明</h4>
+                    <p>C/C++代码格式化，支持函数、语句、预处理指令的基本格式化。</p>
+                </div>
+
+                <div class="input-group">
+                    <label>输入C/C++代码</label>
+                    <div class="textarea-wrapper">
+                        <textarea id="cppInput" placeholder='输入C/C++代码，例如：
+#include<stdio.h>
+int main(){printf("Hello");return 0;}'></textarea>
+                        <span class="char-count" id="cppCount">0 字符</span>
+                    </div>
+                </div>
+
+                <div class="options-group">
+                    <h4>⚙️ 格式化选项</h4>
+                    <div class="option-row">
+                        <div class="option-item">
+                            <label>缩进空格数：</label>
+                            <select id="cppIndent">
+                                <option value="2">2空格</option>
+                                <option value="4" selected>4空格</option>
+                                <option value="tab">Tab</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="button-group">
+                    <button class="btn btn-primary" onclick="formatCpp()">✨ 格式化</button>
+                    <button class="btn btn-secondary" onclick="compressCpp()">📦 压缩</button>
+                    <button class="btn btn-warning" onclick="clearInput('cppInput')">🗑️ 清空</button>
+                </div>
+
+                <div id="cppResult"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 初始化字符计数
+        document.querySelectorAll('textarea').forEach(textarea => {
+            const countId = textarea.id + 'Count';
+            const countElement = document.getElementById(countId);
+            if (countElement) {
+                textarea.addEventListener('input', function() {
+                    countElement.textContent = this.value.length + ' 字符';
+                });
+            }
+        });
+
+        // 切换标签页
+        function switchTab(tabName) {
+            document.querySelectorAll('.formatter-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            document.querySelectorAll('.formatter-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        // 显示结果
+        function showResult(containerId, result, isError = false) {
+            const container = document.getElementById(containerId);
+            if (isError) {
+                container.innerHTML = `
+                    <div class="alert alert-danger">
+                        ❌ ${result}
+                    </div>
+                `;
+            } else {
+                container.innerHTML = `
+                    <div class="result-box">
+                        <h3>格式化结果：</h3>
+                        <button class="copy-btn" onclick="copyResult(this)">📋 复制</button>
+                        <div class="result-content">${escapeHtml(result)}</div>
+                    </div>
+                `;
+            }
+        }
+
+        // 复制结果
+        function copyResult(button) {
+            const resultContent = button.parentElement.querySelector('.result-content');
+            const text = resultContent.textContent;
+            
+            navigator.clipboard.writeText(text).then(() => {
+                const originalText = button.textContent;
+                button.textContent = '✅ 已复制';
+                button.style.background = '#28a745';
+                
+                setTimeout(() => {
+                    button.textContent = originalText;
+                    button.style.background = '#667eea';
+                }, 2000);
+            }).catch(err => {
+                alert('复制失败：' + err);
+            });
+        }
+
+        // 清空输入
+        function clearInput(inputId) {
+            document.getElementById(inputId).value = '';
+            const countElement = document.getElementById(inputId + 'Count');
+            if (countElement) {
+                countElement.textContent = '0 字符';
+            }
+        }
+
+        // HTML转义函数
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // ==================== JSON 格式化 ====================
+        function formatJSON() {
+            const input = document.getElementById('jsonInput').value.trim();
+            if (!input) {
+                showResult('jsonResult', '请输入JSON字符串', true);
+                return;
+            }
+
+            try {
+                const parsed = JSON.parse(input);
+                const indentValue = document.getElementById('jsonIndent').value;
+                const sortKeys = document.getElementById('jsonSortKeys').checked;
+                
+                let indent = indentValue === 'tab' ? '\t' : parseInt(indentValue);
+                
+                let formatted;
+                if (sortKeys) {
+                    formatted = JSON.stringify(sortObject(parsed), null, indent);
+                } else {
+                    formatted = JSON.stringify(parsed, null, indent);
+                }
+                
+                showResult('jsonResult', formatted);
+            } catch (error) {
+                showResult('jsonResult', 'JSON解析错误: ' + error.message, true);
+            }
+        }
+
+        function sortObject(obj) {
+            if (Array.isArray(obj)) {
+                return obj.map(sortObject);
+            } else if (obj !== null && typeof obj === 'object') {
+                return Object.keys(obj).sort().reduce((result, key) => {
+                    result[key] = sortObject(obj[key]);
+                    return result;
+                }, {});
+            }
+            return obj;
+        }
+
+        function compressJSON() {
+            const input = document.getElementById('jsonInput').value.trim();
+            if (!input) {
+                showResult('jsonResult', '请输入JSON字符串', true);
+                return;
+            }
+
+            try {
+                const parsed = JSON.parse(input);
+                const compressed = JSON.stringify(parsed);
+                showResult('jsonResult', compressed);
+            } catch (error) {
+                showResult('jsonResult', 'JSON解析错误: ' + error.message, true);
+            }
+        }
+
+        function validateJSON() {
+            const input = document.getElementById('jsonInput').value.trim();
+            if (!input) {
+                showResult('jsonResult', '请输入JSON字符串', true);
+                return;
+            }
+
+            try {
+                JSON.parse(input);
+                const container = document.getElementById('jsonResult');
+                container.innerHTML = `
+                    <div class="alert alert-success">
+                        ✅ JSON格式正确！
+                    </div>
+                `;
+            } catch (error) {
+                showResult('jsonResult', 'JSON格式错误: ' + error.message, true);
+            }
+        }
+
+        // ==================== XML 格式化 ====================
+        function formatXML() {
+            const input = document.getElementById('xmlInput').value.trim();
+            if (!input) {
+                showResult('xmlResult', '请输入XML字符串', true);
+                return;
+            }
+
+            try {
+                const indentValue = document.getElementById('xmlIndent').value;
+                const indent = indentValue === 'tab' ? '\t' : ' '.repeat(parseInt(indentValue));
+                
+                const formatted = formatXMLString(input, indent);
+                showResult('xmlResult', formatted);
+            } catch (error) {
+                showResult('xmlResult', 'XML格式化错误: ' + error.message, true);
+            }
+        }
+
+        function formatXMLString(xml, indent) {
+            let formatted = '';
+            let level = 0;
+            const lines = xml.replace(/>\s*</g, '>\n<').split('\n');
+            
+            lines.forEach(line => {
+                const trimmed = line.trim();
+                if (!trimmed) return;
+                
+                if (trimmed.match(/^<\/\w/)) {
+                    level--;
+                }
+                
+                formatted += indent.repeat(Math.max(0, level)) + trimmed + '\n';
+                
+                if (trimmed.match(/^<\w[^>]*[^\/]>$/)) {
+                    level++;
+                }
+            });
+            
+            return formatted.trim();
+        }
+
+        function compressXML() {
+            const input = document.getElementById('xmlInput').value.trim();
+            if (!input) {
+                showResult('xmlResult', '请输入XML字符串', true);
+                return;
+            }
+
+            const compressed = input.replace(/>\s+</g, '><').replace(/\s+/g, ' ').trim();
+            showResult('xmlResult', compressed);
+        }
+
+        // ==================== HTML 格式化 ====================
+        function formatHTML() {
+            const input = document.getElementById('htmlInput').value.trim();
+            if (!input) {
+                showResult('htmlResult', '请输入HTML代码', true);
+                return;
+            }
+
+            try {
+                const indentValue = document.getElementById('htmlIndent').value;
+                const indent = indentValue === 'tab' ? '\t' : ' '.repeat(parseInt(indentValue));
+                
+                const formatted = formatHTMLString(input, indent);
+                showResult('htmlResult', formatted);
+            } catch (error) {
+                showResult('htmlResult', 'HTML格式化错误: ' + error.message, true);
+            }
+        }
+
+        function formatHTMLString(html, indent) {
+            let formatted = '';
+            let level = 0;
+            const lines = html.replace(/>\s*</g, '>\n<').split('\n');
+            const inlineTags = ['span', 'a', 'strong', 'em', 'b', 'i', 'u', 'small', 'code'];
+            
+            lines.forEach(line => {
+                const trimmed = line.trim();
+                if (!trimmed) return;
+                
+                const isClosingTag = trimmed.match(/^<\/\w/);
+                const isInlineTag = inlineTags.some(tag => 
+                    trimmed.includes(`<${tag}`) || trimmed.includes(`</${tag}`)
+                );
+                
+                if (isClosingTag && !isInlineTag) {
+                    level = Math.max(0, level - 1);
+                }
+                
+                formatted += indent.repeat(level) + trimmed + '\n';
+                
+                const isOpeningTag = trimmed.match(/^<\w[^>]*[^\/]>$/);
+                const isSelfClosing = trimmed.match(/\/>$/);
+                
+                if (isOpeningTag && !isSelfClosing && !isInlineTag) {
+                    level++;
+                }
+            });
+            
+            return formatted.trim();
+        }
+
+        function compressHTML() {
+            const input = document.getElementById('htmlInput').value.trim();
+            if (!input) {
+                showResult('htmlResult', '请输入HTML代码', true);
+                return;
+            }
+
+            const compressed = input.replace(/>\s+</g, '><').replace(/\s+/g, ' ').trim();
+            showResult('htmlResult', compressed);
+        }
+
+        // ==================== CSS 格式化 ====================
+        function formatCSS() {
+            const input = document.getElementById('cssInput').value.trim();
+            if (!input) {
+                showResult('cssResult', '请输入CSS代码', true);
+                return;
+            }
+
+            try {
+                const indentValue = document.getElementById('cssIndent').value;
+                const indent = indentValue === 'tab' ? '\t' : ' '.repeat(parseInt(indentValue));
+                
+                const formatted = formatCSSString(input, indent);
+                showResult('cssResult', formatted);
+            } catch (error) {
+                showResult('cssResult', 'CSS格式化错误: ' + error.message, true);
+            }
+        }
+
+        function formatCSSString(css, indent) {
+            let formatted = css
+                .replace(/\s*\{\s*/g, ' {\n')
+                .replace(/\s*\}\s*/g, '\n}\n')
+                .replace(/\s*;\s*/g, ';\n')
+                .replace(/\s*,\s*/g, ', ');
+            
+            const lines = formatted.split('\n');
+            let result = '';
+            let level = 0;
+            
+            lines.forEach(line => {
+                const trimmed = line.trim();
+                if (!trimmed) return;
+                
+                if (trimmed === '}') {
+                    level = Math.max(0, level - 1);
+                }
+                
+                result += indent.repeat(level) + trimmed + '\n';
+                
+                if (trimmed.endsWith('{')) {
+                    level++;
+                }
+            });
+            
+            return result.trim();
+        }
+
+        function compressCSS() {
+            const input = document.getElementById('cssInput').value.trim();
+            if (!input) {
+                showResult('cssResult', '请输入CSS代码', true);
+                return;
+            }
+
+            const compressed = input
+                .replace(/\/\*[\s\S]*?\*\//g, '')
+                .replace(/\s+/g, ' ')
+                .replace(/\s*{\s*/g, '{')
+                .replace(/\s*}\s*/g, '}')
+                .replace(/\s*;\s*/g, ';')
+                .replace(/\s*,\s*/g, ',')
+                .replace(/\s*:\s*/g, ':')
+                .trim();
+            showResult('cssResult', compressed);
+        }
+
+        // ==================== JavaScript 格式化 ====================
+        function formatJS() {
+            const input = document.getElementById('jsInput').value.trim();
+            if (!input) {
+                showResult('jsResult', '请输入JavaScript代码', true);
+                return;
+            }
+
+            try {
+                const indentValue = document.getElementById('jsIndent').value;
+                const indent = indentValue === 'tab' ? '\t' : ' '.repeat(parseInt(indentValue));
+                
+                const formatted = formatJSString(input, indent);
+                showResult('jsResult', formatted);
+            } catch (error) {
+                showResult('jsResult', 'JavaScript格式化错误: ' + error.message, true);
+            }
+        }
+
+        function formatJSString(js, indent) {
+            let formatted = js
+                .replace(/\s*\{\s*/g, ' {\n')
+                .replace(/\s*\}\s*/g, '\n}\n')
+                .replace(/\s*;\s*/g, ';\n')
+                .replace(/\s*,\s*/g, ', ');
+            
+            const lines = formatted.split('\n');
+            let result = '';
+            let level = 0;
+            
+            lines.forEach(line => {
+                const trimmed = line.trim();
+                if (!trimmed) return;
+                
+                if (trimmed === '}' || trimmed.startsWith('}')) {
+                    level = Math.max(0, level - 1);
+                }
+                
+                result += indent.repeat(level) + trimmed + '\n';
+                
+                if (trimmed.endsWith('{')) {
+                    level++;
+                }
+            });
+            
+            return result.trim();
+        }
+
+        function compressJS() {
+            const input = document.getElementById('jsInput').value.trim();
+            if (!input) {
+                showResult('jsResult', '请输入JavaScript代码', true);
+                return;
+            }
+
+            const compressed = input
+                .replace(/\/\*[\s\S]*?\*\//g, '')
+                .replace(/\/\/.*/g, '')
+                .replace(/\s+/g, ' ')
+                .replace(/\s*{\s*/g, '{')
+                .replace(/\s*}\s*/g, '}')
+                .replace(/\s*;\s*/g, ';')
+                .replace(/\s*,\s*/g, ',')
+                .trim();
+            showResult('jsResult', compressed);
+        }
+
+        // ==================== SQL 格式化 ====================
+        function formatSQL() {
+            const input = document.getElementById('sqlInput').value.trim();
+            if (!input) {
+                showResult('sqlResult', '请输入SQL语句', true);
+                return;
+            }
+
+            try {
+                const indentValue = document.getElementById('sqlIndent').value;
+                const uppercase = document.getElementById('sqlUppercase').checked;
+                const indent = indentValue === 'tab' ? '\t' : ' '.repeat(parseInt(indentValue));
+                
+                const formatted = formatSQLString(input, indent, uppercase);
+                showResult('sqlResult', formatted);
+            } catch (error) {
+                showResult('sqlResult', 'SQL格式化错误: ' + error.message, true);
+            }
+        }
+
+        function formatSQLString(sql, indent, uppercase) {
+            const keywords = [
+                'SELECT', 'FROM', 'WHERE', 'INSERT', 'UPDATE', 'DELETE', 'CREATE', 'DROP',
+                'ALTER', 'TABLE', 'INDEX', 'VIEW', 'JOIN', 'LEFT', 'RIGHT', 'INNER', 'OUTER',
+                'ON', 'AND', 'OR', 'ORDER', 'BY', 'GROUP', 'HAVING', 'LIMIT', 'OFFSET',
+                'AS', 'INTO', 'VALUES', 'SET', 'UNION', 'CASE', 'WHEN', 'THEN', 'ELSE', 'END'
+            ];
+            
+            let formatted = sql;
+            
+            if (uppercase) {
+                keywords.forEach(keyword => {
+                    const regex = new RegExp('\\b' + keyword + '\\b', 'gi');
+                    formatted = formatted.replace(regex, keyword);
+                });
+            }
+            
+            formatted = formatted
+                .replace(/\s+(SELECT|FROM|WHERE|JOIN|LEFT JOIN|RIGHT JOIN|INNER JOIN|ORDER BY|GROUP BY|HAVING|UNION)\s+/gi, '\n$1 ')
+                .replace(/\s+AND\s+/gi, '\n' + indent + 'AND ')
+                .replace(/\s+OR\s+/gi, '\n' + indent + 'OR ')
+                .replace(/,\s*/g, ',\n' + indent);
+            
+            return formatted.trim();
+        }
+
+        function compressSQL() {
+            const input = document.getElementById('sqlInput').value.trim();
+            if (!input) {
+                showResult('sqlResult', '请输入SQL语句', true);
+                return;
+            }
+
+            const compressed = input
+                .replace(/\s+/g, ' ')
+                .trim();
+            showResult('sqlResult', compressed);
+        }
+
+        // ==================== TypeScript 格式化 ====================
+        function formatTS() {
+            const input = document.getElementById('tsInput').value.trim();
+            if (!input) {
+                showResult('tsResult', '请输入TypeScript代码', true);
+                return;
+            }
+
+            try {
+                const indentValue = document.getElementById('tsIndent').value;
+                const indent = indentValue === 'tab' ? '\t' : ' '.repeat(parseInt(indentValue));
+                
+                // TypeScript格式化（类似JavaScript）
+                const formatted = formatJSString(input, indent);
+                showResult('tsResult', formatted);
+            } catch (error) {
+                showResult('tsResult', 'TypeScript格式化错误: ' + error.message, true);
+            }
+        }
+
+        function compressTS() {
+            const input = document.getElementById('tsInput').value.trim();
+            if (!input) {
+                showResult('tsResult', '请输入TypeScript代码', true);
+                return;
+            }
+
+            const compressed = input
+                .replace(/\/\*[\s\S]*?\*\//g, '')
+                .replace(/\/\/.*/g, '')
+                .replace(/\s+/g, ' ')
+                .replace(/\s*{\s*/g, '{')
+                .replace(/\s*}\s*/g, '}')
+                .replace(/\s*;\s*/g, ';')
+                .replace(/\s*,\s*/g, ',')
+                .trim();
+            showResult('tsResult', compressed);
+        }
+
+        // ==================== YAML 格式化 ====================
+        function formatYAML() {
+            const input = document.getElementById('yamlInput').value.trim();
+            if (!input) {
+                showResult('yamlResult', '请输入YAML代码', true);
+                return;
+            }
+
+            try {
+                const indentValue = document.getElementById('yamlIndent').value;
+                const indent = ' '.repeat(parseInt(indentValue));
+                
+                // 简单的YAML格式化
+                let formatted = input;
+                const lines = formatted.split('\n');
+                let result = '';
+                let level = 0;
+                
+                lines.forEach(line => {
+                    const trimmed = line.trim();
+                    if (!trimmed) return;
+                    
+                    // 检测缩进级别
+                    if (trimmed.endsWith(':') && !trimmed.includes(': ')) {
+                        result += indent.repeat(level) + trimmed + '\n';
+                        level++;
+                    } else if (trimmed.startsWith('- ')) {
+                        result += indent.repeat(level) + trimmed + '\n';
+                    } else {
+                        if (level > 0 && !trimmed.endsWith(':')) {
+                            result += indent.repeat(level) + trimmed + '\n';
+                        } else {
+                            result += trimmed + '\n';
+                            level = 0;
+                        }
+                    }
+                });
+                
+                showResult('yamlResult', result.trim());
+            } catch (error) {
+                showResult('yamlResult', 'YAML格式化错误: ' + error.message, true);
+            }
+        }
+
+        function yamlToJSON() {
+            const input = document.getElementById('yamlInput').value.trim();
+            if (!input) {
+                showResult('yamlResult', '请输入YAML代码', true);
+                return;
+            }
+
+            try {
+                // 简单的YAML到JSON转换
+                const lines = input.split('\n').filter(line => line.trim());
+                let json = {};
+                let currentKey = null;
+                
+                lines.forEach(line => {
+                    const trimmed = line.trim();
+                    if (trimmed.includes(': ')) {
+                        const [key, value] = trimmed.split(': ');
+                        json[key.trim()] = isNaN(value) ? value.trim() : Number(value);
+                    }
+                });
+                
+                const formatted = JSON.stringify(json, null, 2);
+                showResult('yamlResult', formatted);
+            } catch (error) {
+                showResult('yamlResult', 'YAML转JSON错误: ' + error.message, true);
+            }
+        }
+
+        function jsonToYAML() {
+            const input = document.getElementById('yamlInput').value.trim();
+            if (!input) {
+                showResult('yamlResult', '请输入JSON代码', true);
+                return;
+            }
+
+            try {
+                const json = JSON.parse(input);
+                const indentValue = document.getElementById('yamlIndent').value;
+                const indent = ' '.repeat(parseInt(indentValue));
+                
+                let yaml = '';
+                function convertToYAML(obj, level = 0) {
+                    for (let key in obj) {
+                        const value = obj[key];
+                        if (typeof value === 'object' && !Array.isArray(value)) {
+                            yaml += indent.repeat(level) + key + ':\n';
+                            convertToYAML(value, level + 1);
+                        } else if (Array.isArray(value)) {
+                            yaml += indent.repeat(level) + key + ':\n';
+                            value.forEach(item => {
+                                if (typeof item === 'object') {
+                                    yaml += indent.repeat(level + 1) + '-\n';
+                                    convertToYAML(item, level + 2);
+                                } else {
+                                    yaml += indent.repeat(level + 1) + '- ' + item + '\n';
+                                }
+                            });
+                        } else {
+                            yaml += indent.repeat(level) + key + ': ' + value + '\n';
+                        }
+                    }
+                }
+                
+                convertToYAML(json);
+                showResult('yamlResult', yaml.trim());
+            } catch (error) {
+                showResult('yamlResult', 'JSON转YAML错误: ' + error.message, true);
+            }
+        }
+
+        // ==================== Markdown 格式化 ====================
+        function formatMarkdown() {
+            const input = document.getElementById('mdInput').value.trim();
+            if (!input) {
+                showResult('mdResult', '请输入Markdown代码', true);
+                return;
+            }
+
+            try {
+                // Markdown格式化
+                let formatted = input
+                    .replace(/^(#{1,6})\s*(.+)$/gm, '$1 $2')  // 标题格式化
+                    .replace(/^([*+-])\s*(.+)$/gm, '$1 $2')   // 列表格式化
+                    .replace(/\n{3,}/g, '\n\n')                // 移除多余空行
+                    .trim();
+                
+                showResult('mdResult', formatted);
+            } catch (error) {
+                showResult('mdResult', 'Markdown格式化错误: ' + error.message, true);
+            }
+        }
+
+        function compressMarkdown() {
+            const input = document.getElementById('mdInput').value.trim();
+            if (!input) {
+                showResult('mdResult', '请输入Markdown代码', true);
+                return;
+            }
+
+            const compressed = input
+                .replace(/\n{2,}/g, '\n')  // 移除空行
+                .replace(/\s+/g, ' ')       // 压缩空格
+                .trim();
+            showResult('mdResult', compressed);
+        }
+
+        // ==================== Python 格式化 ====================
+        function formatPython() {
+            const input = document.getElementById('pythonInput').value.trim();
+            if (!input) {
+                showResult('pythonResult', '请输入Python代码', true);
+                return;
+            }
+
+            try {
+                const indentValue = document.getElementById('pythonIndent').value;
+                const indent = ' '.repeat(parseInt(indentValue));
+                
+                // Python格式化
+                let formatted = input
+                    .replace(/:\s*([^#\n])/g, ':\n$1')  // 冒号后换行
+                    .split('\n');
+                
+                let result = '';
+                let level = 0;
+                
+                formatted.forEach(line => {
+                    const trimmed = line.trim();
+                    if (!trimmed) return;
+                    
+                    // 检测缩进减少
+                    if (/^(return|break|continue|pass)/.test(trimmed)) {
+                        result += indent.repeat(level) + trimmed + '\n';
+                        return;
+                    }
+                    
+                    // 检测缩进级别
+                    const prevLevel = level;
+                    if (trimmed.startsWith('def ') || trimmed.startsWith('class ') || 
+                        trimmed.startsWith('if ') || trimmed.startsWith('for ') || 
+                        trimmed.startsWith('while ') || trimmed.startsWith('with ') ||
+                        trimmed.startsWith('try:') || trimmed.startsWith('except ')) {
+                        result += indent.repeat(level) + trimmed + '\n';
+                        if (trimmed.endsWith(':')) {
+                            level++;
+                        }
+                    } else if (trimmed.startsWith('elif ') || trimmed.startsWith('else:') || 
+                               trimmed.startsWith('except:') || trimmed.startsWith('finally:')) {
+                        level = Math.max(0, level - 1);
+                        result += indent.repeat(level) + trimmed + '\n';
+                        level++;
+                    } else {
+                        result += indent.repeat(level) + trimmed + '\n';
+                    }
+                });
+                
+                showResult('pythonResult', result.trim());
+            } catch (error) {
+                showResult('pythonResult', 'Python格式化错误: ' + error.message, true);
+            }
+        }
+
+        function compressPython() {
+            const input = document.getElementById('pythonInput').value.trim();
+            if (!input) {
+                showResult('pythonResult', '请输入Python代码', true);
+                return;
+            }
+
+            // Python压缩（保留必要的缩进和换行）
+            const compressed = input
+                .replace(/\s+#.*/g, '')     // 移除注释
+                .replace(/\n{2,}/g, '\n')   // 移除多余空行
+                .replace(/\s+/g, ' ')
+                .replace(/:\s+/g, ':')
+                .trim();
+            showResult('pythonResult', compressed);
+        }
+
+        // ==================== Java 格式化 ====================
+        function formatJava() {
+            const input = document.getElementById('javaInput').value.trim();
+            if (!input) {
+                showResult('javaResult', '请输入Java代码', true);
+                return;
+            }
+
+            try {
+                const indentValue = document.getElementById('javaIndent').value;
+                const indent = indentValue === 'tab' ? '\t' : ' '.repeat(parseInt(indentValue));
+                
+                // Java格式化（类似C风格）
+                const formatted = formatCStyleCode(input, indent);
+                showResult('javaResult', formatted);
+            } catch (error) {
+                showResult('javaResult', 'Java格式化错误: ' + error.message, true);
+            }
+        }
+
+        function compressJava() {
+            const input = document.getElementById('javaInput').value.trim();
+            if (!input) {
+                showResult('javaResult', '请输入Java代码', true);
+                return;
+            }
+
+            const compressed = input
+                .replace(/\/\*[\s\S]*?\*\//g, '')
+                .replace(/\/\/.*/g, '')
+                .replace(/\s+/g, ' ')
+                .replace(/\s*{\s*/g, '{')
+                .replace(/\s*}\s*/g, '}')
+                .replace(/\s*;\s*/g, ';')
+                .trim();
+            showResult('javaResult', compressed);
+        }
+
+        // ==================== C/C++ 格式化 ====================
+        function formatCpp() {
+            const input = document.getElementById('cppInput').value.trim();
+            if (!input) {
+                showResult('cppResult', '请输入C/C++代码', true);
+                return;
+            }
+
+            try {
+                const indentValue = document.getElementById('cppIndent').value;
+                const indent = indentValue === 'tab' ? '\t' : ' '.repeat(parseInt(indentValue));
+                
+                // C/C++格式化
+                const formatted = formatCStyleCode(input, indent);
+                showResult('cppResult', formatted);
+            } catch (error) {
+                showResult('cppResult', 'C/C++格式化错误: ' + error.message, true);
+            }
+        }
+
+        function compressCpp() {
+            const input = document.getElementById('cppInput').value.trim();
+            if (!input) {
+                showResult('cppResult', '请输入C/C++代码', true);
+                return;
+            }
+
+            const compressed = input
+                .replace(/\/\*[\s\S]*?\*\//g, '')
+                .replace(/\/\/.*/g, '')
+                .replace(/\s+/g, ' ')
+                .replace(/\s*{\s*/g, '{')
+                .replace(/\s*}\s*/g, '}')
+                .replace(/\s*;\s*/g, ';')
+                .trim();
+            showResult('cppResult', compressed);
+        }
+
+        // C风格代码格式化通用函数
+        function formatCStyleCode(code, indent) {
+            let formatted = code
+                .replace(/\s*\{\s*/g, ' {\n')
+                .replace(/\s*\}\s*/g, '\n}\n')
+                .replace(/\s*;\s*/g, ';\n')
+                .replace(/\s*,\s*/g, ', ');
+            
+            const lines = formatted.split('\n');
+            let result = '';
+            let level = 0;
+            
+            lines.forEach(line => {
+                const trimmed = line.trim();
+                if (!trimmed) return;
+                
+                // 预处理指令不缩进
+                if (trimmed.startsWith('#')) {
+                    result += trimmed + '\n';
+                    return;
+                }
+                
+                if (trimmed === '}' || trimmed.startsWith('}')) {
+                    level = Math.max(0, level - 1);
+                }
+                
+                result += indent.repeat(level) + trimmed + '\n';
+                
+                if (trimmed.endsWith('{')) {
+                    level++;
+                }
+            });
+            
+            return result.trim();
+        }
+    </script>
+</body>
+</html>
+

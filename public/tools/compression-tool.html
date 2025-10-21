@@ -1,0 +1,1299 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>解压缩工具</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            font-weight: 300;
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .compression-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            border-bottom: 2px solid #e1e5e9;
+            padding-bottom: 10px;
+        }
+
+        .compression-tab {
+            padding: 12px 24px;
+            background: #f8f9fa;
+            border: 2px solid #e1e5e9;
+            border-radius: 10px 10px 0 0;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            color: #666;
+        }
+
+        .compression-tab:hover {
+            background: #e9ecef;
+        }
+
+        .compression-tab.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-color: #667eea;
+        }
+
+        .compression-content {
+            display: none;
+        }
+
+        .compression-content.active {
+            display: block;
+        }
+
+        .input-group {
+            margin-bottom: 25px;
+        }
+
+        .input-group label {
+            display: block;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+        }
+
+        .textarea-wrapper {
+            position: relative;
+        }
+
+        textarea {
+            width: 100%;
+            min-height: 150px;
+            padding: 15px;
+            border: 2px solid #e1e5e9;
+            border-radius: 10px;
+            font-size: 1em;
+            font-family: 'Consolas', 'Monaco', monospace;
+            resize: vertical;
+            transition: all 0.3s ease;
+            background: #f8f9fa;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .char-count {
+            position: absolute;
+            bottom: 10px;
+            right: 15px;
+            font-size: 0.9em;
+            color: #999;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 2px 8px;
+            border-radius: 5px;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-bottom: 25px;
+        }
+
+        .btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+            transform: translateY(-2px);
+        }
+
+        .btn-warning {
+            background: #ffc107;
+            color: #333;
+        }
+
+        .btn-warning:hover {
+            background: #e0a800;
+            transform: translateY(-2px);
+        }
+
+        .result-box {
+            background: #f8f9fa;
+            border: 2px solid #e1e5e9;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+            position: relative;
+        }
+
+        .result-box h3 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+        }
+
+        .result-content {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: 'Consolas', 'Monaco', monospace;
+            word-break: break-all;
+            max-height: 300px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+        }
+
+        .copy-btn {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            padding: 8px 16px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: all 0.3s ease;
+        }
+
+        .copy-btn:hover {
+            background: #5a67d8;
+            transform: scale(1.05);
+        }
+
+        .alert {
+            padding: 15px 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-weight: 500;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert-danger {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .alert-info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+
+        .info-box {
+            background: #e7f3ff;
+            border-left: 4px solid #2196F3;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+
+        .info-box h4 {
+            color: #1976D2;
+            margin-bottom: 8px;
+        }
+
+        .info-box p {
+            color: #666;
+            line-height: 1.6;
+        }
+
+        .stats-box {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .stat-item {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #e1e5e9;
+            text-align: center;
+        }
+
+        .stat-label {
+            font-size: 0.9em;
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        .stat-value {
+            font-size: 1.5em;
+            font-weight: 600;
+            color: #667eea;
+        }
+
+        .file-upload {
+            border: 2px dashed #e1e5e9;
+            border-radius: 10px;
+            padding: 30px;
+            text-align: center;
+            background: #f8f9fa;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .file-upload:hover {
+            border-color: #667eea;
+            background: white;
+        }
+
+        .file-upload.dragover {
+            border-color: #667eea;
+            background: #e7f3ff;
+        }
+
+        .file-upload input[type="file"] {
+            display: none;
+        }
+
+        .file-upload-icon {
+            font-size: 3em;
+            margin-bottom: 10px;
+        }
+
+        .file-upload-text {
+            color: #666;
+            font-size: 1.1em;
+        }
+
+        .file-info {
+            background: white;
+            border: 1px solid #e1e5e9;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 15px;
+            display: none;
+        }
+
+        .file-info.show {
+            display: block;
+        }
+
+        .file-name {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .file-size {
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        .history-section {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 2px solid #e1e5e9;
+        }
+
+        .history-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .history-header h3 {
+            color: #333;
+            font-size: 1.2em;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .clear-history-btn {
+            padding: 6px 12px;
+            background: #dc3545;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: all 0.3s ease;
+        }
+
+        .clear-history-btn:hover {
+            background: #c82333;
+            transform: scale(1.05);
+        }
+
+        .history-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .history-item {
+            background: white;
+            border: 1px solid #e1e5e9;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .history-item:hover {
+            border-color: #4facfe;
+            box-shadow: 0 2px 8px rgba(79, 172, 254, 0.1);
+        }
+
+        .history-item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .history-item-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .delete-history-btn {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 4px 8px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.8em;
+            transition: all 0.3s ease;
+            opacity: 0.7;
+        }
+
+        .delete-history-btn:hover {
+            background: #c82333;
+            opacity: 1;
+            transform: scale(1.05);
+        }
+
+        .history-item-title {
+            font-weight: 600;
+            color: #333;
+            font-size: 1.1em;
+        }
+
+        .history-item-date {
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        .history-item-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 10px;
+            font-size: 0.9em;
+            color: #555;
+        }
+
+        .history-item-detail {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .history-item-detail-label {
+            font-weight: 500;
+            margin-bottom: 2px;
+        }
+
+        .history-item-detail-value {
+            color: #333;
+            font-weight: 600;
+        }
+
+        .empty-history {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+            font-style: italic;
+        }
+
+        /* 移动端优化 */
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+
+            .content {
+                padding: 20px 15px;
+            }
+
+            .header {
+                padding: 20px 15px;
+            }
+
+            .header h1 {
+                font-size: 1.8em;
+                margin-bottom: 8px;
+            }
+
+            .header p {
+                font-size: 0.95em;
+            }
+
+            .compression-tabs {
+                flex-direction: column;
+                gap: 8px;
+                border-bottom: none;
+                padding-bottom: 0;
+            }
+
+            .compression-tab {
+                width: 100%;
+                text-align: center;
+                border-radius: 8px;
+                padding: 10px 20px;
+            }
+
+            .button-group {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .btn {
+                width: 100%;
+                padding: 12px 20px;
+                font-size: 1em;
+            }
+
+            .stats-box {
+                grid-template-columns: 1fr;
+            }
+
+            .history-item-details {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 480px) {
+            .header h1 {
+                font-size: 1.5em;
+            }
+
+            .content {
+                padding: 15px 12px;
+            }
+
+            .file-upload {
+                padding: 20px 10px;
+            }
+
+            .file-upload-icon {
+                font-size: 2em;
+            }
+
+            .history-item-details {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📦 解压缩工具</h1>
+            <p>支持多种压缩算法的压缩和解压操作，节省存储空间</p>
+        </div>
+
+        <div class="content">
+            <div class="compression-tabs">
+                <div class="compression-tab active" onclick="switchTab('gzip')">Gzip压缩</div>
+                <div class="compression-tab" onclick="switchTab('deflate')">Deflate压缩</div>
+                <div class="compression-tab" onclick="switchTab('lzstring')">LZ-String压缩</div>
+                <div class="compression-tab" onclick="switchTab('base64')">Base64压缩</div>
+            </div>
+
+            <!-- Gzip 压缩 -->
+            <div id="gzip" class="compression-content active">
+                <div class="info-box">
+                    <h4>📘 Gzip 压缩说明</h4>
+                    <p>Gzip是最常用的压缩格式之一，基于DEFLATE算法。广泛用于网页传输、文件压缩等场景。提供良好的压缩率和速度平衡，是HTTP传输的标准压缩格式。</p>
+                </div>
+
+                <div class="input-group">
+                    <label>输入文本</label>
+                    <div class="textarea-wrapper">
+                        <textarea id="gzipInput" placeholder="请输入要压缩/解压的文本..."></textarea>
+                        <span class="char-count" id="gzipCount">0 字符</span>
+                    </div>
+                </div>
+
+                <div class="button-group">
+                    <button class="btn btn-primary" onclick="compressGzip()">📦 Gzip 压缩</button>
+                    <button class="btn btn-secondary" onclick="decompressGzip()">📂 Gzip 解压</button>
+                    <button class="btn btn-warning" onclick="clearInput('gzipInput')">🗑️ 清空</button>
+                </div>
+
+                <div id="gzipResult"></div>
+
+                <div class="history-section">
+                    <div class="history-header">
+                        <h3>📜 历史记录</h3>
+                        <button class="clear-history-btn" onclick="clearHistory('gzip')">清空历史</button>
+                    </div>
+                    <div id="gzipHistory" class="history-list"></div>
+                </div>
+            </div>
+
+            <!-- Deflate 压缩 -->
+            <div id="deflate" class="compression-content">
+                <div class="info-box">
+                    <h4>📘 Deflate 压缩说明</h4>
+                    <p>Deflate是一种无损数据压缩算法，结合了LZ77算法和哈夫曼编码。它是Gzip和ZIP格式的核心算法，具有高效的压缩率，广泛应用于各种数据压缩场景。</p>
+                </div>
+
+                <div class="input-group">
+                    <label>输入文本</label>
+                    <div class="textarea-wrapper">
+                        <textarea id="deflateInput" placeholder="请输入要压缩/解压的文本..."></textarea>
+                        <span class="char-count" id="deflateCount">0 字符</span>
+                    </div>
+                </div>
+
+                <div class="button-group">
+                    <button class="btn btn-primary" onclick="compressDeflate()">📦 Deflate 压缩</button>
+                    <button class="btn btn-secondary" onclick="decompressDeflate()">📂 Deflate 解压</button>
+                    <button class="btn btn-warning" onclick="clearInput('deflateInput')">🗑️ 清空</button>
+                </div>
+
+                <div id="deflateResult"></div>
+
+                <div class="history-section">
+                    <div class="history-header">
+                        <h3>📜 历史记录</h3>
+                        <button class="clear-history-btn" onclick="clearHistory('deflate')">清空历史</button>
+                    </div>
+                    <div id="deflateHistory" class="history-list"></div>
+                </div>
+            </div>
+
+            <!-- LZ-String 压缩 -->
+            <div id="lzstring" class="compression-content">
+                <div class="info-box">
+                    <h4>📘 LZ-String 压缩说明</h4>
+                    <p>LZ-String是专为JavaScript优化的压缩库，特别适合压缩UTF-16字符串。支持多种输出格式，压缩后的数据可以直接存储在localStorage中，非常适合前端应用。</p>
+                </div>
+
+                <div class="input-group">
+                    <label>输入文本</label>
+                    <div class="textarea-wrapper">
+                        <textarea id="lzstringInput" placeholder="请输入要压缩/解压的文本..."></textarea>
+                        <span class="char-count" id="lzstringCount">0 字符</span>
+                    </div>
+                </div>
+
+                <div class="button-group">
+                    <button class="btn btn-primary" onclick="compressLZString()">📦 LZ-String 压缩</button>
+                    <button class="btn btn-secondary" onclick="decompressLZString()">📂 LZ-String 解压</button>
+                    <button class="btn btn-primary" onclick="compressLZStringUTF16()">📦 UTF16 压缩</button>
+                    <button class="btn btn-secondary" onclick="decompressLZStringUTF16()">📂 UTF16 解压</button>
+                    <button class="btn btn-warning" onclick="clearInput('lzstringInput')">🗑️ 清空</button>
+                </div>
+
+                <div id="lzstringResult"></div>
+
+                <div class="history-section">
+                    <div class="history-header">
+                        <h3>📜 历史记录</h3>
+                        <button class="clear-history-btn" onclick="clearHistory('lzstring')">清空历史</button>
+                    </div>
+                    <div id="lzstringHistory" class="history-list"></div>
+                </div>
+            </div>
+
+            <!-- Base64 + 压缩 -->
+            <div id="base64" class="compression-content">
+                <div class="info-box">
+                    <h4>📘 Base64 压缩说明</h4>
+                    <p>结合Deflate压缩和Base64编码，先压缩数据后再进行Base64编码。这样既能减小数据大小，又能得到可安全传输的ASCII字符串。适用于需要在文本环境中传输压缩数据的场景。</p>
+                </div>
+
+                <div class="input-group">
+                    <label>输入文本</label>
+                    <div class="textarea-wrapper">
+                        <textarea id="base64Input" placeholder="请输入要压缩/解压的文本..."></textarea>
+                        <span class="char-count" id="base64Count">0 字符</span>
+                    </div>
+                </div>
+
+                <div class="button-group">
+                    <button class="btn btn-primary" onclick="compressBase64()">📦 压缩并Base64编码</button>
+                    <button class="btn btn-secondary" onclick="decompressBase64()">📂 Base64解码并解压</button>
+                    <button class="btn btn-warning" onclick="clearInput('base64Input')">🗑️ 清空</button>
+                </div>
+
+                <div id="base64Result"></div>
+
+                <div class="history-section">
+                    <div class="history-header">
+                        <h3>📜 历史记录</h3>
+                        <button class="clear-history-btn" onclick="clearHistory('base64')">清空历史</button>
+                    </div>
+                    <div id="base64History" class="history-list"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pako/2.1.0/pako.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lz-string/1.5.0/lz-string.min.js"></script>
+    <script>
+        // 初始化字符计数
+        document.querySelectorAll('textarea').forEach(textarea => {
+            const countId = textarea.id + 'Count';
+            const countElement = document.getElementById(countId);
+            if (countElement) {
+                textarea.addEventListener('input', function() {
+                    countElement.textContent = this.value.length + ' 字符';
+                });
+            }
+        });
+
+        // 切换标签页
+        function switchTab(tabName) {
+            document.querySelectorAll('.compression-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            document.querySelectorAll('.compression-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
+            
+            loadHistory(tabName);
+        }
+
+        // ==================== 工具函数 ====================
+        
+        // 字符串转Uint8Array
+        function stringToUint8Array(str) {
+            const encoder = new TextEncoder();
+            return encoder.encode(str);
+        }
+
+        // Uint8Array转字符串
+        function uint8ArrayToString(uint8array) {
+            const decoder = new TextDecoder();
+            return decoder.decode(uint8array);
+        }
+
+        // Uint8Array转Base64
+        function uint8ArrayToBase64(uint8array) {
+            let binary = '';
+            const len = uint8array.byteLength;
+            for (let i = 0; i < len; i++) {
+                binary += String.fromCharCode(uint8array[i]);
+            }
+            return btoa(binary);
+        }
+
+        // Base64转Uint8Array
+        function base64ToUint8Array(base64) {
+            const binary = atob(base64);
+            const len = binary.length;
+            const bytes = new Uint8Array(len);
+            for (let i = 0; i < len; i++) {
+                bytes[i] = binary.charCodeAt(i);
+            }
+            return bytes;
+        }
+
+        // 格式化文件大小
+        function formatSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
+        }
+
+        // 计算压缩率
+        function calculateRatio(original, compressed) {
+            if (original === 0) return '0%';
+            const ratio = ((original - compressed) / original * 100).toFixed(2);
+            return ratio + '%';
+        }
+
+        // ==================== 历史记录管理 ====================
+        const MAX_HISTORY = 20;
+
+        function saveHistory(type, operation, originalSize, compressedSize, ratio, input, output) {
+            const storageKey = `compression_history_${type}`;
+            let history = JSON.parse(localStorage.getItem(storageKey) || '[]');
+            
+            const record = {
+                id: Date.now(),
+                type: type,
+                operation: operation,
+                originalSize: formatSize(originalSize),
+                compressedSize: formatSize(compressedSize),
+                ratio: ratio,
+                input: input, // 保存完整输入
+                output: output, // 保存完整输出
+                inputPreview: input.substring(0, 100), // 用于显示的预览
+                outputPreview: output.substring(0, 100),
+                timestamp: new Date().toLocaleString('zh-CN')
+            };
+            
+            history.unshift(record);
+            
+            if (history.length > MAX_HISTORY) {
+                history = history.slice(0, MAX_HISTORY);
+            }
+            
+            localStorage.setItem(storageKey, JSON.stringify(history));
+            loadHistory(type);
+        }
+
+        function loadHistory(type) {
+            const storageKey = `compression_history_${type}`;
+            const history = JSON.parse(localStorage.getItem(storageKey) || '[]');
+            const historyContainer = document.getElementById(`${type}History`);
+            
+            if (!historyContainer) return;
+            
+            if (history.length === 0) {
+                historyContainer.innerHTML = '<div class="empty-history">📭 暂无历史记录</div>';
+                return;
+            }
+            
+            historyContainer.innerHTML = history.map(record => {
+                const preview = record.inputPreview || record.input?.substring(0, 100) || '';
+                const fullInput = record.input || '';
+                return `
+                    <div class="history-item">
+                        <div class="history-item-header">
+                            <div class="history-item-title" onclick="loadHistoryItem('${type}', ${record.id})" style="cursor: pointer;">${record.operation}</div>
+                            <div class="history-item-actions">
+                                <div class="history-item-date">${record.timestamp}</div>
+                                <button class="delete-history-btn" onclick="deleteHistoryItem('${type}', ${record.id}, event)" title="删除此记录">删除</button>
+                            </div>
+                        </div>
+                        <div class="history-item-details" onclick="loadHistoryItem('${type}', ${record.id})" style="cursor: pointer;">
+                            <div class="history-item-detail">
+                                <div class="history-item-detail-label">原始大小</div>
+                                <div class="history-item-detail-value">${record.originalSize}</div>
+                            </div>
+                            <div class="history-item-detail">
+                                <div class="history-item-detail-label">压缩后大小</div>
+                                <div class="history-item-detail-value">${record.compressedSize}</div>
+                            </div>
+                            <div class="history-item-detail">
+                                <div class="history-item-detail-label">压缩率</div>
+                                <div class="history-item-detail-value">${record.ratio}</div>
+                            </div>
+                            <div class="history-item-detail" style="grid-column: 1 / -1;">
+                                <div class="history-item-detail-label">内容预览</div>
+                                <div class="history-item-detail-value" title="${escapeHtml(fullInput)}" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${escapeHtml(preview)}${fullInput.length > 100 ? '...' : ''}</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // 加载历史记录项到输入框
+        function loadHistoryItem(type, recordId) {
+            const storageKey = `compression_history_${type}`;
+            const history = JSON.parse(localStorage.getItem(storageKey) || '[]');
+            const record = history.find(r => r.id === recordId);
+            
+            if (record) {
+                const inputElement = document.getElementById(`${type}Input`);
+                if (inputElement) {
+                    // 获取完整的输入内容（从完整记录中获取）
+                    inputElement.value = record.input;
+                    // 更新字符计数
+                    const countElement = document.getElementById(`${type}Count`);
+                    if (countElement) {
+                        countElement.textContent = record.input.length + ' 字符';
+                    }
+                    
+                    // 显示一个提示信息
+                    const resultContainer = document.getElementById(`${type}Result`);
+                    if (resultContainer) {
+                        resultContainer.innerHTML = `
+                            <div class="alert alert-info">
+                                ℹ️ 已加载历史记录：${record.operation}
+                            </div>
+                        `;
+                    }
+                }
+            }
+        }
+
+        function deleteHistoryItem(type, recordId, event) {
+            if (event) {
+                event.stopPropagation();
+            }
+            
+            if (confirm('确定要删除这条历史记录吗？')) {
+                const storageKey = `compression_history_${type}`;
+                let history = JSON.parse(localStorage.getItem(storageKey) || '[]');
+                history = history.filter(r => r.id !== recordId);
+                localStorage.setItem(storageKey, JSON.stringify(history));
+                loadHistory(type);
+            }
+        }
+
+        function clearHistory(type) {
+            if (confirm('确定要清空所有历史记录吗？此操作不可恢复。')) {
+                const storageKey = `compression_history_${type}`;
+                localStorage.removeItem(storageKey);
+                loadHistory(type);
+            }
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            loadHistory('gzip');
+        });
+
+        // 显示结果
+        function showResult(containerId, result, isError = false, stats = null) {
+            const container = document.getElementById(containerId);
+            if (isError) {
+                container.innerHTML = `
+                    <div class="alert alert-danger">
+                        ❌ ${result}
+                    </div>
+                `;
+            } else {
+                let statsHtml = '';
+                if (stats) {
+                    statsHtml = `
+                        <div class="stats-box">
+                            <div class="stat-item">
+                                <div class="stat-label">原始大小</div>
+                                <div class="stat-value">${formatSize(stats.originalSize)}</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-label">压缩后大小</div>
+                                <div class="stat-value">${formatSize(stats.compressedSize)}</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-label">压缩率</div>
+                                <div class="stat-value">${stats.ratio}</div>
+                            </div>
+                        </div>
+                    `;
+                }
+                
+                container.innerHTML = `
+                    <div class="result-box">
+                        <h3>结果：</h3>
+                        <button class="copy-btn" onclick="copyResult(this)">📋 复制</button>
+                        <div class="result-content">${result}</div>
+                        ${statsHtml}
+                    </div>
+                `;
+            }
+        }
+
+        function copyResult(button) {
+            const resultContent = button.parentElement.querySelector('.result-content');
+            const text = resultContent.textContent;
+            
+            navigator.clipboard.writeText(text).then(() => {
+                const originalText = button.textContent;
+                button.textContent = '✅ 已复制';
+                button.style.background = '#28a745';
+                
+                setTimeout(() => {
+                    button.textContent = originalText;
+                    button.style.background = '#667eea';
+                }, 2000);
+            }).catch(err => {
+                alert('复制失败：' + err);
+            });
+        }
+
+        function clearInput(inputId) {
+            document.getElementById(inputId).value = '';
+            const countElement = document.getElementById(inputId + 'Count');
+            if (countElement) {
+                countElement.textContent = '0 字符';
+            }
+        }
+
+        function getPreview(text, maxLength = 50) {
+            if (text.length <= maxLength) {
+                return text;
+            }
+            return text.substring(0, maxLength) + '...';
+        }
+
+        // ==================== Gzip 压缩/解压 ====================
+        function compressGzip() {
+            const input = document.getElementById('gzipInput').value;
+            if (!input) {
+                showResult('gzipResult', '请输入要压缩的文本', true);
+                return;
+            }
+            
+            try {
+                const inputBytes = stringToUint8Array(input);
+                const compressed = pako.gzip(inputBytes);
+                const compressedBase64 = uint8ArrayToBase64(compressed);
+                
+                const originalSize = new Blob([input]).size;
+                const compressedSize = compressed.length;
+                const ratio = calculateRatio(originalSize, compressedSize);
+                
+                showResult('gzipResult', compressedBase64, false, {
+                    originalSize: originalSize,
+                    compressedSize: compressedSize,
+                    ratio: ratio
+                });
+                
+                saveHistory('gzip', 'Gzip 压缩', originalSize, compressedSize, ratio, input, compressedBase64);
+            } catch (error) {
+                showResult('gzipResult', '压缩失败：' + error.message, true);
+            }
+        }
+
+        function decompressGzip() {
+            const input = document.getElementById('gzipInput').value;
+            if (!input) {
+                showResult('gzipResult', '请输入要解压的数据', true);
+                return;
+            }
+            
+            try {
+                const compressedBytes = base64ToUint8Array(input);
+                const decompressed = pako.ungzip(compressedBytes);
+                const decompressedText = uint8ArrayToString(decompressed);
+                
+                const compressedSize = compressedBytes.length;
+                const originalSize = new Blob([decompressedText]).size;
+                const ratio = calculateRatio(originalSize, compressedSize);
+                
+                showResult('gzipResult', decompressedText, false, {
+                    originalSize: originalSize,
+                    compressedSize: compressedSize,
+                    ratio: ratio
+                });
+                
+                saveHistory('gzip', 'Gzip 解压', originalSize, compressedSize, ratio, input, decompressedText);
+            } catch (error) {
+                showResult('gzipResult', '解压失败：输入可能不是有效的Gzip数据', true);
+            }
+        }
+
+        // ==================== Deflate 压缩/解压 ====================
+        function compressDeflate() {
+            const input = document.getElementById('deflateInput').value;
+            if (!input) {
+                showResult('deflateResult', '请输入要压缩的文本', true);
+                return;
+            }
+            
+            try {
+                const inputBytes = stringToUint8Array(input);
+                const compressed = pako.deflate(inputBytes);
+                const compressedBase64 = uint8ArrayToBase64(compressed);
+                
+                const originalSize = new Blob([input]).size;
+                const compressedSize = compressed.length;
+                const ratio = calculateRatio(originalSize, compressedSize);
+                
+                showResult('deflateResult', compressedBase64, false, {
+                    originalSize: originalSize,
+                    compressedSize: compressedSize,
+                    ratio: ratio
+                });
+                
+                saveHistory('deflate', 'Deflate 压缩', originalSize, compressedSize, ratio, input, compressedBase64);
+            } catch (error) {
+                showResult('deflateResult', '压缩失败：' + error.message, true);
+            }
+        }
+
+        function decompressDeflate() {
+            const input = document.getElementById('deflateInput').value;
+            if (!input) {
+                showResult('deflateResult', '请输入要解压的数据', true);
+                return;
+            }
+            
+            try {
+                const compressedBytes = base64ToUint8Array(input);
+                const decompressed = pako.inflate(compressedBytes);
+                const decompressedText = uint8ArrayToString(decompressed);
+                
+                const compressedSize = compressedBytes.length;
+                const originalSize = new Blob([decompressedText]).size;
+                const ratio = calculateRatio(originalSize, compressedSize);
+                
+                showResult('deflateResult', decompressedText, false, {
+                    originalSize: originalSize,
+                    compressedSize: compressedSize,
+                    ratio: ratio
+                });
+                
+                saveHistory('deflate', 'Deflate 解压', originalSize, compressedSize, ratio, input, decompressedText);
+            } catch (error) {
+                showResult('deflateResult', '解压失败：输入可能不是有效的Deflate数据', true);
+            }
+        }
+
+        // ==================== LZ-String 压缩/解压 ====================
+        function compressLZString() {
+            const input = document.getElementById('lzstringInput').value;
+            if (!input) {
+                showResult('lzstringResult', '请输入要压缩的文本', true);
+                return;
+            }
+            
+            try {
+                const compressed = LZString.compressToBase64(input);
+                
+                const originalSize = new Blob([input]).size;
+                const compressedSize = new Blob([compressed]).size;
+                const ratio = calculateRatio(originalSize, compressedSize);
+                
+                showResult('lzstringResult', compressed, false, {
+                    originalSize: originalSize,
+                    compressedSize: compressedSize,
+                    ratio: ratio
+                });
+                
+                saveHistory('lzstring', 'LZ-String 压缩', originalSize, compressedSize, ratio, input, compressed);
+            } catch (error) {
+                showResult('lzstringResult', '压缩失败：' + error.message, true);
+            }
+        }
+
+        function decompressLZString() {
+            const input = document.getElementById('lzstringInput').value;
+            if (!input) {
+                showResult('lzstringResult', '请输入要解压的数据', true);
+                return;
+            }
+            
+            try {
+                const decompressed = LZString.decompressFromBase64(input);
+                
+                if (!decompressed) {
+                    showResult('lzstringResult', '解压失败：输入可能不是有效的LZ-String数据', true);
+                    return;
+                }
+                
+                const compressedSize = new Blob([input]).size;
+                const originalSize = new Blob([decompressed]).size;
+                const ratio = calculateRatio(originalSize, compressedSize);
+                
+                showResult('lzstringResult', decompressed, false, {
+                    originalSize: originalSize,
+                    compressedSize: compressedSize,
+                    ratio: ratio
+                });
+                
+                saveHistory('lzstring', 'LZ-String 解压', originalSize, compressedSize, ratio, input, decompressed);
+            } catch (error) {
+                showResult('lzstringResult', '解压失败：' + error.message, true);
+            }
+        }
+
+        function compressLZStringUTF16() {
+            const input = document.getElementById('lzstringInput').value;
+            if (!input) {
+                showResult('lzstringResult', '请输入要压缩的文本', true);
+                return;
+            }
+            
+            try {
+                const compressed = LZString.compressToUTF16(input);
+                
+                const originalSize = new Blob([input]).size;
+                const compressedSize = new Blob([compressed]).size;
+                const ratio = calculateRatio(originalSize, compressedSize);
+                
+                showResult('lzstringResult', compressed, false, {
+                    originalSize: originalSize,
+                    compressedSize: compressedSize,
+                    ratio: ratio
+                });
+                
+                saveHistory('lzstring', 'LZ-String UTF16 压缩', originalSize, compressedSize, ratio, input, compressed);
+            } catch (error) {
+                showResult('lzstringResult', '压缩失败：' + error.message, true);
+            }
+        }
+
+        function decompressLZStringUTF16() {
+            const input = document.getElementById('lzstringInput').value;
+            if (!input) {
+                showResult('lzstringResult', '请输入要解压的数据', true);
+                return;
+            }
+            
+            try {
+                const decompressed = LZString.decompressFromUTF16(input);
+                
+                if (!decompressed) {
+                    showResult('lzstringResult', '解压失败：输入可能不是有效的LZ-String UTF16数据', true);
+                    return;
+                }
+                
+                const compressedSize = new Blob([input]).size;
+                const originalSize = new Blob([decompressed]).size;
+                const ratio = calculateRatio(originalSize, compressedSize);
+                
+                showResult('lzstringResult', decompressed, false, {
+                    originalSize: originalSize,
+                    compressedSize: compressedSize,
+                    ratio: ratio
+                });
+                
+                saveHistory('lzstring', 'LZ-String UTF16 解压', originalSize, compressedSize, ratio, input, decompressed);
+            } catch (error) {
+                showResult('lzstringResult', '解压失败：' + error.message, true);
+            }
+        }
+
+        // ==================== Base64 + 压缩 ====================
+        function compressBase64() {
+            const input = document.getElementById('base64Input').value;
+            if (!input) {
+                showResult('base64Result', '请输入要压缩的文本', true);
+                return;
+            }
+            
+            try {
+                const inputBytes = stringToUint8Array(input);
+                const compressed = pako.deflate(inputBytes);
+                const compressedBase64 = uint8ArrayToBase64(compressed);
+                
+                const originalSize = new Blob([input]).size;
+                const compressedSize = new Blob([compressedBase64]).size;
+                const ratio = calculateRatio(originalSize, compressedSize);
+                
+                showResult('base64Result', compressedBase64, false, {
+                    originalSize: originalSize,
+                    compressedSize: compressedSize,
+                    ratio: ratio
+                });
+                
+                saveHistory('base64', 'Deflate+Base64 压缩', originalSize, compressedSize, ratio, input, compressedBase64);
+            } catch (error) {
+                showResult('base64Result', '压缩失败：' + error.message, true);
+            }
+        }
+
+        function decompressBase64() {
+            const input = document.getElementById('base64Input').value;
+            if (!input) {
+                showResult('base64Result', '请输入要解压的数据', true);
+                return;
+            }
+            
+            try {
+                const compressedBytes = base64ToUint8Array(input);
+                const decompressed = pako.inflate(compressedBytes);
+                const decompressedText = uint8ArrayToString(decompressed);
+                
+                const compressedSize = new Blob([input]).size;
+                const originalSize = new Blob([decompressedText]).size;
+                const ratio = calculateRatio(originalSize, compressedSize);
+                
+                showResult('base64Result', decompressedText, false, {
+                    originalSize: originalSize,
+                    compressedSize: compressedSize,
+                    ratio: ratio
+                });
+                
+                saveHistory('base64', 'Base64+Deflate 解压', originalSize, compressedSize, ratio, input, decompressedText);
+            } catch (error) {
+                showResult('base64Result', '解压失败：输入可能不是有效的Base64压缩数据', true);
+            }
+        }
+    </script>
+</body>
+</html>
+

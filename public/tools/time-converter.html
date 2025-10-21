@@ -1,0 +1,2093 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>时间转换工具</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            font-weight: 300;
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .current-time-section {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 30px;
+            color: white;
+        }
+
+        .current-time-section h2 {
+            color: white;
+            margin-bottom: 25px;
+            font-size: 1.5em;
+            text-align: center;
+        }
+
+        .current-time-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .current-time-item {
+            background: rgba(255, 255, 255, 0.15);
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .current-time-item h4 {
+            color: rgba(255, 255, 255, 0.9);
+            margin-bottom: 15px;
+            font-size: 1.2em;
+            font-weight: 600;
+        }
+
+        .current-time-value {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: white;
+            font-family: 'Courier New', monospace;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .current-timestamp {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 0.9em;
+            color: rgba(255, 255, 255, 0.9);
+            font-family: 'Courier New', monospace;
+        }
+
+        .converter {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 20px;
+        }
+
+        .converter h2 {
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 1.8em;
+            text-align: center;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #555;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #4facfe;
+            box-shadow: 0 0 0 3px rgba(79, 172, 254, 0.1);
+        }
+
+
+        .datetime-input {
+            display: flex;
+            gap: 10px;
+            align-items: end;
+            flex-wrap: wrap;
+        }
+
+        .datetime-input input[type="date"],
+        .datetime-input input[type="time"] {
+            flex: 1;
+            min-width: 120px;
+        }
+
+        .datetime-input input[type="number"] {
+            width: 80px;
+            text-align: center;
+        }
+
+        .datetime-input input {
+            flex: 1;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(79, 172, 254, 0.4);
+        }
+
+        .result {
+            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+            border-radius: 15px;
+            padding: 20px;
+            margin-top: 20px;
+            display: none;
+        }
+
+        .result.show {
+            display: block;
+            animation: fadeInUp 0.5s ease;
+        }
+
+        /* 历史记录样式 */
+        .history-section {
+            margin-top: 30px;
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 20px;
+        }
+
+        .history-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .history-header h3 {
+            color: #2c3e50;
+            margin: 0;
+        }
+
+        .history-controls {
+            display: flex;
+            gap: 10px;
+        }
+
+        .clear-history-btn, .toggle-history-btn {
+            background: #e74c3c;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .toggle-history-btn {
+            background: #3498db;
+        }
+
+        .clear-history-btn:hover {
+            background: #c0392b;
+            transform: translateY(-1px);
+        }
+
+        .toggle-history-btn:hover {
+            background: #2980b9;
+            transform: translateY(-1px);
+        }
+
+        .history-list {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .history-item {
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 10px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s ease;
+        }
+
+        .history-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+        }
+
+        .history-content {
+            flex: 1;
+        }
+
+        .history-conversion {
+            font-size: 1.1em;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+
+        .history-details {
+            font-size: 0.9em;
+            color: #7f8c8d;
+        }
+
+        .time-conversion {
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+
+        .timestamp-info {
+            display: flex;
+            align-items: center;
+            margin-bottom: 3px;
+            gap: 8px;
+        }
+
+        .timestamp-label {
+            color: #7f8c8d;
+            font-size: 0.85em;
+        }
+
+        .timestamp-value {
+            color: #95a5a6;
+            font-size: 0.8em;
+            font-family: 'Courier New', monospace;
+            background: #f8f9fa;
+            padding: 2px 6px;
+            border-radius: 4px;
+            border: 1px solid #e9ecef;
+        }
+
+
+        .history-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .history-action-btn {
+            background: #95a5a6;
+            color: white;
+            border: none;
+            padding: 6px 10px;
+            border-radius: 15px;
+            font-size: 0.8em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .history-action-btn:hover {
+            background: #7f8c8d;
+            transform: scale(1.05);
+        }
+
+        .history-action-btn.delete {
+            background: #e74c3c;
+        }
+
+        .history-action-btn.delete:hover {
+            background: #c0392b;
+        }
+
+        .history-empty {
+            text-align: center;
+            color: #7f8c8d;
+            padding: 20px;
+            font-style: italic;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .result h3 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+        }
+
+        .result-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .result-item {
+            background: rgba(255, 255, 255, 0.9);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .result-item h4 {
+            color: #666;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+        }
+
+        .result-value {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #333;
+            font-family: 'Courier New', monospace;
+            word-break: break-all;
+        }
+
+        .timestamp {
+            background: #f0f0f0;
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 5px;
+        }
+
+        .timezone-info {
+            margin-top: 10px;
+        }
+
+        .dst-status {
+            background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);
+            color: #333;
+            padding: 8px 12px;
+            border-radius: 6px;
+            margin-top: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .dst-status.dst-active {
+            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+            color: #2c3e50;
+        }
+
+        .dst-status.dst-inactive {
+            background: linear-gradient(135deg, #d3d3d3 0%, #f0f0f0 100%);
+            color: #666;
+        }
+
+        .form-group small {
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        /* 确保源时区和目标时区样式完全对齐 */
+        .form-row .form-group {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        .form-row .form-group label {
+            font-weight: 600;
+            color: #555;
+            margin-bottom: 8px;
+            font-size: 16px;
+        }
+
+        .form-row .form-group select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            background-color: white;
+        }
+
+        .form-row .form-group select:focus {
+            outline: none;
+            border-color: #4facfe;
+            box-shadow: 0 0 0 3px rgba(79, 172, 254, 0.1);
+        }
+
+        /* 确保两个时区选择器高度一致 */
+        .form-row .form-group {
+            min-height: 80px;
+        }
+
+        .form-row .form-group select {
+            min-height: 48px;
+            box-sizing: border-box;
+        }
+
+        /* 时区选择器选项样式 */
+        .form-row .form-group select option {
+            padding: 8px 12px;
+            font-size: 16px;
+        }
+
+        /* 平板和小屏幕 */
+        @media (max-width: 992px) {
+            .content {
+                padding: 30px;
+            }
+            
+            .converter h2 {
+                font-size: 1.5em;
+            }
+        }
+
+        /* 移动端优化 */
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+
+            .container {
+                border-radius: 15px;
+            }
+
+            .header {
+                padding: 20px 15px;
+            }
+
+            .header h1 {
+                font-size: 1.8em;
+                margin-bottom: 8px;
+            }
+
+            .header p {
+                font-size: 0.95em;
+            }
+
+            .content {
+                padding: 20px 15px;
+            }
+
+            .current-time-section {
+                padding: 15px;
+                margin-bottom: 20px;
+            }
+
+            .current-time-section h2 {
+                font-size: 1.2em;
+                margin-bottom: 15px;
+            }
+
+            .current-time-grid {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+
+            .current-time-item {
+                padding: 15px;
+            }
+
+            .current-time-item h4 {
+                font-size: 1em;
+                margin-bottom: 10px;
+            }
+            
+            .current-time-value {
+                font-size: 1.3em;
+                margin-bottom: 8px;
+            }
+
+            .current-timestamp {
+                font-size: 0.85em;
+                padding: 6px 10px;
+            }
+
+            .converter {
+                padding: 15px;
+            }
+
+            .converter h2 {
+                font-size: 1.3em;
+                margin-bottom: 20px;
+            }
+
+            .form-group {
+                margin-bottom: 20px;
+            }
+
+            .form-group label {
+                font-size: 15px;
+                margin-bottom: 6px;
+            }
+            
+            .form-row {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+
+            .form-control {
+                padding: 10px 12px;
+                font-size: 15px;
+            }
+            
+            .datetime-input {
+                flex-direction: column;
+                gap: 8px;
+                align-items: stretch;
+            }
+
+            .datetime-input input[type="date"],
+            .datetime-input input[type="time"] {
+                min-width: 100%;
+            }
+
+            .datetime-input input[type="number"] {
+                width: 100%;
+            }
+
+            .btn {
+                padding: 10px 20px;
+                font-size: 15px;
+                width: 100%;
+            }
+
+            .result {
+                padding: 15px;
+                margin-top: 15px;
+            }
+
+            .result h3 {
+                font-size: 1.2em;
+                margin-bottom: 15px;
+            }
+            
+            .result-grid {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+
+            .result-item {
+                padding: 15px;
+            }
+
+            .result-item h4 {
+                font-size: 1em;
+            }
+
+            .result-value {
+                font-size: 1.1em;
+            }
+
+            .history-section {
+                margin-top: 20px;
+                padding: 15px;
+            }
+
+            .history-header {
+                flex-direction: column;
+                gap: 10px;
+                align-items: stretch;
+            }
+
+            .history-header h3 {
+                font-size: 1.2em;
+                text-align: center;
+            }
+
+            .history-controls {
+                justify-content: center;
+                flex-wrap: wrap;
+            }
+
+            .clear-history-btn, .toggle-history-btn {
+                flex: 1;
+                min-width: 120px;
+                padding: 10px 15px;
+                font-size: 0.95em;
+            }
+
+            .history-list {
+                max-height: 300px;
+            }
+
+            .history-item {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 10px;
+                padding: 12px;
+            }
+
+            .history-conversion {
+                font-size: 1em;
+            }
+
+            .history-details {
+                font-size: 0.85em;
+            }
+
+            .history-actions {
+                justify-content: center;
+            }
+
+            .history-action-btn {
+                padding: 8px 15px;
+                font-size: 0.85em;
+            }
+
+            .timestamp-info {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 2px;
+            }
+
+            .timestamp-value {
+                font-size: 0.75em;
+            }
+
+            .dst-status {
+                font-size: 13px;
+                padding: 6px 10px;
+            }
+        }
+
+        /* 小屏手机优化 */
+        @media (max-width: 480px) {
+            .header h1 {
+                font-size: 1.5em;
+            }
+
+            .header p {
+                font-size: 0.9em;
+            }
+
+            .current-time-value {
+                font-size: 1.2em;
+            }
+
+            .current-timestamp {
+                font-size: 0.8em;
+            }
+
+            .converter h2 {
+                font-size: 1.2em;
+            }
+
+            .result h3 {
+                font-size: 1.1em;
+            }
+
+            .result-value {
+                font-size: 1em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🕐 时间转换工具</h1>
+            <p>时区转换工具，支持时区转换和时间戳转换</p>
+        </div>
+
+        <div class="content">
+            <!-- 当前时间展示 -->
+            <div class="current-time-section">
+                <div class="current-time-grid">
+                    <div class="current-time-item">
+                        <h4>本地时间</h4>
+                        <div class="current-time-value" id="localTime">--</div>
+                        <div class="current-timestamp" id="localTimestamp">--</div>
+                    </div>
+                    <div class="current-time-item">
+                        <h4>UTC时间</h4>
+                        <div class="current-time-value" id="utcTime">--</div>
+                        <div class="current-timestamp" id="utcTimestamp">--</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 时间转换器 -->
+            <div class="converter">
+                <h2>🔄 时区转换</h2>
+                <form id="timeConverterForm">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="sourceTimezone">源时区</label>
+                            <select id="sourceTimezone" class="form-control">
+                                <optgroup label="🌎 UTC">
+                                    <option value="UTC">UTC (UTC+0)</option>
+                                </optgroup>
+                                
+                                <!-- 美洲时区 -->
+                                <optgroup label="🌎 美洲">
+                                    <option value="America/New_York">纽约 (UTC-5/-4)</option>
+                                    <option value="America/Chicago">芝加哥 (UTC-6/-5)</option>
+                                    <option value="America/Denver">丹佛 (UTC-7/-6)</option>
+                                    <option value="America/Los_Angeles">洛杉矶 (UTC-8/-7)</option>
+                                    <option value="America/Toronto">多伦多 (UTC-5/-4)</option>
+                                    <option value="America/Vancouver">温哥华 (UTC-8/-7)</option>
+                                    <option value="America/Mexico_City">墨西哥城 (UTC-6/-5)</option>
+                                    <option value="America/Sao_Paulo">圣保罗 (UTC-3)</option>
+                                    <option value="America/Argentina/Buenos_Aires">布宜诺斯艾利斯 (UTC-3)</option>
+                                    <option value="America/Lima">利马 (UTC-5)</option>
+                                    <option value="America/Bogota">波哥大 (UTC-5)</option>
+                                    <option value="America/Caracas">加拉加斯 (UTC-4)</option>
+                                    <option value="America/Santiago">圣地亚哥 (UTC-3/-4)</option>
+                                </optgroup>
+                                
+                                <!-- 欧洲时区 -->
+                                <optgroup label="🌍 欧洲">
+                                    <option value="Europe/London">伦敦 (UTC+0/+1)</option>
+                                    <option value="Europe/Paris">巴黎 (UTC+1/+2)</option>
+                                    <option value="Europe/Berlin">柏林 (UTC+1/+2)</option>
+                                    <option value="Europe/Rome">罗马 (UTC+1/+2)</option>
+                                    <option value="Europe/Madrid">马德里 (UTC+1/+2)</option>
+                                    <option value="Europe/Amsterdam">阿姆斯特丹 (UTC+1/+2)</option>
+                                    <option value="Europe/Zurich">苏黎世 (UTC+1/+2)</option>
+                                    <option value="Europe/Vienna">维也纳 (UTC+1/+2)</option>
+                                    <option value="Europe/Stockholm">斯德哥尔摩 (UTC+1/+2)</option>
+                                    <option value="Europe/Oslo">奥斯陆 (UTC+1/+2)</option>
+                                    <option value="Europe/Copenhagen">哥本哈根 (UTC+1/+2)</option>
+                                    <option value="Europe/Helsinki">赫尔辛基 (UTC+2/+3)</option>
+                                    <option value="Europe/Warsaw">华沙 (UTC+1/+2)</option>
+                                    <option value="Europe/Prague">布拉格 (UTC+1/+2)</option>
+                                    <option value="Europe/Budapest">布达佩斯 (UTC+1/+2)</option>
+                                    <option value="Europe/Athens">雅典 (UTC+2/+3)</option>
+                                    <option value="Europe/Istanbul">伊斯坦布尔 (UTC+3)</option>
+                                    <option value="Europe/Moscow">莫斯科 (UTC+3)</option>
+                                    <option value="Europe/Kiev">基辅 (UTC+2/+3)</option>
+                                </optgroup>
+                                
+                                <!-- 亚洲时区 -->
+                                <optgroup label="🌏 亚洲">
+                                    <option value="Asia/Dubai">迪拜 (UTC+4)</option>
+                                    <option value="Asia/Tehran">德黑兰 (UTC+3:30/+4:30)</option>
+                                    <option value="Asia/Karachi">卡拉奇 (UTC+5)</option>
+                                    <option value="Asia/Kolkata">新德里 (UTC+5:30)</option>
+                                    <option value="Asia/Dhaka">达卡 (UTC+6)</option>
+                                    <option value="Asia/Bangkok">曼谷 (UTC+7)</option>
+                                    <option value="Asia/Jakarta">雅加达 (UTC+7)</option>
+                                    <option value="Asia/Singapore">新加坡 (UTC+8)</option>
+                                    <option value="Asia/Kuala_Lumpur">吉隆坡 (UTC+8)</option>
+                                    <option value="Asia/Manila">马尼拉 (UTC+8)</option>
+                                    <option value="Asia/Shanghai">上海 (UTC+8)</option>
+                                    <option value="Asia/Hong_Kong">香港 (UTC+8)</option>
+                                    <option value="Asia/Taipei">台北 (UTC+8)</option>
+                                    <option value="Asia/Seoul">首尔 (UTC+9)</option>
+                                    <option value="Asia/Tokyo">东京 (UTC+9)</option>
+                                    <option value="Asia/Vladivostok">符拉迪沃斯托克 (UTC+10)</option>
+                                </optgroup>
+                                
+                                <!-- 大洋洲时区 -->
+                                <optgroup label="🌏 大洋洲">
+                                    <option value="Australia/Perth">珀斯 (UTC+8)</option>
+                                    <option value="Australia/Adelaide">阿德莱德 (UTC+9:30/+10:30)</option>
+                                    <option value="Australia/Darwin">达尔文 (UTC+9:30)</option>
+                                    <option value="Australia/Brisbane">布里斯班 (UTC+10)</option>
+                                    <option value="Australia/Sydney">悉尼 (UTC+10/+11)</option>
+                                    <option value="Australia/Melbourne">墨尔本 (UTC+10/+11)</option>
+                                    <option value="Pacific/Auckland">奥克兰 (UTC+12/+13)</option>
+                                    <option value="Pacific/Fiji">斐济 (UTC+12)</option>
+                                    <option value="Pacific/Honolulu">火奴鲁鲁 (UTC-10)</option>
+                                </optgroup>
+                                
+                                <!-- 非洲时区 -->
+                                <optgroup label="🌍 非洲">
+                                    <option value="Africa/Cairo">开罗 (UTC+2)</option>
+                                    <option value="Africa/Johannesburg">约翰内斯堡 (UTC+2)</option>
+                                    <option value="Africa/Lagos">拉各斯 (UTC+1)</option>
+                                    <option value="Africa/Casablanca">卡萨布兰卡 (UTC+0/+1)</option>
+                                    <option value="Africa/Nairobi">内罗毕 (UTC+3)</option>
+                                    <option value="Africa/Algiers">阿尔及尔 (UTC+1)</option>
+                                    <option value="Africa/Tunis">突尼斯 (UTC+1)</option>
+                                </optgroup>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="targetTimezone">目标时区</label>
+                            <select id="targetTimezone" class="form-control">
+                                <optgroup label="🌎 UTC">
+                                    <option value="UTC">UTC (UTC+0)</option>
+                                </optgroup>
+                                
+                                <!-- 美洲时区 -->
+                                <optgroup label="🌎 美洲">
+                                    <option value="America/New_York">纽约 (UTC-5/-4)</option>
+                                    <option value="America/Chicago">芝加哥 (UTC-6/-5)</option>
+                                    <option value="America/Denver">丹佛 (UTC-7/-6)</option>
+                                    <option value="America/Los_Angeles">洛杉矶 (UTC-8/-7)</option>
+                                    <option value="America/Toronto">多伦多 (UTC-5/-4)</option>
+                                    <option value="America/Vancouver">温哥华 (UTC-8/-7)</option>
+                                    <option value="America/Mexico_City">墨西哥城 (UTC-6/-5)</option>
+                                    <option value="America/Sao_Paulo">圣保罗 (UTC-3)</option>
+                                    <option value="America/Argentina/Buenos_Aires">布宜诺斯艾利斯 (UTC-3)</option>
+                                    <option value="America/Lima">利马 (UTC-5)</option>
+                                    <option value="America/Bogota">波哥大 (UTC-5)</option>
+                                    <option value="America/Caracas">加拉加斯 (UTC-4)</option>
+                                    <option value="America/Santiago">圣地亚哥 (UTC-3/-4)</option>
+                                </optgroup>
+                                
+                                <!-- 欧洲时区 -->
+                                <optgroup label="🌍 欧洲">
+                                    <option value="Europe/London">伦敦 (UTC+0/+1)</option>
+                                    <option value="Europe/Paris">巴黎 (UTC+1/+2)</option>
+                                    <option value="Europe/Berlin">柏林 (UTC+1/+2)</option>
+                                    <option value="Europe/Rome">罗马 (UTC+1/+2)</option>
+                                    <option value="Europe/Madrid">马德里 (UTC+1/+2)</option>
+                                    <option value="Europe/Amsterdam">阿姆斯特丹 (UTC+1/+2)</option>
+                                    <option value="Europe/Zurich">苏黎世 (UTC+1/+2)</option>
+                                    <option value="Europe/Vienna">维也纳 (UTC+1/+2)</option>
+                                    <option value="Europe/Stockholm">斯德哥尔摩 (UTC+1/+2)</option>
+                                    <option value="Europe/Oslo">奥斯陆 (UTC+1/+2)</option>
+                                    <option value="Europe/Copenhagen">哥本哈根 (UTC+1/+2)</option>
+                                    <option value="Europe/Helsinki">赫尔辛基 (UTC+2/+3)</option>
+                                    <option value="Europe/Warsaw">华沙 (UTC+1/+2)</option>
+                                    <option value="Europe/Prague">布拉格 (UTC+1/+2)</option>
+                                    <option value="Europe/Budapest">布达佩斯 (UTC+1/+2)</option>
+                                    <option value="Europe/Athens">雅典 (UTC+2/+3)</option>
+                                    <option value="Europe/Istanbul">伊斯坦布尔 (UTC+3)</option>
+                                    <option value="Europe/Moscow">莫斯科 (UTC+3)</option>
+                                    <option value="Europe/Kiev">基辅 (UTC+2/+3)</option>
+                                </optgroup>
+                                
+                                <!-- 亚洲时区 -->
+                                <optgroup label="🌏 亚洲">
+                                    <option value="Asia/Dubai">迪拜 (UTC+4)</option>
+                                    <option value="Asia/Tehran">德黑兰 (UTC+3:30/+4:30)</option>
+                                    <option value="Asia/Karachi">卡拉奇 (UTC+5)</option>
+                                    <option value="Asia/Kolkata">新德里 (UTC+5:30)</option>
+                                    <option value="Asia/Dhaka">达卡 (UTC+6)</option>
+                                    <option value="Asia/Bangkok">曼谷 (UTC+7)</option>
+                                    <option value="Asia/Jakarta">雅加达 (UTC+7)</option>
+                                    <option value="Asia/Singapore">新加坡 (UTC+8)</option>
+                                    <option value="Asia/Kuala_Lumpur">吉隆坡 (UTC+8)</option>
+                                    <option value="Asia/Manila">马尼拉 (UTC+8)</option>
+                                    <option value="Asia/Shanghai">上海 (UTC+8)</option>
+                                    <option value="Asia/Hong_Kong">香港 (UTC+8)</option>
+                                    <option value="Asia/Taipei">台北 (UTC+8)</option>
+                                    <option value="Asia/Seoul">首尔 (UTC+9)</option>
+                                    <option value="Asia/Tokyo">东京 (UTC+9)</option>
+                                    <option value="Asia/Vladivostok">符拉迪沃斯托克 (UTC+10)</option>
+                                </optgroup>
+                                
+                                <!-- 大洋洲时区 -->
+                                <optgroup label="🌏 大洋洲">
+                                    <option value="Australia/Perth">珀斯 (UTC+8)</option>
+                                    <option value="Australia/Adelaide">阿德莱德 (UTC+9:30/+10:30)</option>
+                                    <option value="Australia/Darwin">达尔文 (UTC+9:30)</option>
+                                    <option value="Australia/Brisbane">布里斯班 (UTC+10)</option>
+                                    <option value="Australia/Sydney">悉尼 (UTC+10/+11)</option>
+                                    <option value="Australia/Melbourne">墨尔本 (UTC+10/+11)</option>
+                                    <option value="Pacific/Auckland">奥克兰 (UTC+12/+13)</option>
+                                    <option value="Pacific/Fiji">斐济 (UTC+12)</option>
+                                    <option value="Pacific/Honolulu">火奴鲁鲁 (UTC-10)</option>
+                                </optgroup>
+                                
+                                <!-- 非洲时区 -->
+                                <optgroup label="🌍 非洲">
+                                    <option value="Africa/Cairo">开罗 (UTC+2)</option>
+                                    <option value="Africa/Johannesburg">约翰内斯堡 (UTC+2)</option>
+                                    <option value="Africa/Lagos">拉各斯 (UTC+1)</option>
+                                    <option value="Africa/Casablanca">卡萨布兰卡 (UTC+0/+1)</option>
+                                    <option value="Africa/Nairobi">内罗毕 (UTC+3)</option>
+                                    <option value="Africa/Algiers">阿尔及尔 (UTC+1)</option>
+                                    <option value="Africa/Tunis">突尼斯 (UTC+1)</option>
+                                </optgroup>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="sourceDateTime">源时间</label>
+                        <div class="datetime-input">
+                            <input type="date" id="sourceDate" class="form-control" style="flex: 1;">
+                            <input type="time" id="sourceTime" class="form-control" step="1" style="flex: 1;">
+                            <input type="number" id="sourceMilliseconds" class="form-control" placeholder="000" min="0" max="999" style="width: 80px;">
+                            <button type="button" id="useCurrentTime" class="btn">当前时间</button>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="sourceTimestamp">或输入时间戳 (毫秒)</label>
+                        <div class="datetime-input">
+                            <input type="number" id="sourceTimestamp" class="form-control" placeholder="1705312225123">
+                            <button type="button" id="useCurrentTimestamp" class="btn">当前时间</button>
+                        </div>
+                    </div>
+
+                    <div style="text-align: center;">
+                        <button type="submit" class="btn" style="padding: 15px 40px; font-size: 18px;">
+                            🔄 转换时间
+                        </button>
+                    </div>
+                </form>
+
+                <!-- 转换结果 -->
+                <div class="result" id="conversionResult">
+                    <h3>📊 转换结果</h3>
+                    <div class="result-grid">
+                        <div class="result-item">
+                            <h4>源时区时间</h4>
+                            <div class="result-value" id="sourceTimeResult">--</div>
+                            <div class="timezone-info">
+                                <div class="timestamp">时间戳: <span id="sourceTimestampResult">--</span></div>
+                                <div class="dst-status" id="sourceDSTStatus">--</div>
+                            </div>
+                        </div>
+                        <div class="result-item">
+                            <h4>目标时区时间</h4>
+                            <div class="result-value" id="targetTimeResult">--</div>
+                            <div class="timezone-info">
+                                <div class="timestamp">时间戳: <span id="targetTimestampResult">--</span></div>
+                                <div class="dst-status" id="targetDSTStatus">--</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 历史记录区域 -->
+                <div class="history-section">
+                    <div class="history-header">
+                        <h3>📋 转换历史记录</h3>
+                        <div class="history-controls">
+                            <button class="clear-history-btn" onclick="clearAllHistory()" title="清空所有记录">
+                                🗑️ 清空
+                            </button>
+                            <button class="toggle-history-btn" onclick="toggleHistory()" title="显示/隐藏历史记录">
+                                📖 隐藏
+                            </button>
+                        </div>
+                    </div>
+                    <div class="history-list" id="historyList">
+                        <div class="history-empty" id="historyEmpty">
+                            <p>暂无转换记录</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 格式化时间函数
+        function formatTime(date, timezone = null) {
+            const options = {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit',
+                hour12: false
+            };
+
+            if (timezone) {
+                options.timeZone = timezone;
+            }
+
+            const formatted = date.toLocaleString('zh-CN', options);
+            const milliseconds = date.getMilliseconds().toString().padStart(3, '0');
+            
+            return formatted.replace(/\//g, '-') + '.' + milliseconds;
+        }
+
+        // 创建指定时区的日期对象
+        function createDateInTimezone(dateString, timezone) {
+            if (timezone === 'UTC') {
+                // 对于UTC，直接解析
+                return new Date(dateString + 'Z');
+            } else {
+                // 对于其他时区，需要特殊处理
+                // 首先创建一个本地日期
+                const localDate = new Date(dateString);
+                
+                // 获取该时区相对于UTC的偏移量
+                const utcTime = localDate.getTime() + (localDate.getTimezoneOffset() * 60000);
+                
+                // 创建目标时区的日期
+                const targetDate = new Date(utcTime);
+                return targetDate;
+            }
+        }
+
+        // 获取时间戳
+        function getTimestamp(date) {
+            return date.getTime();
+        }
+
+
+        // 获取本地时区
+        function getLocalTimezone() {
+            const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+            return timezone;
+        }
+
+        // 获取本地时区的UTC偏移
+        function getLocalTimezoneOffset() {
+            const now = new Date();
+            const offset = -now.getTimezoneOffset(); // 获取分钟偏移
+            return offset;
+        }
+
+        // 根据UTC偏移找到最接近的时区
+        function findClosestTimezone(offset) {
+            const timezoneOffsets = {
+                'UTC': 0,
+                // 美洲时区
+                'America/New_York': -300, // UTC-5
+                'America/Chicago': -360, // UTC-6
+                'America/Denver': -420, // UTC-7
+                'America/Los_Angeles': -480, // UTC-8
+                'America/Toronto': -300, // UTC-5
+                'America/Vancouver': -480, // UTC-8
+                'America/Mexico_City': -360, // UTC-6
+                'America/Sao_Paulo': -180, // UTC-3
+                'America/Argentina/Buenos_Aires': -180, // UTC-3
+                'America/Lima': -300, // UTC-5
+                'America/Bogota': -300, // UTC-5
+                'America/Caracas': -240, // UTC-4
+                'America/Santiago': -180, // UTC-3
+                // 欧洲时区
+                'Europe/London': 0, // UTC+0
+                'Europe/Paris': 60, // UTC+1
+                'Europe/Berlin': 60, // UTC+1
+                'Europe/Rome': 60, // UTC+1
+                'Europe/Madrid': 60, // UTC+1
+                'Europe/Amsterdam': 60, // UTC+1
+                'Europe/Zurich': 60, // UTC+1
+                'Europe/Vienna': 60, // UTC+1
+                'Europe/Stockholm': 60, // UTC+1
+                'Europe/Oslo': 60, // UTC+1
+                'Europe/Copenhagen': 60, // UTC+1
+                'Europe/Helsinki': 120, // UTC+2
+                'Europe/Warsaw': 60, // UTC+1
+                'Europe/Prague': 60, // UTC+1
+                'Europe/Budapest': 60, // UTC+1
+                'Europe/Athens': 120, // UTC+2
+                'Europe/Istanbul': 180, // UTC+3
+                'Europe/Moscow': 180, // UTC+3
+                'Europe/Kiev': 120, // UTC+2
+                // 亚洲时区
+                'Asia/Dubai': 240, // UTC+4
+                'Asia/Tehran': 210, // UTC+3:30
+                'Asia/Karachi': 300, // UTC+5
+                'Asia/Kolkata': 330, // UTC+5:30
+                'Asia/Dhaka': 360, // UTC+6
+                'Asia/Bangkok': 420, // UTC+7
+                'Asia/Jakarta': 420, // UTC+7
+                'Asia/Singapore': 480, // UTC+8
+                'Asia/Kuala_Lumpur': 480, // UTC+8
+                'Asia/Manila': 480, // UTC+8
+                'Asia/Shanghai': 480, // UTC+8
+                'Asia/Hong_Kong': 480, // UTC+8
+                'Asia/Taipei': 480, // UTC+8
+                'Asia/Seoul': 540, // UTC+9
+                'Asia/Tokyo': 540, // UTC+9
+                'Asia/Vladivostok': 600, // UTC+10
+                // 大洋洲时区
+                'Australia/Perth': 480, // UTC+8
+                'Australia/Adelaide': 570, // UTC+9:30
+                'Australia/Darwin': 570, // UTC+9:30
+                'Australia/Brisbane': 600, // UTC+10
+                'Australia/Sydney': 600, // UTC+10
+                'Australia/Melbourne': 600, // UTC+10
+                'Pacific/Auckland': 720, // UTC+12
+                'Pacific/Fiji': 720, // UTC+12
+                'Pacific/Honolulu': -600, // UTC-10
+                // 非洲时区
+                'Africa/Cairo': 120, // UTC+2
+                'Africa/Johannesburg': 120, // UTC+2
+                'Africa/Lagos': 60, // UTC+1
+                'Africa/Casablanca': 0, // UTC+0
+                'Africa/Nairobi': 180, // UTC+3
+                'Africa/Algiers': 60, // UTC+1
+                'Africa/Tunis': 60 // UTC+1
+            };
+
+            let closest = 'UTC';
+            let minDiff = Math.abs(offset);
+
+            for (const [timezone, timezoneOffset] of Object.entries(timezoneOffsets)) {
+                const diff = Math.abs(offset - timezoneOffset);
+                if (diff < minDiff) {
+                    minDiff = diff;
+                    closest = timezone;
+                }
+            }
+
+            return closest;
+        }
+
+        // 更新当前时间显示
+        function updateCurrentTime() {
+            const now = new Date();
+            const nowTimestamp = now.getTime();
+            
+            // 格式化本地时间
+            const localTimeStr = formatTime(now);
+            document.getElementById('localTime').textContent = localTimeStr;
+            document.getElementById('localTimestamp').textContent = `时间戳: ${nowTimestamp}`;
+            
+            // 格式化UTC时间
+            const utcTimeStr = formatTime(now, 'UTC');
+            document.getElementById('utcTime').textContent = utcTimeStr;
+            document.getElementById('utcTimestamp').textContent = `时间戳: ${nowTimestamp}`;
+        }
+
+        // 初始化页面
+        function init() {
+            // 更新当前时间显示
+            updateCurrentTime();
+            
+            // 每秒更新一次当前时间
+            setInterval(updateCurrentTime, 1000);
+            
+            // 自动设置源时区为本地时区
+            const localTimezone = getLocalTimezone();
+            const localOffset = getLocalTimezoneOffset();
+            const sourceSelect = document.getElementById('sourceTimezone');
+            
+            // 首先尝试精确匹配
+            let found = false;
+            for (let option of sourceSelect.options) {
+                if (option.value === localTimezone) {
+                    option.selected = true;
+                    found = true;
+                    break;
+                }
+            }
+
+            // 如果没有精确匹配，使用最接近的时区
+            if (!found) {
+                const closestTimezone = findClosestTimezone(localOffset);
+                for (let option of sourceSelect.options) {
+                    if (option.value === closestTimezone) {
+                        option.selected = true;
+                        break;
+                    }
+                }
+            }
+
+            // 设置当前时间按钮
+            document.getElementById('useCurrentTime').addEventListener('click', function() {
+                setCurrentTime();
+            });
+
+            // 设置当前时间的函数
+            function setCurrentTime() {
+                const sourceTimezone = document.getElementById('sourceTimezone').value;
+                const now = new Date();
+                const nowTimestamp = now.getTime();
+                
+                // 获取源时区相对于UTC的偏移量（考虑夏令时）
+                const sourceOffset = getTimezoneOffset(sourceTimezone, nowTimestamp);
+                
+                // 计算源时区的当前时间戳
+                const sourceTimestamp = nowTimestamp + (sourceOffset * 60000);
+                
+                // 转换为日期和时间格式
+                const dateTimeInfo = timestampToDateTimeComponents(sourceTimestamp);
+                
+                document.getElementById('sourceDate').value = dateTimeInfo.date;
+                document.getElementById('sourceTime').value = dateTimeInfo.time;
+                document.getElementById('sourceMilliseconds').value = dateTimeInfo.milliseconds;
+                
+                // 同步到时间戳输入框
+                document.getElementById('sourceTimestamp').value = sourceTimestamp;
+            }
+
+            // 初始化时自动设置当前时间
+            setCurrentTime();
+
+            // 设置当前时间戳按钮
+            document.getElementById('useCurrentTimestamp').addEventListener('click', function() {
+                const now = new Date();
+                const nowTimestamp = now.getTime();
+                document.getElementById('sourceTimestamp').value = nowTimestamp;
+            });
+
+            // 时间戳输入框变化时，自动转换为时间选择器
+            document.getElementById('sourceTimestamp').addEventListener('input', function(e) {
+                const timestamp = parseInt(e.target.value);
+                if (!isNaN(timestamp) && timestamp > 0) {
+                    const dateTimeInfo = timestampToDateTimeComponents(timestamp);
+                    document.getElementById('sourceDate').value = dateTimeInfo.date;
+                    document.getElementById('sourceTime').value = dateTimeInfo.time;
+                    document.getElementById('sourceMilliseconds').value = dateTimeInfo.milliseconds;
+                }
+            });
+
+            // 时间选择器变化时，自动转换为时间戳
+            function updateTimestampFromComponents() {
+                const date = document.getElementById('sourceDate').value;
+                const time = document.getElementById('sourceTime').value;
+                const milliseconds = document.getElementById('sourceMilliseconds').value;
+                
+                if (date && time) {
+                    try {
+                        const timestamp = dateTimeComponentsToTimestamp(date, time, milliseconds);
+                        if (timestamp !== null) {
+                            document.getElementById('sourceTimestamp').value = timestamp;
+                        }
+                    } catch (error) {
+                        // 忽略转换错误
+                    }
+                }
+            }
+
+            // 为所有时间选择器添加事件监听
+            document.getElementById('sourceDate').addEventListener('input', updateTimestampFromComponents);
+            document.getElementById('sourceTime').addEventListener('input', updateTimestampFromComponents);
+            document.getElementById('sourceMilliseconds').addEventListener('input', updateTimestampFromComponents);
+
+            // 时区选择器变化时，自动更新当前时间
+            document.getElementById('sourceTimezone').addEventListener('change', function() {
+                // 如果当前没有手动输入时间，则自动更新为当前时间
+                const sourceDate = document.getElementById('sourceDate').value;
+                const sourceTime = document.getElementById('sourceTime').value;
+                const sourceTimestamp = document.getElementById('sourceTimestamp').value;
+                
+                // 如果所有时间输入框都为空，则自动设置当前时间
+                if (!sourceDate && !sourceTime && !sourceTimestamp) {
+                    setCurrentTime();
+                }
+            });
+
+            // 表单提交处理
+            document.getElementById('timeConverterForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                convertTime();
+            });
+
+        }
+
+
+        // 获取时区偏移量（分钟）- 考虑夏令时
+        function getTimezoneOffset(timezone, timestamp) {
+            if (timezone === 'UTC') return 0;
+            
+            // 从时间戳计算年份、月份、日期
+            const dateInfo = getDateFromTimestamp(timestamp);
+            const year = dateInfo.year;
+            const month = dateInfo.month;
+            const day = dateInfo.day;
+            
+            // 获取夏令时规则
+            const dstRules = getDSTRules(timezone, year);
+            
+            // 检查是否在夏令时期间
+            const isDST = isInDSTPeriod(year, month, day, dstRules);
+            
+            // 基础偏移量（冬令时）
+            const baseOffsets = {
+                // 美洲时区
+                'America/New_York': -300, // UTC-5 (EST)
+                'America/Chicago': -360, // UTC-6 (CST)
+                'America/Denver': -420, // UTC-7 (MST)
+                'America/Los_Angeles': -480, // UTC-8 (PST)
+                'America/Toronto': -300, // UTC-5 (EST)
+                'America/Vancouver': -480, // UTC-8 (PST)
+                'America/Mexico_City': -360, // UTC-6 (CST)
+                'America/Sao_Paulo': -180, // UTC-3 (BRT)
+                'America/Argentina/Buenos_Aires': -180, // UTC-3 (ART)
+                'America/Lima': -300, // UTC-5 (PET)
+                'America/Bogota': -300, // UTC-5 (COT)
+                'America/Caracas': -240, // UTC-4 (VET)
+                'America/Santiago': -180, // UTC-3 (CLT)
+                // 欧洲时区
+                'Europe/London': 0, // UTC+0 (GMT)
+                'Europe/Paris': 60, // UTC+1 (CET)
+                'Europe/Berlin': 60, // UTC+1 (CET)
+                'Europe/Rome': 60, // UTC+1 (CET)
+                'Europe/Madrid': 60, // UTC+1 (CET)
+                'Europe/Amsterdam': 60, // UTC+1 (CET)
+                'Europe/Zurich': 60, // UTC+1 (CET)
+                'Europe/Vienna': 60, // UTC+1 (CET)
+                'Europe/Stockholm': 60, // UTC+1 (CET)
+                'Europe/Oslo': 60, // UTC+1 (CET)
+                'Europe/Copenhagen': 60, // UTC+1 (CET)
+                'Europe/Helsinki': 120, // UTC+2 (EET)
+                'Europe/Warsaw': 60, // UTC+1 (CET)
+                'Europe/Prague': 60, // UTC+1 (CET)
+                'Europe/Budapest': 60, // UTC+1 (CET)
+                'Europe/Athens': 120, // UTC+2 (EET)
+                'Europe/Istanbul': 180, // UTC+3 (TRT)
+                'Europe/Moscow': 180, // UTC+3 (MSK)
+                'Europe/Kiev': 120, // UTC+2 (EET)
+                // 亚洲时区
+                'Asia/Dubai': 240, // UTC+4 (GST)
+                'Asia/Tehran': 210, // UTC+3:30 (IRST)
+                'Asia/Karachi': 300, // UTC+5 (PKT)
+                'Asia/Kolkata': 330, // UTC+5:30 (IST)
+                'Asia/Dhaka': 360, // UTC+6 (BST)
+                'Asia/Bangkok': 420, // UTC+7 (ICT)
+                'Asia/Jakarta': 420, // UTC+7 (WIB)
+                'Asia/Singapore': 480, // UTC+8 (SGT)
+                'Asia/Kuala_Lumpur': 480, // UTC+8 (MYT)
+                'Asia/Manila': 480, // UTC+8 (PHT)
+                'Asia/Shanghai': 480, // UTC+8 (CST)
+                'Asia/Hong_Kong': 480, // UTC+8 (HKT)
+                'Asia/Taipei': 480, // UTC+8 (CST)
+                'Asia/Seoul': 540, // UTC+9 (KST)
+                'Asia/Tokyo': 540, // UTC+9 (JST)
+                'Asia/Vladivostok': 600, // UTC+10 (VLAT)
+                // 大洋洲时区
+                'Australia/Perth': 480, // UTC+8 (AWST)
+                'Australia/Adelaide': 570, // UTC+9:30 (ACST)
+                'Australia/Darwin': 570, // UTC+9:30 (ACST)
+                'Australia/Brisbane': 600, // UTC+10 (AEST)
+                'Australia/Sydney': 600, // UTC+10 (AEST)
+                'Australia/Melbourne': 600, // UTC+10 (AEST)
+                'Pacific/Auckland': 720, // UTC+12 (NZST)
+                'Pacific/Fiji': 720, // UTC+12 (FJT)
+                'Pacific/Honolulu': -600, // UTC-10 (HST)
+                // 非洲时区
+                'Africa/Cairo': 120, // UTC+2 (EET)
+                'Africa/Johannesburg': 120, // UTC+2 (SAST)
+                'Africa/Lagos': 60, // UTC+1 (WAT)
+                'Africa/Casablanca': 0, // UTC+0 (WET)
+                'Africa/Nairobi': 180, // UTC+3 (EAT)
+                'Africa/Algiers': 60, // UTC+1 (CET)
+                'Africa/Tunis': 60 // UTC+1 (CET)
+            };
+            
+            const baseOffset = baseOffsets[timezone] || 0;
+            
+            // 如果在夏令时期间，增加1小时（60分钟）
+            if (isDST) {
+                return baseOffset + 60;
+            }
+            
+            return baseOffset;
+        }
+        
+        // 从时间戳获取日期信息
+        function getDateFromTimestamp(timestamp) {
+            let remaining = timestamp;
+            
+            // 计算年份
+            let year = 1970;
+            while (remaining >= (isLeapYear(year) ? 366 : 365) * 24 * 60 * 60 * 1000) {
+                remaining -= (isLeapYear(year) ? 366 : 365) * 24 * 60 * 60 * 1000;
+                year++;
+            }
+            
+            // 计算月份
+            let month = 1;
+            while (remaining >= getDaysInMonth(year, month) * 24 * 60 * 60 * 1000) {
+                remaining -= getDaysInMonth(year, month) * 24 * 60 * 60 * 1000;
+                month++;
+            }
+            
+            // 计算天数
+            const day = Math.floor(remaining / (24 * 60 * 60 * 1000)) + 1;
+            
+            return { year, month, day };
+        }
+        
+        // 获取夏令时规则
+        function getDSTRules(timezone, year) {
+            const rules = {
+                // 美洲时区（美国/加拿大夏令时）
+                'America/New_York': {
+                    start: { month: 3, day: getSecondSunday(year, 3) }, // 3月第二个周日
+                    end: { month: 11, day: getFirstSunday(year, 11) }    // 11月第一个周日
+                },
+                'America/Chicago': {
+                    start: { month: 3, day: getSecondSunday(year, 3) },
+                    end: { month: 11, day: getFirstSunday(year, 11) }
+                },
+                'America/Denver': {
+                    start: { month: 3, day: getSecondSunday(year, 3) },
+                    end: { month: 11, day: getFirstSunday(year, 11) }
+                },
+                'America/Los_Angeles': {
+                    start: { month: 3, day: getSecondSunday(year, 3) },
+                    end: { month: 11, day: getFirstSunday(year, 11) }
+                },
+                'America/Toronto': {
+                    start: { month: 3, day: getSecondSunday(year, 3) },
+                    end: { month: 11, day: getFirstSunday(year, 11) }
+                },
+                'America/Vancouver': {
+                    start: { month: 3, day: getSecondSunday(year, 3) },
+                    end: { month: 11, day: getFirstSunday(year, 11) }
+                },
+                'America/Mexico_City': {
+                    start: { month: 4, day: getFirstSunday(year, 4) }, // 4月第一个周日
+                    end: { month: 10, day: getLastSunday(year, 10) }    // 10月最后一个周日
+                },
+                'America/Santiago': {
+                    start: { month: 9, day: getFirstSunday(year, 9) }, // 9月第一个周日
+                    end: { month: 4, day: getFirstSunday(year + 1, 4) }  // 次年4月第一个周日
+                },
+                // 欧洲时区（欧盟夏令时）
+                'Europe/London': {
+                    start: { month: 3, day: getLastSunday(year, 3) }, // 3月最后一个周日
+                    end: { month: 10, day: getLastSunday(year, 10) } // 10月最后一个周日
+                },
+                'Europe/Paris': {
+                    start: { month: 3, day: getLastSunday(year, 3) },
+                    end: { month: 10, day: getLastSunday(year, 10) }
+                },
+                'Europe/Berlin': {
+                    start: { month: 3, day: getLastSunday(year, 3) },
+                    end: { month: 10, day: getLastSunday(year, 10) }
+                },
+                'Europe/Rome': {
+                    start: { month: 3, day: getLastSunday(year, 3) },
+                    end: { month: 10, day: getLastSunday(year, 10) }
+                },
+                'Europe/Madrid': {
+                    start: { month: 3, day: getLastSunday(year, 3) },
+                    end: { month: 10, day: getLastSunday(year, 10) }
+                },
+                'Europe/Amsterdam': {
+                    start: { month: 3, day: getLastSunday(year, 3) },
+                    end: { month: 10, day: getLastSunday(year, 10) }
+                },
+                'Europe/Zurich': {
+                    start: { month: 3, day: getLastSunday(year, 3) },
+                    end: { month: 10, day: getLastSunday(year, 10) }
+                },
+                'Europe/Vienna': {
+                    start: { month: 3, day: getLastSunday(year, 3) },
+                    end: { month: 10, day: getLastSunday(year, 10) }
+                },
+                'Europe/Stockholm': {
+                    start: { month: 3, day: getLastSunday(year, 3) },
+                    end: { month: 10, day: getLastSunday(year, 10) }
+                },
+                'Europe/Oslo': {
+                    start: { month: 3, day: getLastSunday(year, 3) },
+                    end: { month: 10, day: getLastSunday(year, 10) }
+                },
+                'Europe/Copenhagen': {
+                    start: { month: 3, day: getLastSunday(year, 3) },
+                    end: { month: 10, day: getLastSunday(year, 10) }
+                },
+                'Europe/Helsinki': {
+                    start: { month: 3, day: getLastSunday(year, 3) },
+                    end: { month: 10, day: getLastSunday(year, 10) }
+                },
+                'Europe/Warsaw': {
+                    start: { month: 3, day: getLastSunday(year, 3) },
+                    end: { month: 10, day: getLastSunday(year, 10) }
+                },
+                'Europe/Prague': {
+                    start: { month: 3, day: getLastSunday(year, 3) },
+                    end: { month: 10, day: getLastSunday(year, 10) }
+                },
+                'Europe/Budapest': {
+                    start: { month: 3, day: getLastSunday(year, 3) },
+                    end: { month: 10, day: getLastSunday(year, 10) }
+                },
+                'Europe/Athens': {
+                    start: { month: 3, day: getLastSunday(year, 3) },
+                    end: { month: 10, day: getLastSunday(year, 10) }
+                },
+                'Europe/Kiev': {
+                    start: { month: 3, day: getLastSunday(year, 3) },
+                    end: { month: 10, day: getLastSunday(year, 10) }
+                },
+                // 大洋洲时区
+                'Australia/Sydney': {
+                    start: { month: 10, day: getFirstSunday(year, 10) }, // 10月第一个周日
+                    end: { month: 4, day: getFirstSunday(year + 1, 4) }   // 次年4月第一个周日
+                },
+                'Australia/Melbourne': {
+                    start: { month: 10, day: getFirstSunday(year, 10) },
+                    end: { month: 4, day: getFirstSunday(year + 1, 4) }
+                },
+                'Australia/Adelaide': {
+                    start: { month: 10, day: getFirstSunday(year, 10) },
+                    end: { month: 4, day: getFirstSunday(year + 1, 4) }
+                },
+                'Pacific/Auckland': {
+                    start: { month: 9, day: getLastSunday(year, 9) }, // 9月最后一个周日
+                    end: { month: 4, day: getFirstSunday(year + 1, 4) } // 次年4月第一个周日
+                }
+            };
+            
+            return rules[timezone] || null;
+        }
+        
+        // 获取某月的第二个周日
+        function getSecondSunday(year, month) {
+            const firstDay = new Date(year, month - 1, 1).getDay();
+            const firstSunday = firstDay === 0 ? 1 : 8 - firstDay;
+            return firstSunday + 7;
+        }
+        
+        // 获取某月的第一个周日
+        function getFirstSunday(year, month) {
+            const firstDay = new Date(year, month - 1, 1).getDay();
+            return firstDay === 0 ? 1 : 8 - firstDay;
+        }
+        
+        // 获取某月的最后一个周日
+        function getLastSunday(year, month) {
+            const lastDay = new Date(year, month, 0).getDate();
+            const lastDayOfWeek = new Date(year, month - 1, lastDay).getDay();
+            return lastDay - lastDayOfWeek;
+        }
+        
+        // 检查是否在夏令时期间
+        function isInDSTPeriod(year, month, day, dstRules) {
+            if (!dstRules) return false;
+            
+            const currentDate = year * 10000 + month * 100 + day;
+            const startDate = year * 10000 + dstRules.start.month * 100 + dstRules.start.day;
+            const endDate = year * 10000 + dstRules.end.month * 100 + dstRules.end.day;
+            
+            // 处理跨年的情况（如澳大利亚）
+            if (dstRules.start.month > dstRules.end.month) {
+                return currentDate >= startDate || currentDate <= endDate;
+            } else {
+                return currentDate >= startDate && currentDate <= endDate;
+            }
+        }
+
+        // 获取时区的夏令时状态信息
+        function getDSTStatus(timezone, timestamp) {
+            if (timezone === 'UTC') {
+                return { isDST: false, status: 'UTC (无夏令时)', className: 'dst-inactive' };
+            }
+
+            const dateInfo = getDateFromTimestamp(timestamp);
+            const dstRules = getDSTRules(timezone, dateInfo.year);
+            const isDST = isInDSTPeriod(dateInfo.year, dateInfo.month, dateInfo.day, dstRules);
+            
+            const timezoneNames = {
+            };
+
+            const cityName = timezoneNames[timezone] || timezone;
+            
+            if (dstRules) {
+                if (isDST) {
+                    return { 
+                        isDST: true, 
+                        status: `${cityName} (夏令时)`, 
+                        className: 'dst-active' 
+                    };
+                } else {
+                    return { 
+                        isDST: false, 
+                        status: `${cityName} (冬令时)`, 
+                        className: 'dst-inactive' 
+                    };
+                }
+            } else {
+                return { 
+                    isDST: false, 
+                    status: `${cityName} (无夏令时)`, 
+                    className: 'dst-inactive' 
+                };
+            }
+        }
+
+        // 将时间字符串转换为时间戳（毫秒）- 纯数学计算
+        function dateTimeToTimestamp(dateTimeStr) {
+            const regex = /^(\d{4})-(\d{2})-(\d{2})\s+(\d{2}):(\d{2}):(\d{2})\.(\d{3})$/;
+            const match = dateTimeStr.match(regex);
+            
+            if (!match) {
+                throw new Error('时间格式不正确');
+            }
+            
+            const [, year, month, day, hour, minute, second, millisecond] = match;
+            
+            // 计算从1970年1月1日00:00:00.000 UTC到指定时间的毫秒数
+            // 使用纯数学计算，不依赖Date对象
+            const y = parseInt(year);
+            const m = parseInt(month);
+            const d = parseInt(day);
+            const h = parseInt(hour);
+            const min = parseInt(minute);
+            const s = parseInt(second);
+            const ms = parseInt(millisecond);
+            
+            // 计算年份的天数
+            let days = 0;
+            for (let i = 1970; i < y; i++) {
+                if (isLeapYear(i)) {
+                    days += 366;
+                } else {
+                    days += 365;
+                }
+            }
+            
+            // 计算当年的天数
+            for (let i = 1; i < m; i++) {
+                days += getDaysInMonth(y, i);
+            }
+            
+            days += d - 1;
+            
+            // 计算总毫秒数
+            const totalMs = (days * 24 * 60 * 60 * 1000) + 
+                           (h * 60 * 60 * 1000) + 
+                           (min * 60 * 1000) + 
+                           (s * 1000) + 
+                           ms;
+            
+            return totalMs;
+        }
+
+        // 判断是否为闰年
+        function isLeapYear(year) {
+            return (year % 4 === 0 && year % 100 !== 0) || (year % 400 === 0);
+        }
+
+        // 获取某月的天数
+        function getDaysInMonth(year, month) {
+            const daysInMonth = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+            if (month === 2 && isLeapYear(year)) {
+                return 29;
+            }
+            return daysInMonth[month - 1];
+        }
+
+        // 将时间戳转换为时间字符串 - 纯数学计算
+        function timestampToDateTime(timestamp) {
+            let remaining = timestamp;
+            
+            // 计算年份
+            let year = 1970;
+            while (remaining >= (isLeapYear(year) ? 366 : 365) * 24 * 60 * 60 * 1000) {
+                remaining -= (isLeapYear(year) ? 366 : 365) * 24 * 60 * 60 * 1000;
+                year++;
+            }
+            
+            // 计算月份
+            let month = 1;
+            while (remaining >= getDaysInMonth(year, month) * 24 * 60 * 60 * 1000) {
+                remaining -= getDaysInMonth(year, month) * 24 * 60 * 60 * 1000;
+                month++;
+            }
+            
+            // 计算天数
+            const day = Math.floor(remaining / (24 * 60 * 60 * 1000)) + 1;
+            remaining %= 24 * 60 * 60 * 1000;
+            
+            // 计算小时
+            const hour = Math.floor(remaining / (60 * 60 * 1000));
+            remaining %= 60 * 60 * 1000;
+            
+            // 计算分钟
+            const minute = Math.floor(remaining / (60 * 1000));
+            remaining %= 60 * 1000;
+            
+            // 计算秒
+            const second = Math.floor(remaining / 1000);
+            remaining %= 1000;
+            
+            // 毫秒
+            const millisecond = remaining;
+            
+            return `${year}-${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')} ${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}:${second.toString().padStart(2, '0')}.${millisecond.toString().padStart(3, '0')}`;
+        }
+
+        // 将时间戳转换为日期时间组件
+        function timestampToDateTimeComponents(timestamp) {
+            let remaining = timestamp;
+            
+            // 计算年份
+            let year = 1970;
+            while (remaining >= (isLeapYear(year) ? 366 : 365) * 24 * 60 * 60 * 1000) {
+                remaining -= (isLeapYear(year) ? 366 : 365) * 24 * 60 * 60 * 1000;
+                year++;
+            }
+            
+            // 计算月份
+            let month = 1;
+            while (remaining >= getDaysInMonth(year, month) * 24 * 60 * 60 * 1000) {
+                remaining -= getDaysInMonth(year, month) * 24 * 60 * 60 * 1000;
+                month++;
+            }
+            
+            // 计算天数
+            const day = Math.floor(remaining / (24 * 60 * 60 * 1000)) + 1;
+            remaining %= 24 * 60 * 60 * 1000;
+            
+            // 计算小时
+            const hour = Math.floor(remaining / (60 * 60 * 1000));
+            remaining %= 60 * 60 * 1000;
+            
+            // 计算分钟
+            const minute = Math.floor(remaining / (60 * 1000));
+            remaining %= 60 * 1000;
+            
+            // 计算秒
+            const second = Math.floor(remaining / 1000);
+            remaining %= 1000;
+            
+            // 毫秒
+            const millisecond = remaining;
+            
+            return {
+                date: `${year}-${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`,
+                time: `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}:${second.toString().padStart(2, '0')}`,
+                milliseconds: millisecond
+            };
+        }
+
+        // 将日期时间组件转换为时间戳
+        function dateTimeComponentsToTimestamp(date, time, milliseconds) {
+            if (!date || !time) return null;
+            
+            // 解析日期
+            const dateParts = date.split('-');
+            const year = parseInt(dateParts[0]);
+            const month = parseInt(dateParts[1]);
+            const day = parseInt(dateParts[2]);
+            
+            // 解析时间
+            const timeParts = time.split(':');
+            const hour = parseInt(timeParts[0]);
+            const minute = parseInt(timeParts[1]);
+            const second = parseInt(timeParts[2]) || 0;
+            
+            // 解析毫秒
+            const ms = parseInt(milliseconds) || 0;
+            
+            // 计算从1970年1月1日00:00:00.000 UTC到指定时间的毫秒数
+            let days = 0;
+            for (let i = 1970; i < year; i++) {
+                if (isLeapYear(i)) {
+                    days += 366;
+                } else {
+                    days += 365;
+                }
+            }
+            
+            // 计算当年的天数
+            for (let i = 1; i < month; i++) {
+                days += getDaysInMonth(year, i);
+            }
+            
+            days += day - 1;
+            
+            // 计算总毫秒数
+            const totalMs = (days * 24 * 60 * 60 * 1000) + 
+                           (hour * 60 * 60 * 1000) + 
+                           (minute * 60 * 1000) + 
+                           (second * 1000) + 
+                           ms;
+            
+            return totalMs;
+        }
+
+        // 将datetime-local格式转换为时间戳
+        function dateTimeLocalToTimestamp(dateTimeLocalStr) {
+            if (!dateTimeLocalStr) return null;
+            
+            // 格式: YYYY-MM-DDTHH:mm
+            const regex = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})$/;
+            const match = dateTimeLocalStr.match(regex);
+            
+            if (!match) {
+                throw new Error('时间格式不正确');
+            }
+            
+            const [, year, month, day, hour, minute] = match;
+            
+            // 计算从1970年1月1日00:00:00.000 UTC到指定时间的毫秒数
+            const y = parseInt(year);
+            const m = parseInt(month);
+            const d = parseInt(day);
+            const h = parseInt(hour);
+            const min = parseInt(minute);
+            
+            // 计算年份的天数
+            let days = 0;
+            for (let i = 1970; i < y; i++) {
+                if (isLeapYear(i)) {
+                    days += 366;
+                } else {
+                    days += 365;
+                }
+            }
+            
+            // 计算当年的天数
+            for (let i = 1; i < m; i++) {
+                days += getDaysInMonth(y, i);
+            }
+            
+            days += d - 1;
+            
+            // 计算总毫秒数
+            const totalMs = (days * 24 * 60 * 60 * 1000) + 
+                           (h * 60 * 60 * 1000) + 
+                           (min * 60 * 1000);
+            
+            return totalMs;
+        }
+
+        // 时间转换函数
+        function convertTime() {
+            const sourceTimezone = document.getElementById('sourceTimezone').value;
+            const targetTimezone = document.getElementById('targetTimezone').value;
+            const sourceDate = document.getElementById('sourceDate').value;
+            const sourceTime = document.getElementById('sourceTime').value;
+            const sourceMilliseconds = document.getElementById('sourceMilliseconds').value;
+            const sourceTimestampInput = document.getElementById('sourceTimestamp').value;
+
+            if (!sourceDate && !sourceTime && !sourceTimestampInput) {
+                alert('请选择时间或输入时间戳！');
+                return;
+            }
+
+            try {
+                let sourceTimestamp;
+                let sourceTimeFormatted;
+
+                // 优先使用时间戳输入
+                if (sourceTimestampInput) {
+                    sourceTimestamp = parseInt(sourceTimestampInput);
+                    if (isNaN(sourceTimestamp) || sourceTimestamp <= 0) {
+                        throw new Error('无效的时间戳');
+                    }
+                    sourceTimeFormatted = timestampToDateTime(sourceTimestamp);
+                } else if (sourceDate && sourceTime) {
+                    // 使用时间选择器输入
+                    sourceTimestamp = dateTimeComponentsToTimestamp(sourceDate, sourceTime, sourceMilliseconds);
+                    if (!sourceTimestamp) {
+                        throw new Error('无效的时间选择');
+                    }
+                    sourceTimeFormatted = timestampToDateTime(sourceTimestamp);
+                } else {
+                    throw new Error('请选择时间或输入时间戳');
+                }
+
+                // 将源时区时间转换为UTC时间戳
+                let utcTimestamp;
+                if (sourceTimezone === 'UTC') {
+                    utcTimestamp = sourceTimestamp;
+                } else {
+                    // 获取源时区相对于UTC的偏移量（考虑夏令时）
+                    const sourceOffset = getTimezoneOffset(sourceTimezone, sourceTimestamp);
+                    
+                    // 将源时区时间转换为UTC时间戳
+                    utcTimestamp = sourceTimestamp - (sourceOffset * 60000);
+                }
+
+                // 从UTC时间戳转换到目标时区
+                let targetTimeFormatted;
+                
+                if (targetTimezone === 'UTC') {
+                    targetTimeFormatted = timestampToDateTime(utcTimestamp);
+                } else {
+                    // 获取目标时区相对于UTC的偏移量（考虑夏令时）
+                    const targetOffset = getTimezoneOffset(targetTimezone, utcTimestamp);
+                    
+                    // 将UTC时间戳转换为目标时区时间戳
+                    const targetTimestamp = utcTimestamp + (targetOffset * 60000);
+                    targetTimeFormatted = timestampToDateTime(targetTimestamp);
+                }
+
+                // 获取夏令时状态
+                const sourceDSTStatus = getDSTStatus(sourceTimezone, sourceTimestamp);
+                const targetDSTStatus = getDSTStatus(targetTimezone, utcTimestamp);
+
+                // 显示结果
+                document.getElementById('sourceTimeResult').textContent = sourceTimeFormatted;
+                document.getElementById('sourceTimestampResult').textContent = utcTimestamp;
+                document.getElementById('targetTimeResult').textContent = targetTimeFormatted;
+                document.getElementById('targetTimestampResult').textContent = utcTimestamp;
+
+                // 显示夏令时状态
+                const sourceDSTElement = document.getElementById('sourceDSTStatus');
+                sourceDSTElement.textContent = sourceDSTStatus.status;
+                sourceDSTElement.className = `dst-status ${sourceDSTStatus.className}`;
+
+                const targetDSTElement = document.getElementById('targetDSTStatus');
+                targetDSTElement.textContent = targetDSTStatus.status;
+                targetDSTElement.className = `dst-status ${targetDSTStatus.className}`;
+
+                // 显示结果区域
+                document.getElementById('conversionResult').classList.add('show');
+
+                // 保存到历史记录
+                saveToHistory({
+                    sourceTimezone,
+                    targetTimezone,
+                    sourceTime: sourceTimeFormatted,
+                    targetTime: targetTimeFormatted,
+                    sourceTimestamp: utcTimestamp,
+                    sourceDSTStatus: sourceDSTStatus.status,
+                    targetDSTStatus: targetDSTStatus.status
+                });
+
+            } catch (error) {
+                alert('时间转换出错：' + error.message);
+            }
+        }
+
+        // 历史记录管理
+        const HISTORY_KEY = 'timeConversionHistory';
+        const MAX_HISTORY = 20;
+
+        // 保存转换记录到历史
+        function saveToHistory(conversionData) {
+            const historyItem = {
+                id: Date.now(),
+                timestamp: new Date().toLocaleString('zh-CN'),
+                ...conversionData
+            };
+
+            let history = getHistory();
+            history.unshift(historyItem); // 添加到开头
+
+            // 限制最多保存20条记录
+            if (history.length > MAX_HISTORY) {
+                history = history.slice(0, MAX_HISTORY);
+            }
+
+            localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
+            updateHistoryDisplay();
+        }
+
+        // 获取历史记录
+        function getHistory() {
+            const historyStr = localStorage.getItem(HISTORY_KEY);
+            return historyStr ? JSON.parse(historyStr) : [];
+        }
+
+        // 更新历史记录显示
+        function updateHistoryDisplay() {
+            const historyList = document.getElementById('historyList');
+            const historyEmpty = document.getElementById('historyEmpty');
+            const history = getHistory();
+
+            if (!historyList) return;
+
+            if (history.length === 0) {
+                if (historyEmpty) historyEmpty.style.display = 'block';
+                return;
+            }
+
+            if (historyEmpty) historyEmpty.style.display = 'none';
+            historyList.innerHTML = '';
+
+            history.forEach(item => {
+                const historyItem = document.createElement('div');
+                historyItem.className = 'history-item';
+                historyItem.innerHTML = `
+                    <div class="history-content">
+                        <div class="history-conversion">
+                            ${item.sourceTimezone} → ${item.targetTimezone}
+                        </div>
+                        <div class="history-details">
+                            <div class="time-conversion">
+                                ${item.sourceTime} → ${item.targetTime}
+                            </div>
+                            <div class="timestamp-info">
+                                <span class="timestamp-label">时间戳:</span>
+                                <span class="timestamp-value">${item.sourceTimestamp}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="history-actions">
+                        <button class="history-action-btn delete" onclick="deleteHistoryItem(${item.id})" title="删除此记录">
+                            🗑️ 删除
+                        </button>
+                    </div>
+                `;
+                historyList.appendChild(historyItem);
+            });
+        }
+
+        // 删除单条历史记录
+        function deleteHistoryItem(id) {
+            let history = getHistory();
+            history = history.filter(h => h.id !== id);
+            localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
+            updateHistoryDisplay();
+        }
+
+        // 清空所有历史记录
+        function clearAllHistory() {
+            if (confirm('确定要清空所有历史记录吗？')) {
+                localStorage.removeItem(HISTORY_KEY);
+                updateHistoryDisplay();
+            }
+        }
+
+        // 切换历史记录显示
+        function toggleHistory() {
+            const historyList = document.getElementById('historyList');
+            const toggleBtn = document.querySelector('.toggle-history-btn');
+            
+            if (!historyList || !toggleBtn) return;
+            
+            if (historyList.style.display === 'none') {
+                historyList.style.display = 'block';
+                toggleBtn.textContent = '📖 隐藏';
+            } else {
+                historyList.style.display = 'none';
+                toggleBtn.textContent = '📖 历史';
+            }
+        }
+
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            init();
+            updateHistoryDisplay();
+        });
+    </script>
+</body>
+</html>

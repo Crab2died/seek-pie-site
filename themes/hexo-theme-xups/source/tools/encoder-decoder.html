@@ -1,0 +1,1484 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>编解码工具</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            font-weight: 300;
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .encoder-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            border-bottom: 2px solid #e1e5e9;
+            padding-bottom: 10px;
+        }
+
+        .encoder-tab {
+            padding: 12px 24px;
+            background: #f8f9fa;
+            border: 2px solid #e1e5e9;
+            border-radius: 10px 10px 0 0;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            color: #666;
+        }
+
+        .encoder-tab:hover {
+            background: #e9ecef;
+        }
+
+        .encoder-tab.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-color: #667eea;
+        }
+
+        .encoder-content {
+            display: none;
+        }
+
+        .encoder-content.active {
+            display: block;
+        }
+
+        .input-group {
+            margin-bottom: 25px;
+        }
+
+        .input-group label {
+            display: block;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+        }
+
+        .textarea-wrapper {
+            position: relative;
+        }
+
+        textarea {
+            width: 100%;
+            min-height: 150px;
+            padding: 15px;
+            border: 2px solid #e1e5e9;
+            border-radius: 10px;
+            font-size: 1em;
+            font-family: 'Consolas', 'Monaco', monospace;
+            resize: vertical;
+            transition: all 0.3s ease;
+            background: #f8f9fa;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .char-count {
+            position: absolute;
+            bottom: 10px;
+            right: 15px;
+            font-size: 0.9em;
+            color: #999;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 2px 8px;
+            border-radius: 5px;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-bottom: 25px;
+        }
+
+        .btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+            transform: translateY(-2px);
+        }
+
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #218838;
+            transform: translateY(-2px);
+        }
+
+        .btn-warning {
+            background: #ffc107;
+            color: #333;
+        }
+
+        .btn-warning:hover {
+            background: #e0a800;
+            transform: translateY(-2px);
+        }
+
+        .result-box {
+            background: #f8f9fa;
+            border: 2px solid #e1e5e9;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+            position: relative;
+        }
+
+        .result-box h3 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+        }
+
+        .result-content {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: 'Consolas', 'Monaco', monospace;
+            word-break: break-all;
+            max-height: 300px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+        }
+
+        .copy-btn {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            padding: 8px 16px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: all 0.3s ease;
+        }
+
+        .copy-btn:hover {
+            background: #5a67d8;
+            transform: scale(1.05);
+        }
+
+        .alert {
+            padding: 15px 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-weight: 500;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert-danger {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .info-box {
+            background: #e7f3ff;
+            border-left: 4px solid #2196F3;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+
+        .info-box h4 {
+            color: #1976D2;
+            margin-bottom: 8px;
+        }
+
+        .info-box p {
+            color: #666;
+            line-height: 1.6;
+        }
+
+        .hash-options {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .hash-option {
+            padding: 8px 16px;
+            background: #f8f9fa;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .hash-option:hover {
+            border-color: #667eea;
+        }
+
+        .hash-option.active {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        .history-section {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 2px solid #e1e5e9;
+        }
+
+        .history-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .history-header h3 {
+            color: #333;
+            font-size: 1.2em;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .clear-history-btn {
+            padding: 6px 12px;
+            background: #dc3545;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: all 0.3s ease;
+        }
+
+        .clear-history-btn:hover {
+            background: #c82333;
+            transform: scale(1.05);
+        }
+
+        .history-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .history-item {
+            background: white;
+            border: 1px solid #e1e5e9;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .history-item:hover {
+            border-color: #4facfe;
+            box-shadow: 0 2px 8px rgba(79, 172, 254, 0.1);
+        }
+
+        .history-item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .history-item-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .delete-history-btn {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 4px 8px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.8em;
+            transition: all 0.3s ease;
+            opacity: 0.7;
+        }
+
+        .delete-history-btn:hover {
+            background: #c82333;
+            opacity: 1;
+            transform: scale(1.05);
+        }
+
+        .history-item-title {
+            font-weight: 600;
+            color: #333;
+            font-size: 1.1em;
+        }
+
+        .history-item-date {
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        .history-item-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 10px;
+            font-size: 0.9em;
+            color: #555;
+        }
+
+        .history-item-detail {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .history-item-detail-label {
+            font-weight: 500;
+            margin-bottom: 2px;
+        }
+
+        .history-item-detail-value {
+            color: #333;
+            font-weight: 600;
+        }
+
+        .empty-history {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+            font-style: italic;
+        }
+
+        /* 移动端优化 */
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+
+            .content {
+                padding: 20px 15px;
+            }
+
+            .header {
+                padding: 20px 15px;
+            }
+
+            .header h1 {
+                font-size: 1.8em;
+                margin-bottom: 8px;
+            }
+
+            .header p {
+                font-size: 0.95em;
+            }
+
+            .encoder-tabs {
+                flex-direction: column;
+                gap: 8px;
+                border-bottom: none;
+                padding-bottom: 0;
+            }
+
+            .encoder-tab {
+                width: 100%;
+                text-align: center;
+                border-radius: 8px;
+                padding: 10px 20px;
+            }
+
+            .info-box {
+                padding: 15px;
+                margin-bottom: 20px;
+            }
+
+            .info-box h4 {
+                font-size: 1em;
+                margin-bottom: 8px;
+            }
+
+            .info-box p {
+                font-size: 0.9em;
+            }
+
+            .input-group {
+                margin-bottom: 20px;
+            }
+
+            .input-group label {
+                font-size: 1em;
+                margin-bottom: 8px;
+            }
+
+            .textarea-wrapper textarea {
+                padding: 12px;
+                font-size: 0.95em;
+                min-height: 120px;
+            }
+
+            .char-count {
+                font-size: 0.85em;
+                padding: 6px 10px;
+            }
+
+            .button-group {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .btn {
+                width: 100%;
+                padding: 12px 20px;
+                font-size: 1em;
+            }
+
+            .result-box {
+                padding: 15px;
+                margin-top: 20px;
+            }
+
+            .result-box h3 {
+                font-size: 1.1em;
+                margin-bottom: 10px;
+            }
+
+            .result-content {
+                font-size: 0.9em;
+            }
+
+            .copy-btn {
+                padding: 8px 16px;
+                font-size: 0.9em;
+            }
+
+            .history-section {
+                margin-top: 25px;
+                padding: 15px;
+            }
+
+            .history-header {
+                flex-direction: column;
+                gap: 10px;
+                margin-bottom: 15px;
+            }
+
+            .history-header h3 {
+                font-size: 1.2em;
+                text-align: center;
+            }
+
+            .clear-history-btn {
+                width: 100%;
+                max-width: 200px;
+                margin: 0 auto;
+            }
+
+            .history-list {
+                max-height: 300px;
+            }
+
+            .history-item {
+                padding: 12px;
+                margin-bottom: 8px;
+            }
+
+            .history-item-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 8px;
+            }
+
+            .history-item-title {
+                font-size: 1em;
+            }
+
+            .history-item-actions {
+                width: 100%;
+                justify-content: space-between;
+            }
+
+            .history-item-date {
+                font-size: 0.85em;
+            }
+
+            .delete-history-btn {
+                font-size: 0.8em;
+                padding: 4px 10px;
+            }
+
+            .history-item-details {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 8px;
+                font-size: 0.85em;
+            }
+        }
+
+        /* 小屏手机优化 */
+        @media (max-width: 480px) {
+            body {
+                padding: 8px;
+            }
+
+            .content {
+                padding: 15px 12px;
+            }
+
+            .header {
+                padding: 15px 12px;
+            }
+
+            .header h1 {
+                font-size: 1.5em;
+            }
+
+            .header p {
+                font-size: 0.9em;
+            }
+
+            .encoder-tab {
+                padding: 8px 16px;
+                font-size: 0.95em;
+            }
+
+            .info-box {
+                padding: 12px;
+                margin-bottom: 15px;
+            }
+
+            .info-box h4 {
+                font-size: 0.95em;
+            }
+
+            .info-box p {
+                font-size: 0.85em;
+            }
+
+            .input-group label {
+                font-size: 0.95em;
+            }
+
+            .textarea-wrapper textarea {
+                padding: 10px;
+                font-size: 0.9em;
+                min-height: 100px;
+            }
+
+            .char-count {
+                font-size: 0.8em;
+            }
+
+            .btn {
+                padding: 10px 16px;
+                font-size: 0.95em;
+            }
+
+            .result-box {
+                padding: 12px;
+            }
+
+            .result-box h3 {
+                font-size: 1em;
+            }
+
+            .result-content {
+                font-size: 0.85em;
+            }
+
+            .copy-btn {
+                padding: 6px 12px;
+                font-size: 0.85em;
+            }
+
+            .history-section {
+                padding: 12px;
+                margin-top: 20px;
+            }
+
+            .history-header h3 {
+                font-size: 1.1em;
+            }
+
+            .history-item {
+                padding: 10px;
+            }
+
+            .history-item-title {
+                font-size: 0.95em;
+            }
+
+            .history-item-details {
+                grid-template-columns: 1fr;
+                gap: 6px;
+                font-size: 0.8em;
+            }
+        }
+
+        /* 超小屏手机 */
+        @media (max-width: 360px) {
+            .header h1 {
+                font-size: 1.3em;
+            }
+
+            .header p {
+                font-size: 0.85em;
+            }
+
+            .encoder-tab {
+                font-size: 0.9em;
+                padding: 6px 12px;
+            }
+
+            .textarea-wrapper textarea {
+                min-height: 80px;
+                font-size: 0.85em;
+            }
+
+            .btn {
+                font-size: 0.9em;
+                padding: 8px 14px;
+            }
+
+            .result-box h3 {
+                font-size: 0.95em;
+            }
+
+            .history-header h3 {
+                font-size: 1em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔐 编解码工具</h1>
+            <p>支持多种编码格式的编码和解码操作</p>
+        </div>
+
+        <div class="content">
+            <div class="encoder-tabs">
+            <div class="encoder-tab active" onclick="switchTab('base64')">Base64</div>
+            <div class="encoder-tab" onclick="switchTab('url')">URL编码</div>
+            <div class="encoder-tab" onclick="switchTab('html')">HTML实体</div>
+            <div class="encoder-tab" onclick="switchTab('unicode')">Unicode</div>
+            <div class="encoder-tab" onclick="switchTab('hash')">哈希计算</div>
+            <div class="encoder-tab" onclick="switchTab('hex')">Hex转换</div>
+            <div class="encoder-tab" onclick="switchTab('binary')">二进制</div>
+        </div>
+
+        <!-- Base64 编码 -->
+        <div id="base64" class="encoder-content active">
+            <div class="info-box">
+                <h4>📘 Base64 编码说明</h4>
+                <p>Base64是一种用64个字符来表示任意二进制数据的方法，常用于在URL、Cookie、网页等传输少量二进制数据。</p>
+            </div>
+
+            <div class="input-group">
+                <label>输入文本</label>
+                <div class="textarea-wrapper">
+                    <textarea id="base64Input" placeholder="请输入要编码/解码的文本..."></textarea>
+                    <span class="char-count" id="base64Count">0 字符</span>
+                </div>
+            </div>
+
+            <div class="button-group">
+                <button class="btn btn-primary" onclick="base64Encode()">🔒 Base64 编码</button>
+                <button class="btn btn-secondary" onclick="base64Decode()">🔓 Base64 解码</button>
+                <button class="btn btn-warning" onclick="clearInput('base64Input')">🗑️ 清空</button>
+            </div>
+
+            <div id="base64Result"></div>
+
+            <div class="history-section">
+                <div class="history-header">
+                    <h3>📜 历史记录</h3>
+                    <button class="clear-history-btn" onclick="clearHistory('base64')">清空历史</button>
+                </div>
+                <div id="base64History" class="history-list"></div>
+            </div>
+        </div>
+
+        <!-- URL 编码 -->
+        <div id="url" class="encoder-content">
+            <div class="info-box">
+                <h4>📘 URL 编码说明</h4>
+                <p>URL编码将URL中的特殊字符转换为百分号加十六进制的形式，确保URL能够正确传输。</p>
+            </div>
+
+            <div class="input-group">
+                <label>输入文本</label>
+                <div class="textarea-wrapper">
+                    <textarea id="urlInput" placeholder="请输入要编码/解码的URL或文本..."></textarea>
+                    <span class="char-count" id="urlCount">0 字符</span>
+                </div>
+            </div>
+
+            <div class="button-group">
+                <button class="btn btn-primary" onclick="urlEncode()">🔒 URL 编码</button>
+                <button class="btn btn-secondary" onclick="urlDecode()">🔓 URL 解码</button>
+                <button class="btn btn-primary" onclick="urlComponentEncode()">🔒 URL Component 编码</button>
+                <button class="btn btn-secondary" onclick="urlComponentDecode()">🔓 URL Component 解码</button>
+                <button class="btn btn-warning" onclick="clearInput('urlInput')">🗑️ 清空</button>
+            </div>
+
+            <div id="urlResult"></div>
+
+            <div class="history-section">
+                <div class="history-header">
+                    <h3>📜 历史记录</h3>
+                    <button class="clear-history-btn" onclick="clearHistory('url')">清空历史</button>
+                </div>
+                <div id="urlHistory" class="history-list"></div>
+            </div>
+        </div>
+
+        <!-- HTML 实体编码 -->
+        <div id="html" class="encoder-content">
+            <div class="info-box">
+                <h4>📘 HTML 实体编码说明</h4>
+                <p>HTML实体编码将HTML中的特殊字符转换为实体形式（如 &lt; &gt; &amp;），防止XSS攻击和显示问题。</p>
+            </div>
+
+            <div class="input-group">
+                <label>输入文本</label>
+                <div class="textarea-wrapper">
+                    <textarea id="htmlInput" placeholder="请输入要编码/解码的HTML文本..."></textarea>
+                    <span class="char-count" id="htmlCount">0 字符</span>
+                </div>
+            </div>
+
+            <div class="button-group">
+                <button class="btn btn-primary" onclick="htmlEncode()">🔒 HTML 编码</button>
+                <button class="btn btn-secondary" onclick="htmlDecode()">🔓 HTML 解码</button>
+                <button class="btn btn-warning" onclick="clearInput('htmlInput')">🗑️ 清空</button>
+            </div>
+
+            <div id="htmlResult"></div>
+
+            <div class="history-section">
+                <div class="history-header">
+                    <h3>📜 历史记录</h3>
+                    <button class="clear-history-btn" onclick="clearHistory('html')">清空历史</button>
+                </div>
+                <div id="htmlHistory" class="history-list"></div>
+            </div>
+        </div>
+
+        <!-- Unicode 编码 -->
+        <div id="unicode" class="encoder-content">
+            <div class="info-box">
+                <h4>📘 Unicode 编码说明</h4>
+                <p>Unicode编码将字符转换为 \uXXXX 形式，常用于JSON、JavaScript等场景中表示特殊字符。</p>
+            </div>
+
+            <div class="input-group">
+                <label>输入文本</label>
+                <div class="textarea-wrapper">
+                    <textarea id="unicodeInput" placeholder="请输入要编码/解码的文本..."></textarea>
+                    <span class="char-count" id="unicodeCount">0 字符</span>
+                </div>
+            </div>
+
+            <div class="button-group">
+                <button class="btn btn-primary" onclick="unicodeEncode()">🔒 Unicode 编码</button>
+                <button class="btn btn-secondary" onclick="unicodeDecode()">🔓 Unicode 解码</button>
+                <button class="btn btn-warning" onclick="clearInput('unicodeInput')">🗑️ 清空</button>
+            </div>
+
+            <div id="unicodeResult"></div>
+
+            <div class="history-section">
+                <div class="history-header">
+                    <h3>📜 历史记录</h3>
+                    <button class="clear-history-btn" onclick="clearHistory('unicode')">清空历史</button>
+                </div>
+                <div id="unicodeHistory" class="history-list"></div>
+            </div>
+        </div>
+
+        <!-- 哈希计算 -->
+        <div id="hash" class="encoder-content">
+            <div class="info-box">
+                <h4>📘 哈希计算说明</h4>
+                <p>哈希函数将任意长度的数据转换为固定长度的字符串，常用于数据完整性校验和密码存储。注意：MD5和SHA-1不建议用于安全敏感场景。</p>
+            </div>
+
+            <div class="input-group">
+                <label>输入文本</label>
+                <div class="textarea-wrapper">
+                    <textarea id="hashInput" placeholder="请输入要计算哈希值的文本..."></textarea>
+                    <span class="char-count" id="hashCount">0 字符</span>
+                </div>
+            </div>
+
+            <div class="hash-options">
+                <div class="hash-option active" data-algo="MD5">MD5</div>
+                <div class="hash-option" data-algo="SHA-1">SHA-1</div>
+                <div class="hash-option" data-algo="SHA-256">SHA-256</div>
+                <div class="hash-option" data-algo="SHA-512">SHA-512</div>
+            </div>
+
+            <div class="button-group">
+                <button class="btn btn-primary" onclick="calculateHash()">🔐 计算哈希</button>
+                <button class="btn btn-warning" onclick="clearInput('hashInput')">🗑️ 清空</button>
+            </div>
+
+            <div id="hashResult"></div>
+
+            <div class="history-section">
+                <div class="history-header">
+                    <h3>📜 历史记录</h3>
+                    <button class="clear-history-btn" onclick="clearHistory('hash')">清空历史</button>
+                </div>
+                <div id="hashHistory" class="history-list"></div>
+            </div>
+        </div>
+
+        <!-- Hex 转换 -->
+        <div id="hex" class="encoder-content">
+            <div class="info-box">
+                <h4>📘 Hex（十六进制）转换说明</h4>
+                <p>将文本转换为十六进制表示，或将十六进制字符串转换回文本，常用于底层数据处理和调试。</p>
+            </div>
+
+            <div class="input-group">
+                <label>输入文本</label>
+                <div class="textarea-wrapper">
+                    <textarea id="hexInput" placeholder="请输入文本或十六进制字符串..."></textarea>
+                    <span class="char-count" id="hexCount">0 字符</span>
+                </div>
+            </div>
+
+            <div class="button-group">
+                <button class="btn btn-primary" onclick="textToHex()">🔒 文本转Hex</button>
+                <button class="btn btn-secondary" onclick="hexToText()">🔓 Hex转文本</button>
+                <button class="btn btn-warning" onclick="clearInput('hexInput')">🗑️ 清空</button>
+            </div>
+
+            <div id="hexResult"></div>
+
+            <div class="history-section">
+                <div class="history-header">
+                    <h3>📜 历史记录</h3>
+                    <button class="clear-history-btn" onclick="clearHistory('hex')">清空历史</button>
+                </div>
+                <div id="hexHistory" class="history-list"></div>
+            </div>
+        </div>
+
+        <!-- 二进制转换 -->
+        <div id="binary" class="encoder-content">
+            <div class="info-box">
+                <h4>📘 二进制转换说明</h4>
+                <p>将文本转换为二进制表示（0和1），或将二进制字符串转换回文本。</p>
+            </div>
+
+            <div class="input-group">
+                <label>输入文本</label>
+                <div class="textarea-wrapper">
+                    <textarea id="binaryInput" placeholder="请输入文本或二进制字符串..."></textarea>
+                    <span class="char-count" id="binaryCount">0 字符</span>
+                </div>
+            </div>
+
+            <div class="button-group">
+                <button class="btn btn-primary" onclick="textToBinary()">🔒 文本转二进制</button>
+                <button class="btn btn-secondary" onclick="binaryToText()">🔓 二进制转文本</button>
+                <button class="btn btn-warning" onclick="clearInput('binaryInput')">🗑️ 清空</button>
+            </div>
+
+            <div id="binaryResult"></div>
+
+            <div class="history-section">
+                <div class="history-header">
+                    <h3>📜 历史记录</h3>
+                    <button class="clear-history-btn" onclick="clearHistory('binary')">清空历史</button>
+                </div>
+                <div id="binaryHistory" class="history-list"></div>
+            </div>
+        </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+    <script>
+        // 初始化字符计数
+        document.querySelectorAll('textarea').forEach(textarea => {
+            const countId = textarea.id + 'Count';
+            const countElement = document.getElementById(countId);
+            if (countElement) {
+                textarea.addEventListener('input', function() {
+                    countElement.textContent = this.value.length + ' 字符';
+                });
+            }
+        });
+
+        // 切换标签页
+        function switchTab(tabName) {
+            // 隐藏所有内容
+            document.querySelectorAll('.encoder-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            document.querySelectorAll('.encoder-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+
+            // 显示选中的内容
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
+            
+            // 加载该类型的历史记录
+            loadHistory(tabName);
+        }
+
+        // ==================== 历史记录管理 ====================
+        const MAX_HISTORY = 20; // 每种类型最多保存20条记录
+
+        // 保存历史记录
+        function saveHistory(type, operation, input, output) {
+            const storageKey = `encoder_history_${type}`;
+            let history = JSON.parse(localStorage.getItem(storageKey) || '[]');
+            
+            // 添加新记录
+            const record = {
+                id: Date.now(),
+                type: type,
+                operation: operation,
+                input: input, // 保存完整输入
+                output: output, // 保存完整输出
+                inputPreview: input.substring(0, 100), // 用于显示的预览
+                outputPreview: output.substring(0, 100),
+                timestamp: new Date().toLocaleString('zh-CN')
+            };
+            
+            // 添加到数组开头
+            history.unshift(record);
+            
+            // 限制数量为20条
+            if (history.length > MAX_HISTORY) {
+                history = history.slice(0, MAX_HISTORY);
+            }
+            
+            // 保存到localStorage
+            localStorage.setItem(storageKey, JSON.stringify(history));
+            
+            // 刷新显示
+            loadHistory(type);
+        }
+
+        // 加载历史记录
+        function loadHistory(type) {
+            const storageKey = `encoder_history_${type}`;
+            const history = JSON.parse(localStorage.getItem(storageKey) || '[]');
+            const historyContainer = document.getElementById(`${type}History`);
+            
+            if (!historyContainer) return;
+            
+            if (history.length === 0) {
+                historyContainer.innerHTML = '<div class="empty-history">📭 暂无历史记录</div>';
+                return;
+            }
+            
+            historyContainer.innerHTML = history.map(record => {
+                const preview = record.inputPreview || record.input.substring(0, 100);
+                const fullInput = record.input || '';
+                return `
+                    <div class="history-item">
+                        <div class="history-item-header">
+                            <div class="history-item-title" onclick="loadHistoryItem('${type}', ${record.id})" style="cursor: pointer;">${record.operation}</div>
+                            <div class="history-item-actions">
+                                <div class="history-item-date">${record.timestamp}</div>
+                                <button class="delete-history-btn" onclick="deleteHistoryItem('${type}', ${record.id}, event)" title="删除此记录">删除</button>
+                            </div>
+                        </div>
+                        <div class="history-item-details" onclick="loadHistoryItem('${type}', ${record.id})" style="cursor: pointer;">
+                            <div class="history-item-detail">
+                                <div class="history-item-detail-label">输入内容</div>
+                                <div class="history-item-detail-value" title="${escapeHtml(fullInput)}" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${escapeHtml(preview)}${fullInput.length > 100 ? '...' : ''}</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // 加载历史记录项到输入框
+        function loadHistoryItem(type, recordId) {
+            const storageKey = `encoder_history_${type}`;
+            const history = JSON.parse(localStorage.getItem(storageKey) || '[]');
+            const record = history.find(r => r.id === recordId);
+            
+            if (record) {
+                const inputElement = document.getElementById(`${type}Input`);
+                if (inputElement) {
+                    // 获取完整的输入内容（从完整记录中获取）
+                    inputElement.value = record.input;
+                    // 更新字符计数
+                    const countElement = document.getElementById(`${type}Count`);
+                    if (countElement) {
+                        countElement.textContent = record.input.length + ' 字符';
+                    }
+                }
+            }
+        }
+
+        // 删除单条历史记录
+        function deleteHistoryItem(type, recordId, event) {
+            // 阻止事件冒泡
+            if (event) {
+                event.stopPropagation();
+            }
+            
+            if (confirm('确定要删除这条历史记录吗？')) {
+                const storageKey = `encoder_history_${type}`;
+                let history = JSON.parse(localStorage.getItem(storageKey) || '[]');
+                history = history.filter(r => r.id !== recordId);
+                localStorage.setItem(storageKey, JSON.stringify(history));
+                loadHistory(type);
+            }
+        }
+
+        // 清空历史记录
+        function clearHistory(type) {
+            if (confirm('确定要清空所有历史记录吗？此操作不可恢复。')) {
+                const storageKey = `encoder_history_${type}`;
+                localStorage.removeItem(storageKey);
+                loadHistory(type);
+            }
+        }
+
+        // HTML转义函数
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // 页面加载时初始化第一个标签页的历史记录
+        document.addEventListener('DOMContentLoaded', function() {
+            loadHistory('base64');
+        });
+
+        // 显示结果
+        function showResult(containerId, result, isError = false) {
+            const container = document.getElementById(containerId);
+            if (isError) {
+                container.innerHTML = `
+                    <div class="alert alert-danger">
+                        ❌ ${result}
+                    </div>
+                `;
+            } else {
+                container.innerHTML = `
+                    <div class="result-box">
+                        <h3>结果：</h3>
+                        <button class="copy-btn" onclick="copyResult(this)">📋 复制</button>
+                        <div class="result-content">${result}</div>
+                    </div>
+                `;
+            }
+        }
+
+        // 复制结果
+        function copyResult(button) {
+            const resultContent = button.parentElement.querySelector('.result-content');
+            const text = resultContent.textContent;
+            
+            navigator.clipboard.writeText(text).then(() => {
+                const originalText = button.textContent;
+                button.textContent = '✅ 已复制';
+                button.style.background = '#28a745';
+                
+                setTimeout(() => {
+                    button.textContent = originalText;
+                    button.style.background = '#667eea';
+                }, 2000);
+            }).catch(err => {
+                alert('复制失败：' + err);
+            });
+        }
+
+        // 清空输入
+        function clearInput(inputId) {
+            document.getElementById(inputId).value = '';
+            const countElement = document.getElementById(inputId + 'Count');
+            if (countElement) {
+                countElement.textContent = '0 字符';
+            }
+        }
+
+        // Base64 编码
+        function base64Encode() {
+            const input = document.getElementById('base64Input').value;
+            if (!input) {
+                showResult('base64Result', '请输入要编码的文本', true);
+                return;
+            }
+            try {
+                const encoded = btoa(unescape(encodeURIComponent(input)));
+                showResult('base64Result', encoded);
+                saveHistory('base64', 'Base64 编码', input, encoded);
+            } catch (error) {
+                showResult('base64Result', '编码失败：' + error.message, true);
+            }
+        }
+
+        // Base64 解码
+        function base64Decode() {
+            const input = document.getElementById('base64Input').value;
+            if (!input) {
+                showResult('base64Result', '请输入要解码的Base64字符串', true);
+                return;
+            }
+            try {
+                const decoded = decodeURIComponent(escape(atob(input)));
+                showResult('base64Result', decoded);
+                saveHistory('base64', 'Base64 解码', input, decoded);
+            } catch (error) {
+                showResult('base64Result', '解码失败：输入可能不是有效的Base64字符串', true);
+            }
+        }
+
+        // URL 编码
+        function urlEncode() {
+            const input = document.getElementById('urlInput').value;
+            if (!input) {
+                showResult('urlResult', '请输入要编码的文本', true);
+                return;
+            }
+            try {
+                const encoded = encodeURI(input);
+                showResult('urlResult', encoded);
+                saveHistory('url', 'URL 编码', input, encoded);
+            } catch (error) {
+                showResult('urlResult', '编码失败：' + error.message, true);
+            }
+        }
+
+        // URL 解码
+        function urlDecode() {
+            const input = document.getElementById('urlInput').value;
+            if (!input) {
+                showResult('urlResult', '请输入要解码的URL', true);
+                return;
+            }
+            try {
+                const decoded = decodeURI(input);
+                showResult('urlResult', decoded);
+                saveHistory('url', 'URL 解码', input, decoded);
+            } catch (error) {
+                showResult('urlResult', '解码失败：' + error.message, true);
+            }
+        }
+
+        // URL Component 编码
+        function urlComponentEncode() {
+            const input = document.getElementById('urlInput').value;
+            if (!input) {
+                showResult('urlResult', '请输入要编码的文本', true);
+                return;
+            }
+            try {
+                const encoded = encodeURIComponent(input);
+                showResult('urlResult', encoded);
+                saveHistory('url', 'URL Component 编码', input, encoded);
+            } catch (error) {
+                showResult('urlResult', '编码失败：' + error.message, true);
+            }
+        }
+
+        // URL Component 解码
+        function urlComponentDecode() {
+            const input = document.getElementById('urlInput').value;
+            if (!input) {
+                showResult('urlResult', '请输入要解码的文本', true);
+                return;
+            }
+            try {
+                const decoded = decodeURIComponent(input);
+                showResult('urlResult', decoded);
+                saveHistory('url', 'URL Component 解码', input, decoded);
+            } catch (error) {
+                showResult('urlResult', '解码失败：' + error.message, true);
+            }
+        }
+
+        // HTML 编码
+        function htmlEncode() {
+            const input = document.getElementById('htmlInput').value;
+            if (!input) {
+                showResult('htmlResult', '请输入要编码的HTML文本', true);
+                return;
+            }
+            const encoded = input
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;')
+                .replace(/\//g, '&#x2F;');
+            showResult('htmlResult', encoded);
+            saveHistory('html', 'HTML 编码', input, encoded);
+        }
+
+        // HTML 解码
+        function htmlDecode() {
+            const input = document.getElementById('htmlInput').value;
+            if (!input) {
+                showResult('htmlResult', '请输入要解码的HTML实体', true);
+                return;
+            }
+            const textarea = document.createElement('textarea');
+            textarea.innerHTML = input;
+            const decoded = textarea.value;
+            showResult('htmlResult', decoded);
+            saveHistory('html', 'HTML 解码', input, decoded);
+        }
+
+        // Unicode 编码
+        function unicodeEncode() {
+            const input = document.getElementById('unicodeInput').value;
+            if (!input) {
+                showResult('unicodeResult', '请输入要编码的文本', true);
+                return;
+            }
+            let encoded = '';
+            for (let i = 0; i < input.length; i++) {
+                const code = input.charCodeAt(i);
+                if (code > 127) {
+                    encoded += '\\u' + ('0000' + code.toString(16)).slice(-4);
+                } else {
+                    encoded += input.charAt(i);
+                }
+            }
+            showResult('unicodeResult', encoded);
+            saveHistory('unicode', 'Unicode 编码', input, encoded);
+        }
+
+        // Unicode 解码
+        function unicodeDecode() {
+            const input = document.getElementById('unicodeInput').value;
+            if (!input) {
+                showResult('unicodeResult', '请输入要解码的Unicode字符串', true);
+                return;
+            }
+            try {
+                const decoded = input.replace(/\\u[\dA-Fa-f]{4}/g, match => {
+                    return String.fromCharCode(parseInt(match.replace(/\\u/g, ''), 16));
+                });
+                showResult('unicodeResult', decoded);
+                saveHistory('unicode', 'Unicode 解码', input, decoded);
+            } catch (error) {
+                showResult('unicodeResult', '解码失败：' + error.message, true);
+            }
+        }
+
+        // 哈希选项切换
+        document.querySelectorAll('.hash-option').forEach(option => {
+            option.addEventListener('click', function() {
+                document.querySelectorAll('.hash-option').forEach(opt => opt.classList.remove('active'));
+                this.classList.add('active');
+            });
+        });
+
+        // 计算哈希
+        function calculateHash() {
+            const input = document.getElementById('hashInput').value;
+            if (!input) {
+                showResult('hashResult', '请输入要计算哈希值的文本', true);
+                return;
+            }
+
+            const activeAlgo = document.querySelector('.hash-option.active').dataset.algo;
+            let hash;
+
+            try {
+                switch (activeAlgo) {
+                    case 'MD5':
+                        hash = CryptoJS.MD5(input).toString();
+                        break;
+                    case 'SHA-1':
+                        hash = CryptoJS.SHA1(input).toString();
+                        break;
+                    case 'SHA-256':
+                        hash = CryptoJS.SHA256(input).toString();
+                        break;
+                    case 'SHA-512':
+                        hash = CryptoJS.SHA512(input).toString();
+                        break;
+                }
+                const result = `${activeAlgo}: ${hash}`;
+                showResult('hashResult', result);
+                saveHistory('hash', `${activeAlgo} 计算`, input, hash);
+            } catch (error) {
+                showResult('hashResult', '计算失败：' + error.message, true);
+            }
+        }
+
+        // 文本转Hex
+        function textToHex() {
+            const input = document.getElementById('hexInput').value;
+            if (!input) {
+                showResult('hexResult', '请输入要转换的文本', true);
+                return;
+            }
+            let hex = '';
+            for (let i = 0; i < input.length; i++) {
+                const code = input.charCodeAt(i);
+                const hexCode = code.toString(16).padStart(2, '0');
+                hex += hexCode + ' ';
+            }
+            const result = hex.trim();
+            showResult('hexResult', result);
+            saveHistory('hex', '文本转Hex', input, result);
+        }
+
+        // Hex转文本
+        function hexToText() {
+            const input = document.getElementById('hexInput').value.replace(/\s/g, '');
+            if (!input) {
+                showResult('hexResult', '请输入要转换的十六进制字符串', true);
+                return;
+            }
+            try {
+                let text = '';
+                for (let i = 0; i < input.length; i += 2) {
+                    const hex = input.substr(i, 2);
+                    text += String.fromCharCode(parseInt(hex, 16));
+                }
+                showResult('hexResult', text);
+                saveHistory('hex', 'Hex转文本', input, text);
+            } catch (error) {
+                showResult('hexResult', '转换失败：输入可能不是有效的十六进制字符串', true);
+            }
+        }
+
+        // 文本转二进制
+        function textToBinary() {
+            const input = document.getElementById('binaryInput').value;
+            if (!input) {
+                showResult('binaryResult', '请输入要转换的文本', true);
+                return;
+            }
+            let binary = '';
+            for (let i = 0; i < input.length; i++) {
+                const code = input.charCodeAt(i);
+                const binaryCode = code.toString(2).padStart(8, '0');
+                binary += binaryCode + ' ';
+            }
+            const result = binary.trim();
+            showResult('binaryResult', result);
+            saveHistory('binary', '文本转二进制', input, result);
+        }
+
+        // 二进制转文本
+        function binaryToText() {
+            const input = document.getElementById('binaryInput').value.replace(/\s/g, '');
+            if (!input) {
+                showResult('binaryResult', '请输入要转换的二进制字符串', true);
+                return;
+            }
+            if (!/^[01]+$/.test(input)) {
+                showResult('binaryResult', '输入包含非二进制字符（只能包含0和1）', true);
+                return;
+            }
+            try {
+                let text = '';
+                for (let i = 0; i < input.length; i += 8) {
+                    const binary = input.substr(i, 8);
+                    if (binary.length === 8) {
+                        text += String.fromCharCode(parseInt(binary, 2));
+                    }
+                }
+                showResult('binaryResult', text);
+                saveHistory('binary', '二进制转文本', input, text);
+            } catch (error) {
+                showResult('binaryResult', '转换失败：' + error.message, true);
+            }
+        }
+    </script>
+</body>
+</html>
+

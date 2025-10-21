@@ -1,0 +1,1469 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>单位转换工具</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Microsoft YaHei', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            font-weight: 300;
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .unit-type-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .unit-type-tab {
+            flex: 1;
+            min-width: 150px;
+            padding: 15px 20px;
+            background: #f8f9fa;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            cursor: pointer;
+            text-align: center;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .unit-type-tab:hover {
+            border-color: #4facfe;
+            background: #ffffff;
+        }
+
+        .unit-type-tab.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-color: #667eea;
+        }
+
+        .converter-content {
+            display: none;
+        }
+
+        .converter-content.active {
+            display: block;
+        }
+
+        .converter-box {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 30px;
+            margin-bottom: 30px;
+        }
+
+        .conversion-grid {
+            display: grid;
+            grid-template-columns: 1fr auto 1fr;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .unit-box {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .unit-box label {
+            display: block;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 1em;
+        }
+
+        .unit-box select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            font-size: 1em;
+            margin-bottom: 15px;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        .unit-box select:focus {
+            outline: none;
+            border-color: #4facfe;
+            box-shadow: 0 0 0 3px rgba(79, 172, 254, 0.1);
+        }
+
+        .unit-box input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            font-size: 1.1em;
+            transition: all 0.3s ease;
+        }
+
+        .unit-box input:focus {
+            outline: none;
+            border-color: #4facfe;
+            box-shadow: 0 0 0 3px rgba(79, 172, 254, 0.1);
+        }
+
+        .swap-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            font-size: 1.5em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .swap-btn:hover {
+            transform: rotate(180deg) scale(1.1);
+        }
+
+        .result-info {
+            background: #e3f2fd;
+            border-left: 4px solid #4facfe;
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+            font-size: 0.95em;
+            color: #1976d2;
+        }
+
+        .history-section {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 30px;
+            margin-top: 30px;
+        }
+
+        .history-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .history-header h3 {
+            color: #333;
+            font-size: 1.3em;
+        }
+
+        .history-btn {
+            background: #17a2b8;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: all 0.3s ease;
+        }
+
+        .history-btn:hover {
+            background: #138496;
+            transform: translateY(-1px);
+        }
+
+        .history-btn.danger {
+            background: #dc3545;
+        }
+
+        .history-btn.danger:hover {
+            background: #c82333;
+        }
+
+        .history-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .history-item {
+            background: white;
+            border: 1px solid #e1e5e9;
+            border-radius: 8px;
+            padding: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .history-item:hover {
+            border-color: #4facfe;
+            box-shadow: 0 2px 8px rgba(79, 172, 254, 0.1);
+        }
+
+        .history-item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .history-item-title {
+            font-weight: 600;
+            color: #333;
+            font-size: 1em;
+        }
+
+        .history-item-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .history-item-date {
+            color: #666;
+            font-size: 0.85em;
+        }
+
+        .delete-history-btn {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 4px 8px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.8em;
+            transition: all 0.3s ease;
+            opacity: 0.7;
+        }
+
+        .delete-history-btn:hover {
+            background: #c82333;
+            opacity: 1;
+            transform: scale(1.05);
+        }
+
+        .history-item-content {
+            color: #555;
+            font-size: 0.95em;
+        }
+
+        .empty-history {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+        }
+
+        /* 移动端优化 */
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+
+            .content {
+                padding: 20px 15px;
+            }
+
+            .header {
+                padding: 20px 15px;
+            }
+
+            .header h1 {
+                font-size: 1.8em;
+                margin-bottom: 8px;
+            }
+
+            .header p {
+                font-size: 0.95em;
+            }
+
+            .unit-type-tabs {
+                flex-direction: column;
+            }
+
+            .unit-type-tab {
+                width: 100%;
+                padding: 12px 16px;
+            }
+
+            .conversion-grid {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+
+            .swap-btn {
+                width: 40px;
+                height: 40px;
+                font-size: 1.2em;
+                margin: 0 auto;
+                transform: rotate(90deg);
+            }
+
+            .swap-btn:hover {
+                transform: rotate(270deg) scale(1.1);
+            }
+
+            .converter-box {
+                padding: 20px 15px;
+            }
+
+            .unit-box {
+                padding: 15px;
+            }
+
+            .history-section {
+                padding: 20px 15px;
+            }
+
+            .history-header {
+                flex-direction: column;
+                gap: 12px;
+                align-items: stretch;
+            }
+
+            .history-header h3 {
+                font-size: 1.2em;
+                text-align: center;
+            }
+
+            .history-header div {
+                display: flex;
+                justify-content: center;
+                gap: 10px;
+            }
+
+            .history-btn {
+                flex: 1;
+                max-width: 150px;
+            }
+
+            .history-item {
+                padding: 12px;
+            }
+
+            .history-item-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 8px;
+            }
+
+            .history-item-actions {
+                width: 100%;
+                justify-content: space-between;
+            }
+        }
+
+        /* 小屏手机优化 */
+        @media (max-width: 480px) {
+            body {
+                padding: 8px;
+            }
+
+            .content {
+                padding: 15px 12px;
+            }
+
+            .header {
+                padding: 15px 12px;
+            }
+
+            .header h1 {
+                font-size: 1.5em;
+            }
+
+            .header p {
+                font-size: 0.9em;
+            }
+
+            .unit-type-tab {
+                padding: 10px 12px;
+                font-size: 0.95em;
+            }
+
+            .converter-box {
+                padding: 15px 12px;
+            }
+
+            .unit-box {
+                padding: 12px;
+            }
+
+            .unit-box label {
+                font-size: 0.95em;
+            }
+
+            .unit-box input, .unit-box select {
+                padding: 10px 12px;
+                font-size: 1em;
+            }
+
+            .history-section {
+                padding: 15px 12px;
+            }
+
+            .history-header h3 {
+                font-size: 1.1em;
+            }
+
+            .history-item {
+                padding: 10px;
+            }
+
+            .history-item-title {
+                font-size: 0.95em;
+            }
+
+            .history-item-content {
+                font-size: 0.9em;
+            }
+        }
+
+        /* 超小屏手机 */
+        @media (max-width: 360px) {
+            .header h1 {
+                font-size: 1.3em;
+            }
+
+            .header p {
+                font-size: 0.85em;
+            }
+
+            .unit-type-tab {
+                font-size: 0.9em;
+            }
+
+            .unit-box input, .unit-box select {
+                font-size: 0.95em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📏 单位转换工具</h1>
+            <p>支持长度、重量、面积、体积、密度、温度、时间、速度、角度、压力、热量、功率、数据等多种单位转换</p>
+        </div>
+
+        <div class="content">
+            <div class="unit-type-tabs">
+                <div class="unit-type-tab active" onclick="switchUnitType('length')">
+                    📐 长度
+                </div>
+                <div class="unit-type-tab" onclick="switchUnitType('weight')">
+                    ⚖️ 重量
+                </div>
+                <div class="unit-type-tab" onclick="switchUnitType('area')">
+                    📦 面积
+                </div>
+                <div class="unit-type-tab" onclick="switchUnitType('volume')">
+                    🧊 体积
+                </div>
+                <div class="unit-type-tab" onclick="switchUnitType('density')">
+                    🎯 密度
+                </div>
+                <div class="unit-type-tab" onclick="switchUnitType('temperature')">
+                    🌡️ 温度
+                </div>
+                <div class="unit-type-tab" onclick="switchUnitType('time')">
+                    ⏰ 时间
+                </div>
+                <div class="unit-type-tab" onclick="switchUnitType('speed')">
+                    🚀 速度
+                </div>
+                <div class="unit-type-tab" onclick="switchUnitType('angle')">
+                    📐 角度
+                </div>
+                <div class="unit-type-tab" onclick="switchUnitType('pressure')">
+                    🔧 压力
+                </div>
+                <div class="unit-type-tab" onclick="switchUnitType('energy')">
+                    ⚡ 热量
+                </div>
+                <div class="unit-type-tab" onclick="switchUnitType('power')">
+                    💡 功率
+                </div>
+                <div class="unit-type-tab" onclick="switchUnitType('data')">
+                    💾 数据
+                </div>
+            </div>
+
+            <!-- 长度转换 -->
+            <div class="converter-content active" id="length-converter">
+                <div class="converter-box">
+                    <div class="conversion-grid">
+                        <div class="unit-box">
+                            <label>从</label>
+                            <select id="length-from-unit">
+                                <option value="nm">纳米 (nm)</option>
+                                <option value="um">微米 (μm)</option>
+                                <option value="mm">毫米 (mm)</option>
+                                <option value="cm">厘米 (cm)</option>
+                                <option value="in">英寸 (in)</option>
+                                <option value="ft">英尺 (ft)</option>
+                                <option value="yd">码 (yd)</option>
+                                <option value="m">米 (m)</option>
+                                <option value="km">千米 (km)</option>
+                                <option value="mi">英里 (mi)</option>
+                                <option value="nmi">海里 (nmi)</option>
+                            </select>
+                            <input type="number" id="length-from-value" placeholder="输入数值" value="1">
+                        </div>
+
+                        <button class="swap-btn" onclick="swapUnits('length')" title="交换单位">⇄</button>
+
+                        <div class="unit-box">
+                            <label>到</label>
+                            <select id="length-to-unit">
+                                <option value="nm">纳米 (nm)</option>
+                                <option value="um">微米 (μm)</option>
+                                <option value="mm">毫米 (mm)</option>
+                                <option value="cm">厘米 (cm)</option>
+                                <option value="in">英寸 (in)</option>
+                                <option value="ft">英尺 (ft)</option>
+                                <option value="yd">码 (yd)</option>
+                                <option value="m" selected>米 (m)</option>
+                                <option value="km">千米 (km)</option>
+                                <option value="mi">英里 (mi)</option>
+                                <option value="nmi">海里 (nmi)</option>
+                            </select>
+                            <input type="number" id="length-to-value" placeholder="转换结果" readonly>
+                        </div>
+                    </div>
+                    <div class="result-info" id="length-info"></div>
+                </div>
+            </div>
+
+            <!-- 重量转换 -->
+            <div class="converter-content" id="weight-converter">
+                <div class="converter-box">
+                    <div class="conversion-grid">
+                        <div class="unit-box">
+                            <label>从</label>
+                            <select id="weight-from-unit">
+                                <option value="mg">毫克 (mg)</option>
+                                <option value="g">克 (g)</option>
+                                <option value="liang">两</option>
+                                <option value="oz">盎司 (oz)</option>
+                                <option value="jin">斤</option>
+                                <option value="lb">磅 (lb)</option>
+                                <option value="kg">千克 (kg)</option>
+                                <option value="t">吨 (t)</option>
+                            </select>
+                            <input type="number" id="weight-from-value" placeholder="输入数值" value="1">
+                        </div>
+
+                        <button class="swap-btn" onclick="swapUnits('weight')" title="交换单位">⇄</button>
+
+                        <div class="unit-box">
+                            <label>到</label>
+                            <select id="weight-to-unit">
+                                <option value="mg">毫克 (mg)</option>
+                                <option value="g" selected>克 (g)</option>
+                                <option value="liang">两</option>
+                                <option value="oz">盎司 (oz)</option>
+                                <option value="jin">斤</option>
+                                <option value="lb">磅 (lb)</option>
+                                <option value="kg">千克 (kg)</option>
+                                <option value="t">吨 (t)</option>
+                            </select>
+                            <input type="number" id="weight-to-value" placeholder="转换结果" readonly>
+                        </div>
+                    </div>
+                    <div class="result-info" id="weight-info"></div>
+                </div>
+            </div>
+
+            <!-- 面积转换 -->
+            <div class="converter-content" id="area-converter">
+                <div class="converter-box">
+                    <div class="conversion-grid">
+                        <div class="unit-box">
+                            <label>从</label>
+                            <select id="area-from-unit">
+                                <option value="mm2">平方毫米 (mm²)</option>
+                                <option value="cm2">平方厘米 (cm²)</option>
+                                <option value="in2">平方英寸 (in²)</option>
+                                <option value="ft2">平方英尺 (ft²)</option>
+                                <option value="yd2">平方码 (yd²)</option>
+                                <option value="m2">平方米 (m²)</option>
+                                <option value="mu">亩</option>
+                                <option value="ha">公顷 (ha)</option>
+                                <option value="acre">英亩 (acre)</option>
+                                <option value="km2">平方千米 (km²)</option>
+                                <option value="mi2">平方英里 (mi²)</option>
+                            </select>
+                            <input type="number" id="area-from-value" placeholder="输入数值" value="1">
+                        </div>
+
+                        <button class="swap-btn" onclick="swapUnits('area')" title="交换单位">⇄</button>
+
+                        <div class="unit-box">
+                            <label>到</label>
+                            <select id="area-to-unit">
+                                <option value="mm2">平方毫米 (mm²)</option>
+                                <option value="cm2">平方厘米 (cm²)</option>
+                                <option value="in2">平方英寸 (in²)</option>
+                                <option value="ft2">平方英尺 (ft²)</option>
+                                <option value="yd2">平方码 (yd²)</option>
+                                <option value="m2" selected>平方米 (m²)</option>
+                                <option value="mu">亩</option>
+                                <option value="ha">公顷 (ha)</option>
+                                <option value="acre">英亩 (acre)</option>
+                                <option value="km2">平方千米 (km²)</option>
+                                <option value="mi2">平方英里 (mi²)</option>
+                            </select>
+                            <input type="number" id="area-to-value" placeholder="转换结果" readonly>
+                        </div>
+                    </div>
+                    <div class="result-info" id="area-info"></div>
+                </div>
+            </div>
+
+            <!-- 体积转换 -->
+            <div class="converter-content" id="volume-converter">
+                <div class="converter-box">
+                    <div class="conversion-grid">
+                        <div class="unit-box">
+                            <label>从</label>
+                            <select id="volume-from-unit">
+                                <option value="ml">毫升 (mL)</option>
+                                <option value="cm3">立方厘米 (cm³)</option>
+                                <option value="fl-oz">液体盎司 (fl oz)</option>
+                                <option value="cup">杯 (cup)</option>
+                                <option value="pt">品脱 (pt)</option>
+                                <option value="qt">夸脱 (qt)</option>
+                                <option value="l">升 (L)</option>
+                                <option value="dm3">立方分米 (dm³)</option>
+                                <option value="gal">加仑 (gal)</option>
+                                <option value="m3">立方米 (m³)</option>
+                            </select>
+                            <input type="number" id="volume-from-value" placeholder="输入数值" value="1">
+                        </div>
+
+                        <button class="swap-btn" onclick="swapUnits('volume')" title="交换单位">⇄</button>
+
+                        <div class="unit-box">
+                            <label>到</label>
+                            <select id="volume-to-unit">
+                                <option value="ml">毫升 (mL)</option>
+                                <option value="cm3">立方厘米 (cm³)</option>
+                                <option value="fl-oz">液体盎司 (fl oz)</option>
+                                <option value="cup">杯 (cup)</option>
+                                <option value="pt">品脱 (pt)</option>
+                                <option value="qt">夸脱 (qt)</option>
+                                <option value="l" selected>升 (L)</option>
+                                <option value="dm3">立方分米 (dm³)</option>
+                                <option value="gal">加仑 (gal)</option>
+                                <option value="m3">立方米 (m³)</option>
+                            </select>
+                            <input type="number" id="volume-to-value" placeholder="转换结果" readonly>
+                        </div>
+                    </div>
+                    <div class="result-info" id="volume-info"></div>
+                </div>
+            </div>
+
+            <!-- 密度转换 -->
+            <div class="converter-content" id="density-converter">
+                <div class="converter-box">
+                    <div class="conversion-grid">
+                        <div class="unit-box">
+                            <label>从</label>
+                            <select id="density-from-unit">
+                                <option value="g/cm3">克/立方厘米 (g/cm³)</option>
+                                <option value="g/ml">克/毫升 (g/mL)</option>
+                                <option value="kg/l">千克/升 (kg/L)</option>
+                                <option value="kg/m3">千克/立方米 (kg/m³)</option>
+                                <option value="t/m3">吨/立方米 (t/m³)</option>
+                                <option value="lb/in3">磅/立方英寸 (lb/in³)</option>
+                                <option value="lb/ft3">磅/立方英尺 (lb/ft³)</option>
+                                <option value="lb/gal">磅/加仑 (lb/gal)</option>
+                            </select>
+                            <input type="number" id="density-from-value" placeholder="输入数值" value="1">
+                        </div>
+
+                        <button class="swap-btn" onclick="swapUnits('density')" title="交换单位">⇄</button>
+
+                        <div class="unit-box">
+                            <label>到</label>
+                            <select id="density-to-unit">
+                                <option value="g/cm3" selected>克/立方厘米 (g/cm³)</option>
+                                <option value="g/ml">克/毫升 (g/mL)</option>
+                                <option value="kg/l">千克/升 (kg/L)</option>
+                                <option value="kg/m3">千克/立方米 (kg/m³)</option>
+                                <option value="t/m3">吨/立方米 (t/m³)</option>
+                                <option value="lb/in3">磅/立方英寸 (lb/in³)</option>
+                                <option value="lb/ft3">磅/立方英尺 (lb/ft³)</option>
+                                <option value="lb/gal">磅/加仑 (lb/gal)</option>
+                            </select>
+                            <input type="number" id="density-to-value" placeholder="转换结果" readonly>
+                        </div>
+                    </div>
+                    <div class="result-info" id="density-info"></div>
+                </div>
+            </div>
+
+            <!-- 温度转换 -->
+            <div class="converter-content" id="temperature-converter">
+                <div class="converter-box">
+                    <div class="conversion-grid">
+                        <div class="unit-box">
+                            <label>从</label>
+                            <select id="temperature-from-unit">
+                                <option value="k">开尔文 (K)</option>
+                                <option value="c">摄氏度 (°C)</option>
+                                <option value="f">华氏度 (°F)</option>
+                            </select>
+                            <input type="number" id="temperature-from-value" placeholder="输入数值" value="0">
+                        </div>
+
+                        <button class="swap-btn" onclick="swapUnits('temperature')" title="交换单位">⇄</button>
+
+                        <div class="unit-box">
+                            <label>到</label>
+                            <select id="temperature-to-unit">
+                                <option value="k">开尔文 (K)</option>
+                                <option value="c" selected>摄氏度 (°C)</option>
+                                <option value="f">华氏度 (°F)</option>
+                            </select>
+                            <input type="number" id="temperature-to-value" placeholder="转换结果" readonly>
+                        </div>
+                    </div>
+                    <div class="result-info" id="temperature-info"></div>
+                </div>
+            </div>
+
+            <!-- 时间转换 -->
+            <div class="converter-content" id="time-converter">
+                <div class="converter-box">
+                    <div class="conversion-grid">
+                        <div class="unit-box">
+                            <label>从</label>
+                            <select id="time-from-unit">
+                                <option value="us">微秒 (μs)</option>
+                                <option value="ms">毫秒 (ms)</option>
+                                <option value="s">秒 (s)</option>
+                                <option value="min">分钟 (min)</option>
+                                <option value="h">小时 (h)</option>
+                                <option value="d">天 (d)</option>
+                                <option value="week">周</option>
+                                <option value="month">月</option>
+                                <option value="year">年</option>
+                            </select>
+                            <input type="number" id="time-from-value" placeholder="输入数值" value="1">
+                        </div>
+
+                        <button class="swap-btn" onclick="swapUnits('time')" title="交换单位">⇄</button>
+
+                        <div class="unit-box">
+                            <label>到</label>
+                            <select id="time-to-unit">
+                                <option value="us">微秒 (μs)</option>
+                                <option value="ms">毫秒 (ms)</option>
+                                <option value="s" selected>秒 (s)</option>
+                                <option value="min">分钟 (min)</option>
+                                <option value="h">小时 (h)</option>
+                                <option value="d">天 (d)</option>
+                                <option value="week">周</option>
+                                <option value="month">月</option>
+                                <option value="year">年</option>
+                            </select>
+                            <input type="number" id="time-to-value" placeholder="转换结果" readonly>
+                        </div>
+                    </div>
+                    <div class="result-info" id="time-info"></div>
+                </div>
+            </div>
+
+            <!-- 速度转换 -->
+            <div class="converter-content" id="speed-converter">
+                <div class="converter-box">
+                    <div class="conversion-grid">
+                        <div class="unit-box">
+                            <label>从</label>
+                            <select id="speed-from-unit">
+                                <option value="ft/s">英尺/秒 (ft/s)</option>
+                                <option value="m/s">米/秒 (m/s)</option>
+                                <option value="km/h">千米/小时 (km/h)</option>
+                                <option value="knot">节 (knot)</option>
+                                <option value="mi/h">英里/小时 (mph)</option>
+                                <option value="mach">马赫 (Mach)</option>
+                            </select>
+                            <input type="number" id="speed-from-value" placeholder="输入数值" value="1">
+                        </div>
+
+                        <button class="swap-btn" onclick="swapUnits('speed')" title="交换单位">⇄</button>
+
+                        <div class="unit-box">
+                            <label>到</label>
+                            <select id="speed-to-unit">
+                                <option value="ft/s">英尺/秒 (ft/s)</option>
+                                <option value="m/s">米/秒 (m/s)</option>
+                                <option value="km/h" selected>千米/小时 (km/h)</option>
+                                <option value="knot">节 (knot)</option>
+                                <option value="mi/h">英里/小时 (mph)</option>
+                                <option value="mach">马赫 (Mach)</option>
+                            </select>
+                            <input type="number" id="speed-to-value" placeholder="转换结果" readonly>
+                        </div>
+                    </div>
+                    <div class="result-info" id="speed-info"></div>
+                </div>
+            </div>
+
+            <!-- 角度转换 -->
+            <div class="converter-content" id="angle-converter">
+                <div class="converter-box">
+                    <div class="conversion-grid">
+                        <div class="unit-box">
+                            <label>从</label>
+                            <select id="angle-from-unit">
+                                <option value="deg">度 (°)</option>
+                                <option value="rad">弧度 (rad)</option>
+                                <option value="grad">梯度 (grad)</option>
+                                <option value="arcmin">角分 (')</option>
+                                <option value="arcsec">角秒 (")</option>
+                                <option value="turn">圈</option>
+                            </select>
+                            <input type="number" id="angle-from-value" placeholder="输入数值" value="180">
+                        </div>
+
+                        <button class="swap-btn" onclick="swapUnits('angle')" title="交换单位">⇄</button>
+
+                        <div class="unit-box">
+                            <label>到</label>
+                            <select id="angle-to-unit">
+                                <option value="deg">度 (°)</option>
+                                <option value="rad" selected>弧度 (rad)</option>
+                                <option value="grad">梯度 (grad)</option>
+                                <option value="arcmin">角分 (')</option>
+                                <option value="arcsec">角秒 (")</option>
+                                <option value="turn">圈</option>
+                            </select>
+                            <input type="number" id="angle-to-value" placeholder="转换结果" readonly>
+                        </div>
+                    </div>
+                    <div class="result-info" id="angle-info"></div>
+                </div>
+            </div>
+
+            <!-- 压力转换 -->
+            <div class="converter-content" id="pressure-converter">
+                <div class="converter-box">
+                    <div class="conversion-grid">
+                        <div class="unit-box">
+                            <label>从</label>
+                            <select id="pressure-from-unit">
+                                <option value="pa">帕斯卡 (Pa)</option>
+                                <option value="kpa">千帕 (kPa)</option>
+                                <option value="mpa">兆帕 (MPa)</option>
+                                <option value="bar">巴 (bar)</option>
+                                <option value="psi">磅力/平方英寸 (psi)</option>
+                                <option value="atm">标准大气压 (atm)</option>
+                                <option value="mmhg">毫米汞柱 (mmHg)</option>
+                                <option value="torr">托 (Torr)</option>
+                            </select>
+                            <input type="number" id="pressure-from-value" placeholder="输入数值" value="1">
+                        </div>
+
+                        <button class="swap-btn" onclick="swapUnits('pressure')" title="交换单位">⇄</button>
+
+                        <div class="unit-box">
+                            <label>到</label>
+                            <select id="pressure-to-unit">
+                                <option value="pa">帕斯卡 (Pa)</option>
+                                <option value="kpa" selected>千帕 (kPa)</option>
+                                <option value="mpa">兆帕 (MPa)</option>
+                                <option value="bar">巴 (bar)</option>
+                                <option value="psi">磅力/平方英寸 (psi)</option>
+                                <option value="atm">标准大气压 (atm)</option>
+                                <option value="mmhg">毫米汞柱 (mmHg)</option>
+                                <option value="torr">托 (Torr)</option>
+                            </select>
+                            <input type="number" id="pressure-to-value" placeholder="转换结果" readonly>
+                        </div>
+                    </div>
+                    <div class="result-info" id="pressure-info"></div>
+                </div>
+            </div>
+
+            <!-- 热量/能量转换 -->
+            <div class="converter-content" id="energy-converter">
+                <div class="converter-box">
+                    <div class="conversion-grid">
+                        <div class="unit-box">
+                            <label>从</label>
+                            <select id="energy-from-unit">
+                                <option value="j">焦耳 (J)</option>
+                                <option value="kj">千焦 (kJ)</option>
+                                <option value="cal">卡路里 (cal)</option>
+                                <option value="kcal">千卡 (kcal)</option>
+                                <option value="wh">瓦时 (Wh)</option>
+                                <option value="kwh">千瓦时 (kWh)</option>
+                                <option value="ev">电子伏特 (eV)</option>
+                                <option value="btu">英热单位 (BTU)</option>
+                            </select>
+                            <input type="number" id="energy-from-value" placeholder="输入数值" value="1">
+                        </div>
+
+                        <button class="swap-btn" onclick="swapUnits('energy')" title="交换单位">⇄</button>
+
+                        <div class="unit-box">
+                            <label>到</label>
+                            <select id="energy-to-unit">
+                                <option value="j">焦耳 (J)</option>
+                                <option value="kj" selected>千焦 (kJ)</option>
+                                <option value="cal">卡路里 (cal)</option>
+                                <option value="kcal">千卡 (kcal)</option>
+                                <option value="wh">瓦时 (Wh)</option>
+                                <option value="kwh">千瓦时 (kWh)</option>
+                                <option value="ev">电子伏特 (eV)</option>
+                                <option value="btu">英热单位 (BTU)</option>
+                            </select>
+                            <input type="number" id="energy-to-value" placeholder="转换结果" readonly>
+                        </div>
+                    </div>
+                    <div class="result-info" id="energy-info"></div>
+                </div>
+            </div>
+
+            <!-- 功率转换 -->
+            <div class="converter-content" id="power-converter">
+                <div class="converter-box">
+                    <div class="conversion-grid">
+                        <div class="unit-box">
+                            <label>从</label>
+                            <select id="power-from-unit">
+                                <option value="w">瓦特 (W)</option>
+                                <option value="kw">千瓦 (kW)</option>
+                                <option value="mw">兆瓦 (MW)</option>
+                                <option value="hp">马力 (hp)</option>
+                                <option value="btu/h">英热单位/小时 (BTU/h)</option>
+                                <option value="cal/s">卡路里/秒 (cal/s)</option>
+                            </select>
+                            <input type="number" id="power-from-value" placeholder="输入数值" value="1">
+                        </div>
+
+                        <button class="swap-btn" onclick="swapUnits('power')" title="交换单位">⇄</button>
+
+                        <div class="unit-box">
+                            <label>到</label>
+                            <select id="power-to-unit">
+                                <option value="w">瓦特 (W)</option>
+                                <option value="kw" selected>千瓦 (kW)</option>
+                                <option value="mw">兆瓦 (MW)</option>
+                                <option value="hp">马力 (hp)</option>
+                                <option value="btu/h">英热单位/小时 (BTU/h)</option>
+                                <option value="cal/s">卡路里/秒 (cal/s)</option>
+                            </select>
+                            <input type="number" id="power-to-value" placeholder="转换结果" readonly>
+                        </div>
+                    </div>
+                    <div class="result-info" id="power-info"></div>
+                </div>
+            </div>
+
+            <!-- 数据/存储转换 -->
+            <div class="converter-content" id="data-converter">
+                <div class="converter-box">
+                    <div class="conversion-grid">
+                        <div class="unit-box">
+                            <label>从</label>
+                            <select id="data-from-unit">
+                                <option value="bit">比特 (bit)</option>
+                                <option value="byte">字节 (Byte)</option>
+                                <option value="kb">千字节 (KB)</option>
+                                <option value="kib">千位字节 (KiB)</option>
+                                <option value="mb">兆字节 (MB)</option>
+                                <option value="mib">兆位字节 (MiB)</option>
+                                <option value="gb">吉字节 (GB)</option>
+                                <option value="gib">吉位字节 (GiB)</option>
+                                <option value="tb">太字节 (TB)</option>
+                                <option value="tib">太位字节 (TiB)</option>
+                                <option value="pb">拍字节 (PB)</option>
+                                <option value="pib">拍位字节 (PiB)</option>
+                            </select>
+                            <input type="number" id="data-from-value" placeholder="输入数值" value="1">
+                        </div>
+
+                        <button class="swap-btn" onclick="swapUnits('data')" title="交换单位">⇄</button>
+
+                        <div class="unit-box">
+                            <label>到</label>
+                            <select id="data-to-unit">
+                                <option value="bit">比特 (bit)</option>
+                                <option value="byte">字节 (Byte)</option>
+                                <option value="kb">千字节 (KB)</option>
+                                <option value="kib">千位字节 (KiB)</option>
+                                <option value="mb" selected>兆字节 (MB)</option>
+                                <option value="mib">兆位字节 (MiB)</option>
+                                <option value="gb">吉字节 (GB)</option>
+                                <option value="gib">吉位字节 (GiB)</option>
+                                <option value="tb">太字节 (TB)</option>
+                                <option value="tib">太位字节 (TiB)</option>
+                                <option value="pb">拍字节 (PB)</option>
+                                <option value="pib">拍位字节 (PiB)</option>
+                            </select>
+                            <input type="number" id="data-to-value" placeholder="转换结果" readonly>
+                        </div>
+                    </div>
+                    <div class="result-info" id="data-info"></div>
+                </div>
+            </div>
+
+            <!-- 历史记录 -->
+            <div class="history-section">
+                <div class="history-header">
+                    <h3>📊 转换历史</h3>
+                    <div>
+                        <button class="history-btn danger" onclick="clearHistory()">清空历史</button>
+                    </div>
+                </div>
+                <div class="history-list" id="historyList">
+                    <div class="empty-history">
+                        <div>📝</div>
+                        <p>暂无转换历史</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 单位转换配置（基于精确的国际标准转换系数）
+        const conversionData = {
+            length: {
+                m: 1,
+                km: 0.001,
+                cm: 100,
+                mm: 1000,
+                um: 1000000,
+                nm: 1000000000,
+                mi: 0.000621371192237334,      // 1 m = 0.000621371192237334 英里
+                yd: 1.0936132983377078,         // 1 m = 1.0936132983377078 码
+                ft: 3.280839895013123,          // 1 m = 3.280839895013123 英尺
+                in: 39.37007874015748,          // 1 m = 39.37007874015748 英寸
+                nmi: 0.0005399568034557236      // 1 m = 0.0005399568034557236 海里
+            },
+            weight: {
+                kg: 1,
+                g: 1000,
+                mg: 1000000,
+                t: 0.001,
+                lb: 2.2046226218487757,         // 1 kg = 2.2046226218487757 磅
+                oz: 35.27396194958041,          // 1 kg = 35.27396194958041 盎司
+                jin: 2,                         // 1 kg = 2 斤（中国标准）
+                liang: 20                       // 1 kg = 20 两（中国标准）
+            },
+            area: {
+                m2: 1,
+                km2: 0.000001,
+                cm2: 10000,
+                mm2: 1000000,
+                ha: 0.0001,                     // 1 m² = 0.0001 公顷
+                mu: 0.0015,                     // 1 m² = 0.0015 亩（1亩 ≈ 666.67 m²）
+                mi2: 3.861021585424458e-7,      // 1 m² = 3.861021585424458e-7 平方英里
+                yd2: 1.1959900463010803,        // 1 m² = 1.1959900463010803 平方码
+                ft2: 10.763910416709722,        // 1 m² = 10.763910416709722 平方英尺
+                in2: 1550.0031000062,           // 1 m² = 1550.0031000062 平方英寸
+                acre: 0.0002471053814671653     // 1 m² = 0.0002471053814671653 英亩
+            },
+            volume: {
+                m3: 1,
+                l: 1000,
+                ml: 1000000,
+                cm3: 1000000,
+                dm3: 1000,
+                gal: 264.17205235814845,        // 1 m³ = 264.17205235814845 美制加仑
+                qt: 1056.6882094325938,         // 1 m³ = 1056.6882094325938 夸脱
+                pt: 2113.3764188651876,         // 1 m³ = 2113.3764188651876 品脱
+                cup: 4226.752837730375,         // 1 m³ = 4226.752837730375 杯
+                'fl-oz': 33814.022701842998     // 1 m³ = 33814.022701842998 液体盎司
+            },
+            density: {
+                'kg/m3': 1,                     // 基准单位：千克/立方米
+                'g/cm3': 0.001,                 // 1 kg/m³ = 0.001 g/cm³（1 g/cm³ = 1000 kg/m³）
+                'g/ml': 0.001,                  // 1 kg/m³ = 0.001 g/mL（等同于 g/cm³）
+                'kg/l': 0.001,                  // 1 kg/m³ = 0.001 kg/L（1 kg/L = 1000 kg/m³）
+                't/m3': 0.001,                  // 1 kg/m³ = 0.001 t/m³（1 t/m³ = 1000 kg/m³）
+                'lb/in3': 3.6127292e-5,         // 1 kg/m³ = 3.6127292e-5 lb/in³（1 lb/in³ ≈ 27679.9 kg/m³）
+                'lb/ft3': 0.062427960576145,    // 1 kg/m³ = 0.062427960576145 lb/ft³（1 lb/ft³ ≈ 16.0185 kg/m³）
+                'lb/gal': 0.008345404452053,    // 1 kg/m³ = 0.008345404452053 lb/gal（1 lb/gal ≈ 119.826 kg/m³）
+            },
+            speed: {
+                'm/s': 1,
+                'km/h': 3.6,
+                'mi/h': 2.236936292054402,      // 1 m/s = 2.236936292054402 英里/小时
+                'ft/s': 3.280839895013123,      // 1 m/s = 3.280839895013123 英尺/秒
+                'knot': 1.9438444924406046,     // 1 m/s = 1.9438444924406046 节
+                'mach': 0.0029154518950437317   // 1 m/s = 0.0029154518950437317 马赫（343 m/s标准）
+            },
+            time: {
+                s: 1,
+                min: 1/60,
+                h: 1/3600,
+                d: 1/86400,
+                week: 1/604800,
+                month: 1/2592000,               // 按30天计算
+                year: 1/31536000,               // 按365天计算
+                ms: 1000,
+                us: 1000000
+            },
+            angle: {
+                deg: 1,
+                rad: Math.PI / 180,             // 1° = π/180 弧度 ≈ 0.017453292519943295
+                grad: 10/9,                     // 1° = 10/9 梯度 ≈ 1.1111111111111112
+                arcmin: 60,                     // 1° = 60 角分
+                arcsec: 3600,                   // 1° = 3600 角秒
+                turn: 1/360                     // 1° = 1/360 圈 ≈ 0.002777777777777778
+            },
+            pressure: {
+                pa: 1,
+                kpa: 0.001,
+                mpa: 0.000001,
+                bar: 0.00001,                   // 1 Pa = 0.00001 bar
+                psi: 0.00014503773773020924,    // 1 Pa = 0.00014503773773020924 磅力/平方英寸
+                atm: 9.869232667160129e-6,      // 1 Pa = 9.869232667160129e-6 标准大气压
+                mmhg: 0.007500616827041698,     // 1 Pa = 0.007500616827041698 毫米汞柱
+                torr: 0.007500616827041698      // 1 Pa = 0.007500616827041698 托
+            },
+            energy: {
+                j: 1,
+                kj: 0.001,
+                cal: 0.23900573613766732,       // 1 J = 0.23900573613766732 卡路里（thermochemical）
+                kcal: 0.00023900573613766733,   // 1 J = 0.00023900573613766733 千卡
+                wh: 1/3600,                     // 1 J = 1/3600 瓦时 ≈ 0.0002777777777777778
+                kwh: 1/3600000,                 // 1 J = 1/3600000 千瓦时 ≈ 2.7777777777777776e-7
+                ev: 6.241509074460763e18,       // 1 J = 6.241509074460763e18 电子伏特
+                btu: 0.0009478171203133172      // 1 J = 0.0009478171203133172 英热单位
+            },
+            power: {
+                w: 1,
+                kw: 0.001,
+                mw: 0.000001,
+                hp: 0.0013410220888438283,      // 1 W = 0.0013410220888438283 马力（机械马力）
+                'btu/h': 3.412141633127942,     // 1 W = 3.412141633127942 英热单位/小时
+                'cal/s': 0.23900573613766732    // 1 W = 0.23900573613766732 卡路里/秒
+            },
+            data: {
+                bit: 8,                         // 1 byte = 8 bits
+                byte: 1,                        // 基准单位：字节
+                kb: 0.001,                      // 1 byte = 0.001 KB（十进制：1 KB = 1000 bytes）
+                mb: 0.000001,                   // 1 byte = 0.000001 MB（1 MB = 1,000,000 bytes）
+                gb: 1e-9,                       // 1 byte = 1e-9 GB（1 GB = 1,000,000,000 bytes）
+                tb: 1e-12,                      // 1 byte = 1e-12 TB（1 TB = 1,000,000,000,000 bytes）
+                pb: 1e-15,                      // 1 byte = 1e-15 PB（1 PB = 1,000,000,000,000,000 bytes）
+                kib: 1/1024,                    // 1 byte = 1/1024 KiB（二进制：1 KiB = 1024 bytes）
+                mib: 1/1048576,                 // 1 byte = 1/1048576 MiB（1 MiB = 1024² bytes）
+                gib: 1/1073741824,              // 1 byte = 1/1073741824 GiB（1 GiB = 1024³ bytes）
+                tib: 1/1099511627776,           // 1 byte = 1/1099511627776 TiB（1 TiB = 1024⁴ bytes）
+                pib: 1/1125899906842624         // 1 byte = 1/1125899906842624 PiB（1 PiB = 1024⁵ bytes）
+            }
+        };
+
+        const HISTORY_KEY = 'unit_converter_history';
+        const MAX_HISTORY = 20;
+        let currentType = 'length';
+
+        // 智能格式化数字显示
+        function formatNumber(num) {
+            if (num === 0) return '0';
+            
+            const absNum = Math.abs(num);
+            
+            // 对于非常大或非常小的数字使用科学记数法
+            if (absNum > 1e15 || (absNum < 1e-6 && absNum > 0)) {
+                return num.toExponential(10).replace(/\.?0+e/, 'e');
+            }
+            
+            // 对于普通大小的数字，使用最多12位小数
+            let formatted = num.toFixed(12);
+            // 移除末尾的0和小数点
+            formatted = formatted.replace(/\.?0+$/, '');
+            
+            return formatted;
+        }
+
+        // 切换单位类型
+        function switchUnitType(type) {
+            currentType = type;
+            
+            // 更新标签页样式
+            document.querySelectorAll('.unit-type-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            event.target.classList.add('active');
+
+            // 更新内容显示
+            document.querySelectorAll('.converter-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            document.getElementById(`${type}-converter`).classList.add('active');
+
+            // 执行一次转换（不记入历史）
+            convert(type, false);
+        }
+
+        // 通用转换函数
+        function convert(type, saveHistory = true) {
+            const fromValue = parseFloat(document.getElementById(`${type}-from-value`).value);
+            const fromUnit = document.getElementById(`${type}-from-unit`).value;
+            const toUnit = document.getElementById(`${type}-to-unit`).value;
+            const toValueInput = document.getElementById(`${type}-to-value`);
+            const infoDiv = document.getElementById(`${type}-info`);
+
+            if (isNaN(fromValue)) {
+                toValueInput.value = '';
+                infoDiv.textContent = '';
+                return;
+            }
+
+            let result;
+            
+            if (type === 'temperature') {
+                result = convertTemperature(fromValue, fromUnit, toUnit);
+            } else {
+                // 标准转换：先转换到基准单位，再转换到目标单位
+                const baseValue = fromValue / conversionData[type][fromUnit];
+                result = baseValue * conversionData[type][toUnit];
+            }
+
+            // 使用智能格式化函数
+            const formattedResult = formatNumber(result);
+            toValueInput.value = formattedResult;
+            
+            // 显示转换信息
+            const fromUnitText = document.getElementById(`${type}-from-unit`).selectedOptions[0].text;
+            const toUnitText = document.getElementById(`${type}-to-unit`).selectedOptions[0].text;
+            infoDiv.textContent = `${fromValue} ${fromUnitText} = ${formattedResult} ${toUnitText}`;
+
+            // 保存到历史记录
+            if (saveHistory) {
+                saveToHistory(type, fromValue, fromUnitText, result, toUnitText);
+            }
+        }
+
+        // 温度转换（特殊处理）
+        function convertTemperature(value, fromUnit, toUnit) {
+            // 先转换为摄氏度
+            let celsius;
+            switch(fromUnit) {
+                case 'c':
+                    celsius = value;
+                    break;
+                case 'f':
+                    celsius = (value - 32) * 5/9;
+                    break;
+                case 'k':
+                    celsius = value - 273.15;
+                    break;
+            }
+
+            // 再转换为目标单位
+            let result;
+            switch(toUnit) {
+                case 'c':
+                    result = celsius;
+                    break;
+                case 'f':
+                    result = celsius * 9/5 + 32;
+                    break;
+                case 'k':
+                    result = celsius + 273.15;
+                    break;
+            }
+
+            return result;
+        }
+
+        // 交换单位
+        function swapUnits(type) {
+            const fromUnit = document.getElementById(`${type}-from-unit`);
+            const toUnit = document.getElementById(`${type}-to-unit`);
+            const fromValue = document.getElementById(`${type}-from-value`);
+            const toValue = document.getElementById(`${type}-to-value`);
+
+            // 交换单位选择
+            const tempUnit = fromUnit.value;
+            fromUnit.value = toUnit.value;
+            toUnit.value = tempUnit;
+
+            // 交换数值
+            const tempValue = fromValue.value;
+            fromValue.value = toValue.value;
+            toValue.value = tempValue;
+
+            // 重新计算
+            convert(type);
+        }
+
+        // 保存到历史记录
+        function saveToHistory(type, fromValue, fromUnit, toValue, toUnit) {
+            const history = getHistory();
+            
+            const typeNames = {
+                'length': '长度',
+                'weight': '重量',
+                'area': '面积',
+                'volume': '体积',
+                'density': '密度',
+                'temperature': '温度',
+                'time': '时间',
+                'speed': '速度',
+                'angle': '角度',
+                'pressure': '压力',
+                'energy': '热量',
+                'power': '功率',
+                'data': '数据'
+            };
+
+            const record = {
+                id: Date.now(),
+                type: typeNames[type],
+                typKey: type,
+                from: `${fromValue} ${fromUnit}`,
+                to: `${formatNumber(toValue)} ${toUnit}`,
+                timestamp: new Date().toLocaleString('zh-CN')
+            };
+
+            history.unshift(record);
+
+            if (history.length > MAX_HISTORY) {
+                history.pop();
+            }
+
+            localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
+            displayHistory();
+        }
+
+        // 获取历史记录
+        function getHistory() {
+            const historyStr = localStorage.getItem(HISTORY_KEY);
+            return historyStr ? JSON.parse(historyStr) : [];
+        }
+
+        // 显示历史记录
+        function displayHistory() {
+            const history = getHistory();
+            const historyList = document.getElementById('historyList');
+
+            if (history.length === 0) {
+                historyList.innerHTML = `
+                    <div class="empty-history">
+                        <div>📝</div>
+                        <p>暂无转换历史</p>
+                    </div>
+                `;
+                return;
+            }
+
+            historyList.innerHTML = history.map(record => `
+                <div class="history-item">
+                    <div class="history-item-header">
+                        <div class="history-item-title">${record.type}转换</div>
+                        <div class="history-item-actions">
+                            <div class="history-item-date">${record.timestamp}</div>
+                            <button class="delete-history-btn" onclick="deleteHistoryItem(${record.id}, event)" title="删除此记录">删除</button>
+                        </div>
+                    </div>
+                    <div class="history-item-content">
+                        ${record.from} = ${record.to}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // 删除单条历史记录
+        function deleteHistoryItem(id, event) {
+            event.stopPropagation();
+            
+            if (confirm('确定要删除这条历史记录吗？')) {
+                let history = getHistory();
+                history = history.filter(record => record.id !== id);
+                localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
+                displayHistory();
+            }
+        }
+
+        // 清空历史记录
+        function clearHistory() {
+            if (confirm('确定要清空所有历史记录吗？此操作不可恢复。')) {
+                localStorage.removeItem(HISTORY_KEY);
+                displayHistory();
+            }
+        }
+
+        // 为所有输入框和选择框添加事件监听
+        document.addEventListener('DOMContentLoaded', function() {
+            const types = ['length', 'weight', 'area', 'volume', 'density', 'temperature', 'time', 'speed', 'angle', 'pressure', 'energy', 'power', 'data'];
+            
+            types.forEach(type => {
+                const fromValue = document.getElementById(`${type}-from-value`);
+                const fromUnit = document.getElementById(`${type}-from-unit`);
+                const toUnit = document.getElementById(`${type}-to-unit`);
+
+                if (fromValue) {
+                    fromValue.addEventListener('input', () => convert(type));
+                }
+                if (fromUnit) {
+                    fromUnit.addEventListener('change', () => convert(type));
+                }
+                if (toUnit) {
+                    toUnit.addEventListener('change', () => convert(type));
+                }
+            });
+
+            // 加载历史记录
+            displayHistory();
+
+            // 初始转换（不记入历史）
+            convert('length', false);
+        });
+    </script>
+</body>
+</html>
+
