@@ -118,19 +118,96 @@
 
         @media (max-width: 768px) {
             .container {
-                padding: 15px;
+                padding: 10px;
             }
 
             .header h1 {
-                font-size: 2rem;
+                font-size: 1.5rem;
+            }
+
+            .header p {
+                font-size: 0.9rem;
             }
 
             .nav-grid {
                 grid-template-columns: 1fr;
+                gap: 12px;
+            }
+
+            .nav-card {
+                padding: 15px;
+                border-radius: 10px;
+            }
+
+            .nav-card h3 {
+                font-size: 1rem;
+                gap: 8px;
+            }
+
+            .nav-card p {
+                font-size: 0.85rem;
+            }
+
+            .icon {
+                font-size: 1.2rem;
+            }
+
+            .back-btn {
+                padding: 8px 16px;
+                font-size: 0.9rem;
+                border-radius: 6px;
             }
 
             .tool-content {
-                padding: 20px;
+                padding: 15px;
+                min-height: 400px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 8px;
+            }
+
+            .header h1 {
+                font-size: 1.3rem;
+            }
+
+            .header p {
+                font-size: 0.85rem;
+            }
+
+            .nav-grid {
+                gap: 10px;
+            }
+
+            .nav-card {
+                padding: 12px;
+                border-radius: 8px;
+            }
+
+            .nav-card h3 {
+                font-size: 0.95rem;
+                gap: 6px;
+            }
+
+            .nav-card p {
+                font-size: 0.8rem;
+            }
+
+            .icon {
+                font-size: 1rem;
+            }
+
+            .back-btn {
+                padding: 6px 12px;
+                font-size: 0.85rem;
+                border-radius: 5px;
+            }
+
+            .tool-content {
+                padding: 12px;
+                min-height: 350px;
             }
         }
     </style>
@@ -143,11 +220,6 @@
         </div>
 
         <div class="nav-grid">
-
-            <div class="nav-card" onclick="showTool('calculator')">
-                <h3><span class="icon">🧮</span>科学计算器</h3>
-                <p>支持基本运算和科学函数，包含三角函数、对数等高级功能</p>
-            </div>
 
             <div class="nav-card" onclick="showTool('time')">
                 <h3><span class="icon">🕐</span>时间转换工具</h3>
@@ -178,11 +250,17 @@
                 <h3><span class="icon">🔐</span>编解码工具</h3>
                 <p>支持Base64、URL、HTML、Unicode等多种编码格式的编码和解码</p>
             </div>
-
+ 
             <div class="nav-card" onclick="showTool('crypto')">
                 <h3><span class="icon">🔒</span>加解密工具</h3>
                 <p>支持对称加密、非对称加密、HMAC签名等多种加密算法</p>
             </div>
+
+            <div class="nav-card" onclick="showTool('jwt')">
+                <h3><span class="icon">🔑</span>JWT解析工具</h3>
+                <p>解析和验证JSON Web Token，支持Header、Payload和Signature分析</p>
+            </div>
+
 
             <div class="nav-card" onclick="showTool('unit')">
                 <h3><span class="icon">📏</span>单位转换工具</h3>
@@ -206,7 +284,7 @@
 
             <div class="nav-card" onclick="showTool('formatter')">
                 <h3><span class="icon">✨</span>代码格式化工具</h3>
-                <p>支持JSON、XML、HTML、CSS、SQL、YAML、Markdown等各种格式</p>
+                <p>支持JSON、XML、HTML、CSS、SQL、Java, Python等各种格式</p>
             </div>
 
             <div class="nav-card" onclick="showTool('csv')">
@@ -217,6 +295,21 @@
             <div class="nav-card" onclick="showTool('json')">
                 <h3><span class="icon">📋</span>JSON数组展示工具</h3>
                 <p>解析JSON数组数据，支持表格展示、列管理和数据导出</p>
+            </div>
+
+            <div class="nav-card" onclick="showTool('chart')">
+                <h3><span class="icon">📊</span>报表展示工具</h3>
+                <p>支持柱状图、折线图、饼图、雷达图等多种图表类型的数据可视化</p>
+            </div>
+
+            <div class="nav-card" onclick="showTool('qrcode')">
+                <h3><span class="icon">📱</span>二维码与条形码工具</h3>
+                <p>快速生成二维码和多种格式的条形码，支持自定义样式和下载</p>
+            </div>
+
+            <div class="nav-card" onclick="showTool('api')">
+                <h3><span class="icon">🚀</span>API调试工具</h3>
+                <p>强大的HTTP API测试工具，支持多种请求方法、参数配置和历史记录</p>
             </div>
 
         </div>
@@ -232,7 +325,6 @@
                 'json': 'json-array-tool.html',
                 'time': 'time-converter.html',
                 'exchange': 'exchange-rate.html',
-                'calculator': 'scientific-calculator.html',
                 'loan': 'loan-calculator.html',
                 'converter': 'number-converter.html',
                 'encoder': 'encoder-decoder.html',
@@ -242,7 +334,11 @@
                 'cron': 'cron-tool.html',
                 'crypto': 'crypto-tool.html',
                 'compression': 'compression-tool.html',
-                'formatter': 'formatter-tool.html'
+                'formatter': 'formatter-tool.html',
+                'chart': 'chart-tool.html',
+                'qrcode': 'qrcode-barcode-tool.html',
+                'jwt': 'jwt-tool.html',
+                'api': 'api-test-tool.html'
             };
 
             const filename = toolFileMap[toolName];

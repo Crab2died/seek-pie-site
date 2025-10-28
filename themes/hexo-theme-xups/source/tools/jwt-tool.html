@@ -1,0 +1,1185 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JWT解析工具</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            font-weight: 300;
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .info-box {
+            background: #e7f3ff;
+            border-left: 4px solid #2196F3;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+
+        .info-box h4 {
+            color: #1976D2;
+            margin-bottom: 8px;
+        }
+
+        .info-box p {
+            color: #666;
+            line-height: 1.6;
+        }
+
+        .input-group {
+            margin-bottom: 25px;
+        }
+
+        .input-group label {
+            display: block;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+        }
+
+        .textarea-wrapper {
+            position: relative;
+        }
+
+        textarea {
+            width: 100%;
+            min-height: 150px;
+            padding: 15px;
+            border: 2px solid #e1e5e9;
+            border-radius: 10px;
+            font-size: 0.95em;
+            font-family: 'Consolas', 'Monaco', monospace;
+            resize: vertical;
+            transition: all 0.3s ease;
+            background: #f8f9fa;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .char-count {
+            position: absolute;
+            bottom: 10px;
+            right: 15px;
+            font-size: 0.9em;
+            color: #999;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 2px 8px;
+            border-radius: 5px;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-bottom: 25px;
+        }
+
+        .btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+            transform: translateY(-2px);
+        }
+
+        .btn-warning {
+            background: #ffc107;
+            color: #333;
+        }
+
+        .btn-warning:hover {
+            background: #e0a800;
+            transform: translateY(-2px);
+        }
+
+        .result-section {
+            margin-top: 30px;
+        }
+
+        .result-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            border-bottom: 2px solid #e1e5e9;
+            padding-bottom: 10px;
+        }
+
+        .result-tab {
+            padding: 10px 20px;
+            background: #f8f9fa;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px 8px 0 0;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            color: #666;
+        }
+
+        .result-tab:hover {
+            background: #e9ecef;
+        }
+
+        .result-tab.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-color: #667eea;
+        }
+
+        .result-content {
+            display: none;
+        }
+
+        .result-content.active {
+            display: block;
+        }
+
+        .result-box {
+            background: #f8f9fa;
+            border: 2px solid #e1e5e9;
+            border-radius: 10px;
+            padding: 20px;
+            position: relative;
+            margin-bottom: 20px;
+        }
+
+        .result-box h3 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .json-content {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 0.9em;
+            max-height: 400px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+
+        .copy-btn {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            padding: 8px 16px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: all 0.3s ease;
+        }
+
+        .copy-btn:hover {
+            background: #5a67d8;
+            transform: scale(1.05);
+        }
+
+        .alert {
+            padding: 15px 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-weight: 500;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert-danger {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .alert-warning {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+
+        .token-status {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+
+        .status-item {
+            flex: 1;
+            min-width: 200px;
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            border: 2px solid #e1e5e9;
+        }
+
+        .status-label {
+            font-size: 0.9em;
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        .status-value {
+            font-size: 1.1em;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .status-value.expired {
+            color: #dc3545;
+        }
+
+        .status-value.valid {
+            color: #28a745;
+        }
+
+        .history-section {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 2px solid #e1e5e9;
+        }
+
+        .history-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .history-header h3 {
+            color: #333;
+            font-size: 1.2em;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .clear-history-btn {
+            padding: 6px 12px;
+            background: #dc3545;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: all 0.3s ease;
+        }
+
+        .clear-history-btn:hover {
+            background: #c82333;
+            transform: scale(1.05);
+        }
+
+        .history-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .history-item {
+            background: white;
+            border: 1px solid #e1e5e9;
+            border-radius: 8px;
+            padding: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .history-item:hover {
+            border-color: #4facfe;
+            box-shadow: 0 2px 8px rgba(79, 172, 254, 0.1);
+        }
+
+        .history-item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .history-item-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .delete-history-btn {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 4px 8px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.8em;
+            transition: all 0.3s ease;
+            opacity: 0.7;
+        }
+
+        .delete-history-btn:hover {
+            background: #c82333;
+            opacity: 1;
+            transform: scale(1.05);
+        }
+
+        .history-item-date {
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        .history-item-preview {
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 0.85em;
+            color: #555;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .empty-history {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+            font-style: italic;
+        }
+
+        .key-value-pair {
+            display: flex;
+            margin-bottom: 10px;
+            padding: 10px;
+            background: white;
+            border-radius: 5px;
+        }
+
+        .key-value-pair .key {
+            font-weight: 600;
+            color: #667eea;
+            min-width: 100px;
+        }
+
+        .key-value-pair .value {
+            color: #333;
+            word-break: break-all;
+        }
+
+        /* 移动端优化 */
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+
+            .content {
+                padding: 20px 15px;
+            }
+
+            .header {
+                padding: 20px 15px;
+            }
+
+            .header h1 {
+                font-size: 1.8em;
+                margin-bottom: 8px;
+            }
+
+            .header p {
+                font-size: 0.95em;
+            }
+
+            .result-tabs {
+                flex-direction: column;
+                gap: 8px;
+                border-bottom: none;
+                padding-bottom: 0;
+            }
+
+            .result-tab {
+                width: 100%;
+                text-align: center;
+                border-radius: 8px;
+                padding: 10px 15px;
+            }
+
+            .info-box {
+                padding: 12px;
+                margin-bottom: 15px;
+            }
+
+            .info-box h4 {
+                font-size: 1em;
+                margin-bottom: 6px;
+            }
+
+            .info-box p {
+                font-size: 0.9em;
+            }
+
+            .input-group {
+                margin-bottom: 20px;
+            }
+
+            .input-group label {
+                font-size: 1em;
+                margin-bottom: 8px;
+            }
+
+            .textarea-wrapper textarea {
+                padding: 12px;
+                font-size: 0.9em;
+                min-height: 120px;
+            }
+
+            .char-count {
+                font-size: 0.85em;
+                padding: 6px 10px;
+            }
+
+            .button-group {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .btn {
+                width: 100%;
+                padding: 12px 20px;
+                font-size: 1em;
+            }
+
+            .token-status {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .status-item {
+                min-width: 100%;
+            }
+
+            .result-box {
+                padding: 15px;
+            }
+
+            .result-box h3 {
+                font-size: 1.1em;
+                margin-bottom: 10px;
+            }
+
+            .json-content {
+                font-size: 0.85em;
+                max-height: 300px;
+            }
+
+            .copy-btn {
+                padding: 6px 12px;
+                font-size: 0.85em;
+            }
+
+            .history-section {
+                margin-top: 25px;
+                padding: 15px;
+            }
+
+            .history-header {
+                flex-direction: column;
+                gap: 10px;
+                margin-bottom: 15px;
+            }
+
+            .history-header h3 {
+                font-size: 1.2em;
+                text-align: center;
+            }
+
+            .clear-history-btn {
+                width: 100%;
+                max-width: 200px;
+                margin: 0 auto;
+            }
+
+            .history-list {
+                max-height: 300px;
+            }
+
+            .history-item {
+                padding: 12px;
+            }
+
+            .history-item-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 8px;
+            }
+
+            .history-item-actions {
+                width: 100%;
+                justify-content: space-between;
+            }
+
+            .history-item-date {
+                font-size: 0.85em;
+            }
+
+            .delete-history-btn {
+                font-size: 0.8em;
+                padding: 4px 10px;
+            }
+
+            .key-value-pair {
+                flex-direction: column;
+                gap: 5px;
+            }
+
+            .key-value-pair .key {
+                min-width: auto;
+            }
+        }
+
+        /* 小屏手机优化 */
+        @media (max-width: 480px) {
+            body {
+                padding: 8px;
+            }
+
+            .content {
+                padding: 15px 12px;
+            }
+
+            .header {
+                padding: 15px 12px;
+            }
+
+            .header h1 {
+                font-size: 1.5em;
+            }
+
+            .header p {
+                font-size: 0.9em;
+            }
+
+            .result-tab {
+                padding: 8px 12px;
+                font-size: 0.95em;
+            }
+
+            .info-box {
+                padding: 10px;
+            }
+
+            .info-box h4 {
+                font-size: 0.95em;
+            }
+
+            .info-box p {
+                font-size: 0.85em;
+            }
+
+            .input-group label {
+                font-size: 0.95em;
+            }
+
+            .textarea-wrapper textarea {
+                padding: 10px;
+                font-size: 0.85em;
+                min-height: 100px;
+            }
+
+            .char-count {
+                font-size: 0.8em;
+            }
+
+            .btn {
+                padding: 10px 16px;
+                font-size: 0.95em;
+            }
+
+            .result-box {
+                padding: 12px;
+            }
+
+            .result-box h3 {
+                font-size: 1em;
+            }
+
+            .json-content {
+                font-size: 0.8em;
+            }
+
+            .copy-btn {
+                padding: 6px 10px;
+                font-size: 0.8em;
+            }
+
+            .history-section {
+                padding: 12px;
+                margin-top: 20px;
+            }
+
+            .history-header h3 {
+                font-size: 1.1em;
+            }
+
+            .history-item {
+                padding: 10px;
+            }
+
+            .history-item-preview {
+                font-size: 0.8em;
+            }
+        }
+
+        /* 超小屏手机 */
+        @media (max-width: 360px) {
+            .header h1 {
+                font-size: 1.3em;
+            }
+
+            .header p {
+                font-size: 0.85em;
+            }
+
+            .result-tab {
+                font-size: 0.9em;
+                padding: 6px 10px;
+            }
+
+            .textarea-wrapper textarea {
+                min-height: 80px;
+                font-size: 0.8em;
+            }
+
+            .btn {
+                font-size: 0.9em;
+                padding: 8px 14px;
+            }
+
+            .result-box h3 {
+                font-size: 0.95em;
+            }
+
+            .history-header h3 {
+                font-size: 1em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔑 JWT解析工具</h1>
+            <p>解析和验证JSON Web Token，支持Header、Payload和Signature分析</p>
+        </div>
+
+        <div class="content">
+            <div class="info-box">
+                <h4>📘 JWT 说明</h4>
+                <p>JWT（JSON Web Token）是一种开放标准（RFC 7519），用于在各方之间安全地传输信息。JWT由三部分组成：Header（头部）、Payload（载荷）和Signature（签名），使用点号（.）分隔。</p>
+            </div>
+
+            <div class="input-group">
+                <label>输入JWT Token</label>
+                <div class="textarea-wrapper">
+                    <textarea id="jwtInput" placeholder="请输入完整的JWT Token，例如：eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"></textarea>
+                    <span class="char-count" id="jwtCount">0 字符</span>
+                </div>
+            </div>
+
+            <div class="button-group">
+                <button class="btn btn-primary" onclick="parseJWT()">🔍 解析JWT</button>
+                <button class="btn btn-secondary" onclick="loadSampleJWT()">📝 加载示例</button>
+                <button class="btn btn-warning" onclick="clearInput()">🗑️ 清空</button>
+            </div>
+
+            <div id="alertContainer"></div>
+
+            <div id="resultSection" class="result-section" style="display: none;">
+                <div class="token-status" id="tokenStatus"></div>
+
+                <div class="result-tabs">
+                    <div class="result-tab active" onclick="switchTab('header')">Header（头部）</div>
+                    <div class="result-tab" onclick="switchTab('payload')">Payload（载荷）</div>
+                    <div class="result-tab" onclick="switchTab('signature')">Signature（签名）</div>
+                    <div class="result-tab" onclick="switchTab('raw')">原始数据</div>
+                </div>
+
+                <div id="header" class="result-content active">
+                    <div class="result-box">
+                        <h3>📋 Header（头部）</h3>
+                        <button class="copy-btn" onclick="copyContent('headerContent')">📋 复制</button>
+                        <div id="headerContent" class="json-content"></div>
+                    </div>
+                </div>
+
+                <div id="payload" class="result-content">
+                    <div class="result-box">
+                        <h3>📦 Payload（载荷）</h3>
+                        <button class="copy-btn" onclick="copyContent('payloadContent')">📋 复制</button>
+                        <div id="payloadContent" class="json-content"></div>
+                    </div>
+                </div>
+
+                <div id="signature" class="result-content">
+                    <div class="result-box">
+                        <h3>🔐 Signature（签名）</h3>
+                        <button class="copy-btn" onclick="copyContent('signatureContent')">📋 复制</button>
+                        <div id="signatureContent" class="json-content"></div>
+                    </div>
+                </div>
+
+                <div id="raw" class="result-content">
+                    <div class="result-box">
+                        <h3>📄 原始数据</h3>
+                        <button class="copy-btn" onclick="copyContent('rawContent')">📋 复制</button>
+                        <div id="rawContent" class="json-content"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="history-section">
+                <div class="history-header">
+                    <h3>📜 历史记录</h3>
+                    <button class="clear-history-btn" onclick="clearHistory()">清空历史</button>
+                </div>
+                <div id="jwtHistory" class="history-list"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 初始化字符计数
+        const jwtInput = document.getElementById('jwtInput');
+        const jwtCount = document.getElementById('jwtCount');
+        
+        jwtInput.addEventListener('input', function() {
+            jwtCount.textContent = this.value.length + ' 字符';
+        });
+
+        // 切换标签页
+        function switchTab(tabName) {
+            document.querySelectorAll('.result-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            document.querySelectorAll('.result-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        // 显示提示信息
+        function showAlert(message, type = 'danger') {
+            const alertContainer = document.getElementById('alertContainer');
+            const alertClass = type === 'success' ? 'alert-success' : (type === 'warning' ? 'alert-warning' : 'alert-danger');
+            const icon = type === 'success' ? '✅' : (type === 'warning' ? '⚠️' : '❌');
+            
+            alertContainer.innerHTML = `
+                <div class="alert ${alertClass}">
+                    ${icon} ${message}
+                </div>
+            `;
+
+            setTimeout(() => {
+                alertContainer.innerHTML = '';
+            }, 5000);
+        }
+
+        // Base64 URL 解码
+        function base64UrlDecode(str) {
+            // 将 Base64 URL 转换为标准 Base64
+            str = str.replace(/-/g, '+').replace(/_/g, '/');
+            
+            // 补充填充字符
+            while (str.length % 4) {
+                str += '=';
+            }
+            
+            try {
+                // 解码
+                return decodeURIComponent(escape(atob(str)));
+            } catch (e) {
+                throw new Error('无效的Base64编码');
+            }
+        }
+
+        // 解析JWT
+        function parseJWT(saveHistory = true) {
+            const token = jwtInput.value.trim();
+            
+            if (!token) {
+                showAlert('请输入JWT Token');
+                document.getElementById('resultSection').style.display = 'none';
+                return;
+            }
+
+            try {
+                // 分割JWT
+                const parts = token.split('.');
+                
+                if (parts.length !== 3) {
+                    throw new Error('JWT格式错误：应该包含三个部分（Header.Payload.Signature）');
+                }
+
+                // 解析Header
+                const headerJson = base64UrlDecode(parts[0]);
+                const header = JSON.parse(headerJson);
+
+                // 解析Payload
+                const payloadJson = base64UrlDecode(parts[1]);
+                const payload = JSON.parse(payloadJson);
+
+                // Signature
+                const signature = parts[2];
+
+                // 显示结果
+                displayResults(header, payload, signature, parts);
+
+                // 只在需要时保存到历史记录
+                if (saveHistory) {
+                    saveToHistory(token, header, payload);
+                }
+
+                // 显示成功消息
+                showAlert('JWT解析成功！', 'success');
+                
+            } catch (error) {
+                showAlert('解析失败：' + error.message);
+                document.getElementById('resultSection').style.display = 'none';
+            }
+        }
+
+        // 显示解析结果
+        function displayResults(header, payload, signature, parts) {
+            // 显示结果区域
+            document.getElementById('resultSection').style.display = 'block';
+
+            // 显示Token状态
+            displayTokenStatus(payload);
+
+            // 显示Header
+            document.getElementById('headerContent').textContent = JSON.stringify(header, null, 2);
+
+            // 显示Payload
+            document.getElementById('payloadContent').textContent = JSON.stringify(payload, null, 2);
+
+            // 显示Signature
+            const signatureInfo = {
+                '签名算法': header.alg || 'Unknown',
+                '签名值': signature,
+                '说明': '签名用于验证Token的完整性和真实性。需要密钥才能验证签名是否有效。'
+            };
+            document.getElementById('signatureContent').textContent = JSON.stringify(signatureInfo, null, 2);
+
+            // 显示原始数据
+            const rawData = {
+                'Header (Base64)': parts[0],
+                'Payload (Base64)': parts[1],
+                'Signature': parts[2],
+                'Complete Token': parts.join('.')
+            };
+            document.getElementById('rawContent').textContent = JSON.stringify(rawData, null, 2);
+        }
+
+        // 显示Token状态
+        function displayTokenStatus(payload) {
+            const statusContainer = document.getElementById('tokenStatus');
+            let statusHTML = '';
+
+            // 检查是否有过期时间
+            if (payload.exp) {
+                const expDate = new Date(payload.exp * 1000);
+                const now = new Date();
+                const isExpired = now > expDate;
+
+                statusHTML += `
+                    <div class="status-item">
+                        <div class="status-label">Token状态</div>
+                        <div class="status-value ${isExpired ? 'expired' : 'valid'}">
+                            ${isExpired ? '❌ 已过期' : '✅ 有效'}
+                        </div>
+                    </div>
+                `;
+
+                statusHTML += `
+                    <div class="status-item">
+                        <div class="status-label">过期时间</div>
+                        <div class="status-value">
+                            ${expDate.toLocaleString('zh-CN')}
+                        </div>
+                    </div>
+                `;
+
+                if (!isExpired) {
+                    const timeLeft = expDate - now;
+                    const hours = Math.floor(timeLeft / (1000 * 60 * 60));
+                    const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
+                    
+                    statusHTML += `
+                        <div class="status-item">
+                            <div class="status-label">剩余时间</div>
+                            <div class="status-value">
+                                ${hours}小时 ${minutes}分钟
+                            </div>
+                        </div>
+                    `;
+                }
+            } else {
+                statusHTML += `
+                    <div class="status-item">
+                        <div class="status-label">Token状态</div>
+                        <div class="status-value">
+                            ⚠️ 无过期时间
+                        </div>
+                    </div>
+                `;
+            }
+
+            // 检查是否有签发时间
+            if (payload.iat) {
+                const iatDate = new Date(payload.iat * 1000);
+                statusHTML += `
+                    <div class="status-item">
+                        <div class="status-label">签发时间</div>
+                        <div class="status-value">
+                            ${iatDate.toLocaleString('zh-CN')}
+                        </div>
+                    </div>
+                `;
+            }
+
+            // 检查是否有Not Before时间
+            if (payload.nbf) {
+                const nbfDate = new Date(payload.nbf * 1000);
+                statusHTML += `
+                    <div class="status-item">
+                        <div class="status-label">生效时间</div>
+                        <div class="status-value">
+                            ${nbfDate.toLocaleString('zh-CN')}
+                        </div>
+                    </div>
+                `;
+            }
+
+            statusContainer.innerHTML = statusHTML;
+        }
+
+        // 复制内容
+        function copyContent(elementId) {
+            const content = document.getElementById(elementId).textContent;
+            
+            navigator.clipboard.writeText(content).then(() => {
+                const button = event.target;
+                const originalText = button.textContent;
+                button.textContent = '✅ 已复制';
+                button.style.background = '#28a745';
+                
+                setTimeout(() => {
+                    button.textContent = originalText;
+                    button.style.background = '#667eea';
+                }, 2000);
+            }).catch(err => {
+                alert('复制失败：' + err);
+            });
+        }
+
+        // 清空输入
+        function clearInput() {
+            jwtInput.value = '';
+            jwtCount.textContent = '0 字符';
+            document.getElementById('resultSection').style.display = 'none';
+            document.getElementById('alertContainer').innerHTML = '';
+        }
+
+        // 加载示例JWT
+        function loadSampleJWT() {
+            const sampleToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyLCJleHAiOjE3Mzc0ODgwMjIsImVtYWlsIjoiam9obi5kb2VAZXhhbXBsZS5jb20iLCJyb2xlIjoiYWRtaW4ifQ.4Hb-4VHM8jTgxkPLkLBmgw6FXnV8RmLOdOQlLQQvQ_E';
+            jwtInput.value = sampleToken;
+            jwtCount.textContent = sampleToken.length + ' 字符';
+            parseJWT();
+        }
+
+        // ==================== 历史记录管理 ====================
+        const MAX_HISTORY = 10;
+
+        // 保存到历史记录
+        function saveToHistory(token, header, payload) {
+            const storageKey = 'jwt_history';
+            let history = JSON.parse(localStorage.getItem(storageKey) || '[]');
+            
+            const record = {
+                id: Date.now(),
+                token: token,
+                tokenPreview: token.substring(0, 50) + '...',
+                header: header,
+                payload: payload,
+                timestamp: new Date().toLocaleString('zh-CN')
+            };
+            
+            history.unshift(record);
+            
+            if (history.length > MAX_HISTORY) {
+                history = history.slice(0, MAX_HISTORY);
+            }
+            
+            localStorage.setItem(storageKey, JSON.stringify(history));
+            loadHistory();
+        }
+
+        // 加载历史记录
+        function loadHistory() {
+            const storageKey = 'jwt_history';
+            const history = JSON.parse(localStorage.getItem(storageKey) || '[]');
+            const historyContainer = document.getElementById('jwtHistory');
+            
+            if (history.length === 0) {
+                historyContainer.innerHTML = '<div class="empty-history">📭 暂无历史记录</div>';
+                return;
+            }
+            
+            historyContainer.innerHTML = history.map(record => `
+                <div class="history-item" onclick="loadHistoryItem(${record.id})">
+                    <div class="history-item-header">
+                        <div class="history-item-actions">
+                            <div class="history-item-date">${record.timestamp}</div>
+                            <button class="delete-history-btn" onclick="deleteHistoryItem(${record.id}, event)" title="删除此记录">删除</button>
+                        </div>
+                    </div>
+                    <div class="history-item-preview" title="${escapeHtml(record.token)}">
+                        ${escapeHtml(record.tokenPreview)}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // 加载历史记录项
+        function loadHistoryItem(recordId) {
+            const storageKey = 'jwt_history';
+            const history = JSON.parse(localStorage.getItem(storageKey) || '[]');
+            const record = history.find(r => r.id === recordId);
+            
+            if (record) {
+                jwtInput.value = record.token;
+                jwtCount.textContent = record.token.length + ' 字符';
+                // 加载历史记录时不保存新的历史记录
+                parseJWT(false);
+            }
+        }
+
+        // 删除单条历史记录
+        function deleteHistoryItem(recordId, event) {
+            if (event) {
+                event.stopPropagation();
+            }
+            
+            if (confirm('确定要删除这条历史记录吗？')) {
+                const storageKey = 'jwt_history';
+                let history = JSON.parse(localStorage.getItem(storageKey) || '[]');
+                history = history.filter(r => r.id !== recordId);
+                localStorage.setItem(storageKey, JSON.stringify(history));
+                loadHistory();
+            }
+        }
+
+        // 清空历史记录
+        function clearHistory() {
+            if (confirm('确定要清空所有历史记录吗？此操作不可恢复。')) {
+                const storageKey = 'jwt_history';
+                localStorage.removeItem(storageKey);
+                loadHistory();
+            }
+        }
+
+        // HTML转义函数
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // 页面加载时加载历史记录
+        document.addEventListener('DOMContentLoaded', function() {
+            loadHistory();
+        });
+    </script>
+</body>
+</html>
+

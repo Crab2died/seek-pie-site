@@ -258,32 +258,106 @@
             color: #333;
             margin-bottom: 15px;
             font-size: 1.2em;
+            display: inline-block;
+        }
+
+        .result-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .result-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .result-content-wrapper {
+            background: #282c34;
+            border-radius: 8px;
+            overflow: hidden;
+            max-height: 600px;
+            overflow-y: auto;
         }
 
         .result-content {
-            background: white;
-            padding: 15px;
-            border-radius: 8px;
+            display: flex;
             font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
-            word-break: break-all;
-            max-height: 400px;
-            overflow-y: auto;
-            white-space: pre-wrap;
-            line-height: 1.6;
             font-size: 14px;
+            line-height: 1.8;
+            color: #abb2bf;
+        }
+
+        .line-numbers {
+            background: #21252b;
+            color: #5c6370;
+            padding: 15px 10px;
+            text-align: right;
+            user-select: none;
+            border-right: 2px solid #181a1f;
+            min-width: 50px;
+        }
+
+        .line-numbers span {
+            display: block;
+            line-height: 1.8;
+        }
+
+        .code-content {
+            padding: 15px;
+            flex: 1;
+            white-space: pre;
+            overflow-x: auto;
+        }
+
+        /* 语法高亮颜色 */
+        .keyword {
+            color: #c678dd;
+            font-weight: bold;
+        }
+
+        .string {
+            color: #98c379;
+        }
+
+        .number {
+            color: #d19a66;
+        }
+
+        .comment {
+            color: #5c6370;
+            font-style: italic;
+        }
+
+        .function {
+            color: #61afef;
+        }
+
+        .property {
+            color: #e06c75;
+        }
+
+        .operator {
+            color: #56b6c2;
+        }
+
+        .tag {
+            color: #e06c75;
+        }
+
+        .attribute {
+            color: #d19a66;
         }
 
         .copy-btn {
-            position: absolute;
-            top: 15px;
-            right: 15px;
-            padding: 8px 16px;
+            padding: 6px 12px;
             background: #667eea;
             color: white;
             border: none;
-            border-radius: 8px;
+            border-radius: 6px;
             cursor: pointer;
-            font-size: 0.9em;
+            font-size: 0.85em;
             transition: all 0.3s ease;
         }
 
@@ -327,6 +401,44 @@
         .info-box p {
             color: #666;
             line-height: 1.6;
+        }
+
+        /* 美化滚动条 */
+        .result-content-wrapper::-webkit-scrollbar {
+            width: 10px;
+            height: 10px;
+        }
+
+        .result-content-wrapper::-webkit-scrollbar-track {
+            background: #21252b;
+            border-radius: 5px;
+        }
+
+        .result-content-wrapper::-webkit-scrollbar-thumb {
+            background: #4b5263;
+            border-radius: 5px;
+        }
+
+        .result-content-wrapper::-webkit-scrollbar-thumb:hover {
+            background: #5c6370;
+        }
+
+        .code-content::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        .code-content::-webkit-scrollbar-track {
+            background: #282c34;
+        }
+
+        .code-content::-webkit-scrollbar-thumb {
+            background: #4b5263;
+            border-radius: 4px;
+        }
+
+        .code-content::-webkit-scrollbar-thumb:hover {
+            background: #5c6370;
         }
 
         /* 移动端优化 */
@@ -377,6 +489,30 @@
                 flex-direction: column;
                 align-items: flex-start;
             }
+
+            .result-header {
+                flex-direction: column;
+                gap: 10px;
+                align-items: flex-start;
+            }
+
+            .result-actions {
+                width: 100%;
+            }
+
+            .copy-btn {
+                width: 100%;
+            }
+
+            .line-numbers {
+                min-width: 35px;
+                padding: 15px 5px;
+                font-size: 12px;
+            }
+
+            .code-content {
+                font-size: 12px;
+            }
         }
     </style>
 </head>
@@ -384,7 +520,7 @@
     <div class="container">
         <div class="header">
             <h1>✨ 代码格式化工具</h1>
-            <p>支持12种编程语言和数据格式的格式化、压缩和美化操作</p>
+            <p>支持10种编程语言和数据格式的格式化、压缩和美化操作</p>
         </div>
 
         <div class="content">
@@ -396,8 +532,6 @@
                 <div class="formatter-tab" onclick="switchTab('javascript')">JavaScript</div>
                 <div class="formatter-tab" onclick="switchTab('typescript')">TypeScript</div>
                 <div class="formatter-tab" onclick="switchTab('sql')">SQL</div>
-                <div class="formatter-tab" onclick="switchTab('yaml')">YAML</div>
-                <div class="formatter-tab" onclick="switchTab('markdown')">Markdown</div>
                 <div class="formatter-tab" onclick="switchTab('python')">Python</div>
                 <div class="formatter-tab" onclick="switchTab('java')">Java</div>
                 <div class="formatter-tab" onclick="switchTab('cpp')">C/C++</div>
@@ -678,74 +812,6 @@
                 <div id="tsResult"></div>
             </div>
 
-            <!-- YAML 格式化 -->
-            <div id="yaml" class="formatter-content">
-                <div class="info-box">
-                    <h4>📘 YAML 格式化说明</h4>
-                    <p>YAML是一种人类友好的数据序列化格式，常用于配置文件。支持格式化和JSON互转。</p>
-                </div>
-
-                <div class="input-group">
-                    <label>输入YAML或JSON代码</label>
-                    <div class="textarea-wrapper">
-                        <textarea id="yamlInput" placeholder='输入YAML或JSON代码，例如：name: 张三
-age: 25
-city: 北京'></textarea>
-                        <span class="char-count" id="yamlCount">0 字符</span>
-                    </div>
-                </div>
-
-                <div class="options-group">
-                    <h4>⚙️ 格式化选项</h4>
-                    <div class="option-row">
-                        <div class="option-item">
-                            <label>缩进空格数：</label>
-                            <select id="yamlIndent">
-                                <option value="2" selected>2空格</option>
-                                <option value="4">4空格</option>
-                            </select>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="button-group">
-                    <button class="btn btn-primary" onclick="formatYAML()">✨ 格式化</button>
-                    <button class="btn btn-success" onclick="yamlToJSON()">🔄 转JSON</button>
-                    <button class="btn btn-success" onclick="jsonToYAML()">🔄 转YAML</button>
-                    <button class="btn btn-warning" onclick="clearInput('yamlInput')">🗑️ 清空</button>
-                </div>
-
-                <div id="yamlResult"></div>
-            </div>
-
-            <!-- Markdown 格式化 -->
-            <div id="markdown" class="formatter-content">
-                <div class="info-box">
-                    <h4>📘 Markdown 格式化说明</h4>
-                    <p>Markdown是一种轻量级标记语言，常用于编写文档。支持格式化和预览。</p>
-                </div>
-
-                <div class="input-group">
-                    <label>输入Markdown代码</label>
-                    <div class="textarea-wrapper">
-                        <textarea id="mdInput" placeholder='输入Markdown代码，例如：
-# 标题
-## 二级标题
-- 列表项1
-- 列表项2'></textarea>
-                        <span class="char-count" id="mdCount">0 字符</span>
-                    </div>
-                </div>
-
-                <div class="button-group">
-                    <button class="btn btn-primary" onclick="formatMarkdown()">✨ 格式化</button>
-                    <button class="btn btn-secondary" onclick="compressMarkdown()">📦 压缩</button>
-                    <button class="btn btn-warning" onclick="clearInput('mdInput')">🗑️ 清空</button>
-                </div>
-
-                <div id="mdResult"></div>
-            </div>
-
             <!-- Python 格式化 -->
             <div id="python" class="formatter-content">
                 <div class="info-box">
@@ -891,7 +957,7 @@ int main(){printf("Hello");return 0;}'></textarea>
         }
 
         // 显示结果
-        function showResult(containerId, result, isError = false) {
+        function showResult(containerId, result, isError = false, language = 'text') {
             const container = document.getElementById(containerId);
             if (isError) {
                 container.innerHTML = `
@@ -900,20 +966,237 @@ int main(){printf("Hello");return 0;}'></textarea>
                     </div>
                 `;
             } else {
+                const lines = result.split('\n');
+                const lineCount = lines.length;
+                
+                // 生成行号
+                let lineNumbers = '';
+                for (let i = 1; i <= lineCount; i++) {
+                    lineNumbers += `<span>${i}</span>`;
+                }
+                
+                // 应用语法高亮
+                const highlightedCode = highlightSyntax(result, language);
+                
                 container.innerHTML = `
                     <div class="result-box">
-                        <h3>格式化结果：</h3>
-                        <button class="copy-btn" onclick="copyResult(this)">📋 复制</button>
-                        <div class="result-content">${escapeHtml(result)}</div>
+                        <div class="result-header">
+                            <h3>✨ 格式化结果 (${lineCount} 行)</h3>
+                            <div class="result-actions">
+                                <button class="copy-btn" onclick="copyResult(this)">📋 复制</button>
+                            </div>
+                        </div>
+                        <div class="result-content-wrapper">
+                            <div class="result-content">
+                                <div class="line-numbers">${lineNumbers}</div>
+                                <div class="code-content">${highlightedCode}</div>
+                            </div>
+                        </div>
                     </div>
                 `;
             }
         }
 
+        // 语法高亮函数（改进版，避免重复匹配）
+        function highlightSyntax(code, language) {
+            let highlighted = escapeHtml(code);
+            
+            switch(language) {
+                case 'json':
+                    // JSON 高亮 - 按行处理避免冲突
+                    highlighted = highlighted.split('\n').map(line => {
+                        // 先匹配属性名（在冒号前的字符串）
+                        line = line.replace(/("(?:[^"\\]|\\.)*")\s*:/g, '<span class="property">$1</span>:');
+                        // 再匹配值中的字符串（在冒号后的字符串）
+                        line = line.replace(/:\s*("(?:[^"\\]|\\.)*")/g, ': <span class="string">$1</span>');
+                        // 匹配数字值
+                        line = line.replace(/:\s*(\d+\.?\d*)\b/g, ': <span class="number">$1</span>');
+                        // 匹配布尔值和null
+                        line = line.replace(/:\s*\b(true|false|null)\b/g, ': <span class="keyword">$1</span>');
+                        return line;
+                    }).join('\n');
+                    break;
+                    
+                case 'xml':
+                case 'html':
+                    // XML/HTML 高亮
+                    highlighted = highlighted
+                        .replace(/(&lt;\/?)([\w-]+)/g, '$1<span class="tag">$2</span>')
+                        .replace(/([\w-]+)=/g, '<span class="attribute">$1</span>=')
+                        .replace(/="([^"]*)"/g, '=<span class="string">"$1"</span>');
+                    break;
+                    
+                case 'css':
+                    // CSS 高亮 - 按行处理
+                    highlighted = highlighted.split('\n').map(line => {
+                        // 注释
+                        if (line.includes('/*') || line.includes('*/') || line.trim().startsWith('*')) {
+                            return '<span class="comment">' + line + '</span>';
+                        }
+                        // 选择器
+                        line = line.replace(/^(\s*)([\w\-#.:,\s\[\]="']+)(\s*\{)/, '$1<span class="tag">$2</span>$3');
+                        // 属性名
+                        line = line.replace(/(\s+)([\w-]+)(\s*):/g, '$1<span class="property">$2</span>$3:');
+                        // 属性值
+                        line = line.replace(/:\s*([^;{]+)(;?)/g, ': <span class="string">$1</span>$2');
+                        return line;
+                    }).join('\n');
+                    break;
+                    
+                case 'javascript':
+                case 'typescript':
+                    // JavaScript/TypeScript 高亮 - 先处理字符串和注释
+                    const jsTokens = [];
+                    let jsTemp = highlighted;
+                    
+                    // 保护字符串
+                    jsTemp = jsTemp.replace(/("(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*'|`(?:[^`\\]|\\.)*`)/g, (match) => {
+                        const index = jsTokens.length;
+                        jsTokens.push('<span class="string">' + match + '</span>');
+                        return `__STRING_${index}__`;
+                    });
+                    
+                    // 保护注释
+                    jsTemp = jsTemp.replace(/\/\*[\s\S]*?\*\//g, (match) => {
+                        const index = jsTokens.length;
+                        jsTokens.push('<span class="comment">' + match + '</span>');
+                        return `__COMMENT_${index}__`;
+                    });
+                    jsTemp = jsTemp.replace(/\/\/.*/g, (match) => {
+                        const index = jsTokens.length;
+                        jsTokens.push('<span class="comment">' + match + '</span>');
+                        return `__COMMENT_${index}__`;
+                    });
+                    
+                    // 高亮关键字
+                    jsTemp = jsTemp.replace(/\b(function|const|let|var|if|else|for|while|return|class|import|export|from|async|await|new|try|catch|throw|switch|case|break|continue|typeof|instanceof)\b/g, '<span class="keyword">$1</span>');
+                    
+                    // 高亮数字
+                    jsTemp = jsTemp.replace(/\b(\d+\.?\d*)\b/g, '<span class="number">$1</span>');
+                    
+                    // 高亮函数名
+                    jsTemp = jsTemp.replace(/\b([a-zA-Z_$][\w$]*)\s*\(/g, '<span class="function">$1</span>(');
+                    
+                    // 还原保护的内容
+                    highlighted = jsTemp.replace(/__STRING_(\d+)__|__COMMENT_(\d+)__/g, (match, strIndex, comIndex) => {
+                        return jsTokens[strIndex || comIndex];
+                    });
+                    break;
+                    
+                case 'sql':
+                    // SQL 高亮 - 先处理注释和字符串
+                    const sqlTokens = [];
+                    let sqlTemp = highlighted;
+                    
+                    // 保护字符串
+                    sqlTemp = sqlTemp.replace(/('(?:[^'\\]|\\.)*')/g, (match) => {
+                        const index = sqlTokens.length;
+                        sqlTokens.push('<span class="string">' + match + '</span>');
+                        return `__STRING_${index}__`;
+                    });
+                    
+                    // 保护注释
+                    sqlTemp = sqlTemp.replace(/--.*$/gm, (match) => {
+                        const index = sqlTokens.length;
+                        sqlTokens.push('<span class="comment">' + match + '</span>');
+                        return `__COMMENT_${index}__`;
+                    });
+                    
+                    // 高亮关键字
+                    sqlTemp = sqlTemp.replace(/\b(SELECT|FROM|WHERE|INSERT|UPDATE|DELETE|CREATE|DROP|ALTER|TABLE|JOIN|LEFT|RIGHT|INNER|OUTER|ON|AND|OR|ORDER|BY|GROUP|HAVING|LIMIT|AS|INTO|VALUES|SET|UNION|CASE|WHEN|THEN|ELSE|END)\b/gi, '<span class="keyword">$1</span>');
+                    
+                    // 高亮数字
+                    sqlTemp = sqlTemp.replace(/\b(\d+\.?\d*)\b/g, '<span class="number">$1</span>');
+                    
+                    // 还原
+                    highlighted = sqlTemp.replace(/__STRING_(\d+)__|__COMMENT_(\d+)__/g, (match, strIndex, comIndex) => {
+                        return sqlTokens[strIndex || comIndex];
+                    });
+                    break;
+                    
+                case 'python':
+                    // Python 高亮 - 先处理字符串和注释
+                    const pyTokens = [];
+                    let pyTemp = highlighted;
+                    
+                    // 保护字符串
+                    pyTemp = pyTemp.replace(/("(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*')/g, (match) => {
+                        const index = pyTokens.length;
+                        pyTokens.push('<span class="string">' + match + '</span>');
+                        return `__STRING_${index}__`;
+                    });
+                    
+                    // 保护注释
+                    pyTemp = pyTemp.replace(/#.*/g, (match) => {
+                        const index = pyTokens.length;
+                        pyTokens.push('<span class="comment">' + match + '</span>');
+                        return `__COMMENT_${index}__`;
+                    });
+                    
+                    // 高亮关键字
+                    pyTemp = pyTemp.replace(/\b(def|class|if|elif|else|for|while|return|import|from|as|try|except|finally|with|lambda|pass|break|continue|True|False|None)\b/g, '<span class="keyword">$1</span>');
+                    
+                    // 高亮数字
+                    pyTemp = pyTemp.replace(/\b(\d+\.?\d*)\b/g, '<span class="number">$1</span>');
+                    
+                    // 高亮函数名
+                    pyTemp = pyTemp.replace(/\b([a-zA-Z_][\w]*)\s*\(/g, '<span class="function">$1</span>(');
+                    
+                    // 还原
+                    highlighted = pyTemp.replace(/__STRING_(\d+)__|__COMMENT_(\d+)__/g, (match, strIndex, comIndex) => {
+                        return pyTokens[strIndex || comIndex];
+                    });
+                    break;
+                    
+                case 'java':
+                case 'cpp':
+                    // Java/C++ 高亮 - 先处理字符串和注释
+                    const javaTokens = [];
+                    let javaTemp = highlighted;
+                    
+                    // 保护字符串
+                    javaTemp = javaTemp.replace(/("(?:[^"\\]|\\.)*")/g, (match) => {
+                        const index = javaTokens.length;
+                        javaTokens.push('<span class="string">' + match + '</span>');
+                        return `__STRING_${index}__`;
+                    });
+                    
+                    // 保护注释
+                    javaTemp = javaTemp.replace(/\/\*[\s\S]*?\*\//g, (match) => {
+                        const index = javaTokens.length;
+                        javaTokens.push('<span class="comment">' + match + '</span>');
+                        return `__COMMENT_${index}__`;
+                    });
+                    javaTemp = javaTemp.replace(/\/\/.*/g, (match) => {
+                        const index = javaTokens.length;
+                        javaTokens.push('<span class="comment">' + match + '</span>');
+                        return `__COMMENT_${index}__`;
+                    });
+                    
+                    // 高亮关键字
+                    javaTemp = javaTemp.replace(/\b(public|private|protected|class|interface|extends|implements|static|void|int|double|float|long|boolean|char|if|else|for|while|return|new|import|package|try|catch|finally|throw|throws|String|System)\b/g, '<span class="keyword">$1</span>');
+                    
+                    // 高亮数字
+                    javaTemp = javaTemp.replace(/\b(\d+\.?\d*)\b/g, '<span class="number">$1</span>');
+                    
+                    // 高亮函数名
+                    javaTemp = javaTemp.replace(/\b([a-zA-Z_][\w]*)\s*\(/g, '<span class="function">$1</span>(');
+                    
+                    // 还原
+                    highlighted = javaTemp.replace(/__STRING_(\d+)__|__COMMENT_(\d+)__/g, (match, strIndex, comIndex) => {
+                        return javaTokens[strIndex || comIndex];
+                    });
+                    break;
+            }
+            
+            return highlighted;
+        }
+
         // 复制结果
         function copyResult(button) {
-            const resultContent = button.parentElement.querySelector('.result-content');
-            const text = resultContent.textContent;
+            const resultBox = button.closest('.result-box');
+            const codeContent = resultBox.querySelector('.code-content');
+            const text = codeContent.textContent;
             
             navigator.clipboard.writeText(text).then(() => {
                 const originalText = button.textContent;
@@ -967,7 +1250,7 @@ int main(){printf("Hello");return 0;}'></textarea>
                     formatted = JSON.stringify(parsed, null, indent);
                 }
                 
-                showResult('jsonResult', formatted);
+                showResult('jsonResult', formatted, false, 'json');
             } catch (error) {
                 showResult('jsonResult', 'JSON解析错误: ' + error.message, true);
             }
@@ -995,7 +1278,7 @@ int main(){printf("Hello");return 0;}'></textarea>
             try {
                 const parsed = JSON.parse(input);
                 const compressed = JSON.stringify(parsed);
-                showResult('jsonResult', compressed);
+                showResult('jsonResult', compressed, false, 'json');
             } catch (error) {
                 showResult('jsonResult', 'JSON解析错误: ' + error.message, true);
             }
@@ -1034,7 +1317,7 @@ int main(){printf("Hello");return 0;}'></textarea>
                 const indent = indentValue === 'tab' ? '\t' : ' '.repeat(parseInt(indentValue));
                 
                 const formatted = formatXMLString(input, indent);
-                showResult('xmlResult', formatted);
+                showResult('xmlResult', formatted, false, 'xml');
             } catch (error) {
                 showResult('xmlResult', 'XML格式化错误: ' + error.message, true);
             }
@@ -1071,7 +1354,7 @@ int main(){printf("Hello");return 0;}'></textarea>
             }
 
             const compressed = input.replace(/>\s+</g, '><').replace(/\s+/g, ' ').trim();
-            showResult('xmlResult', compressed);
+            showResult('xmlResult', compressed, false, 'xml');
         }
 
         // ==================== HTML 格式化 ====================
@@ -1087,7 +1370,7 @@ int main(){printf("Hello");return 0;}'></textarea>
                 const indent = indentValue === 'tab' ? '\t' : ' '.repeat(parseInt(indentValue));
                 
                 const formatted = formatHTMLString(input, indent);
-                showResult('htmlResult', formatted);
+                showResult('htmlResult', formatted, false, 'html');
             } catch (error) {
                 showResult('htmlResult', 'HTML格式化错误: ' + error.message, true);
             }
@@ -1133,7 +1416,7 @@ int main(){printf("Hello");return 0;}'></textarea>
             }
 
             const compressed = input.replace(/>\s+</g, '><').replace(/\s+/g, ' ').trim();
-            showResult('htmlResult', compressed);
+            showResult('htmlResult', compressed, false, 'html');
         }
 
         // ==================== CSS 格式化 ====================
@@ -1149,7 +1432,7 @@ int main(){printf("Hello");return 0;}'></textarea>
                 const indent = indentValue === 'tab' ? '\t' : ' '.repeat(parseInt(indentValue));
                 
                 const formatted = formatCSSString(input, indent);
-                showResult('cssResult', formatted);
+                showResult('cssResult', formatted, false, 'css');
             } catch (error) {
                 showResult('cssResult', 'CSS格式化错误: ' + error.message, true);
             }
@@ -1200,7 +1483,7 @@ int main(){printf("Hello");return 0;}'></textarea>
                 .replace(/\s*,\s*/g, ',')
                 .replace(/\s*:\s*/g, ':')
                 .trim();
-            showResult('cssResult', compressed);
+            showResult('cssResult', compressed, false, 'css');
         }
 
         // ==================== JavaScript 格式化 ====================
@@ -1216,7 +1499,7 @@ int main(){printf("Hello");return 0;}'></textarea>
                 const indent = indentValue === 'tab' ? '\t' : ' '.repeat(parseInt(indentValue));
                 
                 const formatted = formatJSString(input, indent);
-                showResult('jsResult', formatted);
+                showResult('jsResult', formatted, false, 'javascript');
             } catch (error) {
                 showResult('jsResult', 'JavaScript格式化错误: ' + error.message, true);
             }
@@ -1267,7 +1550,7 @@ int main(){printf("Hello");return 0;}'></textarea>
                 .replace(/\s*;\s*/g, ';')
                 .replace(/\s*,\s*/g, ',')
                 .trim();
-            showResult('jsResult', compressed);
+            showResult('jsResult', compressed, false, 'javascript');
         }
 
         // ==================== SQL 格式化 ====================
@@ -1284,7 +1567,7 @@ int main(){printf("Hello");return 0;}'></textarea>
                 const indent = indentValue === 'tab' ? '\t' : ' '.repeat(parseInt(indentValue));
                 
                 const formatted = formatSQLString(input, indent, uppercase);
-                showResult('sqlResult', formatted);
+                showResult('sqlResult', formatted, false, 'sql');
             } catch (error) {
                 showResult('sqlResult', 'SQL格式化错误: ' + error.message, true);
             }
@@ -1326,7 +1609,7 @@ int main(){printf("Hello");return 0;}'></textarea>
             const compressed = input
                 .replace(/\s+/g, ' ')
                 .trim();
-            showResult('sqlResult', compressed);
+            showResult('sqlResult', compressed, false, 'sql');
         }
 
         // ==================== TypeScript 格式化 ====================
@@ -1343,7 +1626,7 @@ int main(){printf("Hello");return 0;}'></textarea>
                 
                 // TypeScript格式化（类似JavaScript）
                 const formatted = formatJSString(input, indent);
-                showResult('tsResult', formatted);
+                showResult('tsResult', formatted, false, 'typescript');
             } catch (error) {
                 showResult('tsResult', 'TypeScript格式化错误: ' + error.message, true);
             }
@@ -1365,157 +1648,7 @@ int main(){printf("Hello");return 0;}'></textarea>
                 .replace(/\s*;\s*/g, ';')
                 .replace(/\s*,\s*/g, ',')
                 .trim();
-            showResult('tsResult', compressed);
-        }
-
-        // ==================== YAML 格式化 ====================
-        function formatYAML() {
-            const input = document.getElementById('yamlInput').value.trim();
-            if (!input) {
-                showResult('yamlResult', '请输入YAML代码', true);
-                return;
-            }
-
-            try {
-                const indentValue = document.getElementById('yamlIndent').value;
-                const indent = ' '.repeat(parseInt(indentValue));
-                
-                // 简单的YAML格式化
-                let formatted = input;
-                const lines = formatted.split('\n');
-                let result = '';
-                let level = 0;
-                
-                lines.forEach(line => {
-                    const trimmed = line.trim();
-                    if (!trimmed) return;
-                    
-                    // 检测缩进级别
-                    if (trimmed.endsWith(':') && !trimmed.includes(': ')) {
-                        result += indent.repeat(level) + trimmed + '\n';
-                        level++;
-                    } else if (trimmed.startsWith('- ')) {
-                        result += indent.repeat(level) + trimmed + '\n';
-                    } else {
-                        if (level > 0 && !trimmed.endsWith(':')) {
-                            result += indent.repeat(level) + trimmed + '\n';
-                        } else {
-                            result += trimmed + '\n';
-                            level = 0;
-                        }
-                    }
-                });
-                
-                showResult('yamlResult', result.trim());
-            } catch (error) {
-                showResult('yamlResult', 'YAML格式化错误: ' + error.message, true);
-            }
-        }
-
-        function yamlToJSON() {
-            const input = document.getElementById('yamlInput').value.trim();
-            if (!input) {
-                showResult('yamlResult', '请输入YAML代码', true);
-                return;
-            }
-
-            try {
-                // 简单的YAML到JSON转换
-                const lines = input.split('\n').filter(line => line.trim());
-                let json = {};
-                let currentKey = null;
-                
-                lines.forEach(line => {
-                    const trimmed = line.trim();
-                    if (trimmed.includes(': ')) {
-                        const [key, value] = trimmed.split(': ');
-                        json[key.trim()] = isNaN(value) ? value.trim() : Number(value);
-                    }
-                });
-                
-                const formatted = JSON.stringify(json, null, 2);
-                showResult('yamlResult', formatted);
-            } catch (error) {
-                showResult('yamlResult', 'YAML转JSON错误: ' + error.message, true);
-            }
-        }
-
-        function jsonToYAML() {
-            const input = document.getElementById('yamlInput').value.trim();
-            if (!input) {
-                showResult('yamlResult', '请输入JSON代码', true);
-                return;
-            }
-
-            try {
-                const json = JSON.parse(input);
-                const indentValue = document.getElementById('yamlIndent').value;
-                const indent = ' '.repeat(parseInt(indentValue));
-                
-                let yaml = '';
-                function convertToYAML(obj, level = 0) {
-                    for (let key in obj) {
-                        const value = obj[key];
-                        if (typeof value === 'object' && !Array.isArray(value)) {
-                            yaml += indent.repeat(level) + key + ':\n';
-                            convertToYAML(value, level + 1);
-                        } else if (Array.isArray(value)) {
-                            yaml += indent.repeat(level) + key + ':\n';
-                            value.forEach(item => {
-                                if (typeof item === 'object') {
-                                    yaml += indent.repeat(level + 1) + '-\n';
-                                    convertToYAML(item, level + 2);
-                                } else {
-                                    yaml += indent.repeat(level + 1) + '- ' + item + '\n';
-                                }
-                            });
-                        } else {
-                            yaml += indent.repeat(level) + key + ': ' + value + '\n';
-                        }
-                    }
-                }
-                
-                convertToYAML(json);
-                showResult('yamlResult', yaml.trim());
-            } catch (error) {
-                showResult('yamlResult', 'JSON转YAML错误: ' + error.message, true);
-            }
-        }
-
-        // ==================== Markdown 格式化 ====================
-        function formatMarkdown() {
-            const input = document.getElementById('mdInput').value.trim();
-            if (!input) {
-                showResult('mdResult', '请输入Markdown代码', true);
-                return;
-            }
-
-            try {
-                // Markdown格式化
-                let formatted = input
-                    .replace(/^(#{1,6})\s*(.+)$/gm, '$1 $2')  // 标题格式化
-                    .replace(/^([*+-])\s*(.+)$/gm, '$1 $2')   // 列表格式化
-                    .replace(/\n{3,}/g, '\n\n')                // 移除多余空行
-                    .trim();
-                
-                showResult('mdResult', formatted);
-            } catch (error) {
-                showResult('mdResult', 'Markdown格式化错误: ' + error.message, true);
-            }
-        }
-
-        function compressMarkdown() {
-            const input = document.getElementById('mdInput').value.trim();
-            if (!input) {
-                showResult('mdResult', '请输入Markdown代码', true);
-                return;
-            }
-
-            const compressed = input
-                .replace(/\n{2,}/g, '\n')  // 移除空行
-                .replace(/\s+/g, ' ')       // 压缩空格
-                .trim();
-            showResult('mdResult', compressed);
+            showResult('tsResult', compressed, false, 'typescript');
         }
 
         // ==================== Python 格式化 ====================
@@ -1568,7 +1701,7 @@ int main(){printf("Hello");return 0;}'></textarea>
                     }
                 });
                 
-                showResult('pythonResult', result.trim());
+                showResult('pythonResult', result.trim(), false, 'python');
             } catch (error) {
                 showResult('pythonResult', 'Python格式化错误: ' + error.message, true);
             }
@@ -1588,7 +1721,7 @@ int main(){printf("Hello");return 0;}'></textarea>
                 .replace(/\s+/g, ' ')
                 .replace(/:\s+/g, ':')
                 .trim();
-            showResult('pythonResult', compressed);
+            showResult('pythonResult', compressed, false, 'python');
         }
 
         // ==================== Java 格式化 ====================
@@ -1605,7 +1738,7 @@ int main(){printf("Hello");return 0;}'></textarea>
                 
                 // Java格式化（类似C风格）
                 const formatted = formatCStyleCode(input, indent);
-                showResult('javaResult', formatted);
+                showResult('javaResult', formatted, false, 'java');
             } catch (error) {
                 showResult('javaResult', 'Java格式化错误: ' + error.message, true);
             }
@@ -1626,7 +1759,7 @@ int main(){printf("Hello");return 0;}'></textarea>
                 .replace(/\s*}\s*/g, '}')
                 .replace(/\s*;\s*/g, ';')
                 .trim();
-            showResult('javaResult', compressed);
+            showResult('javaResult', compressed, false, 'java');
         }
 
         // ==================== C/C++ 格式化 ====================
@@ -1643,7 +1776,7 @@ int main(){printf("Hello");return 0;}'></textarea>
                 
                 // C/C++格式化
                 const formatted = formatCStyleCode(input, indent);
-                showResult('cppResult', formatted);
+                showResult('cppResult', formatted, false, 'cpp');
             } catch (error) {
                 showResult('cppResult', 'C/C++格式化错误: ' + error.message, true);
             }
@@ -1664,7 +1797,7 @@ int main(){printf("Hello");return 0;}'></textarea>
                 .replace(/\s*}\s*/g, '}')
                 .replace(/\s*;\s*/g, ';')
                 .trim();
-            showResult('cppResult', compressed);
+            showResult('cppResult', compressed, false, 'cpp');
         }
 
         // C风格代码格式化通用函数

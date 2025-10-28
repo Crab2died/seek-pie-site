@@ -1,0 +1,1130 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>报表展示工具</title>
+    <script src="libs/chart.umd.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Microsoft YaHei', 'Segoe UI', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            font-weight: 300;
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .section {
+            margin-bottom: 30px;
+        }
+
+        .section-title {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .chart-types-section {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 30px;
+        }
+
+         .chart-types {
+             display: grid;
+             grid-template-columns: repeat(3, 1fr);
+             gap: 15px;
+             margin-bottom: 15px;
+         }
+
+         .chart-type-btn {
+             padding: 15px 10px;
+             border: 2px solid #e1e5e9;
+             background: white;
+             border-radius: 10px;
+             cursor: pointer;
+             transition: all 0.3s ease;
+             font-size: 0.9rem;
+             display: flex;
+             flex-direction: column;
+             align-items: center;
+             gap: 8px;
+             text-align: center;
+         }
+
+         .chart-type-btn:hover {
+             border-color: #4facfe;
+             transform: translateY(-2px);
+             box-shadow: 0 4px 12px rgba(79, 172, 254, 0.2);
+         }
+
+         .chart-type-btn.selected {
+             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+             color: white;
+             border-color: #667eea;
+             transform: translateY(-2px);
+             box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+         }
+
+         .chart-type-btn .icon {
+             font-size: 1.8rem;
+         }
+
+        .multi-select-hint {
+            font-size: 0.9rem;
+            color: #666;
+            text-align: center;
+            font-style: italic;
+            margin-top: 10px;
+        }
+
+        .config-section {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 30px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #555;
+            font-size: 1em;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: all 0.3s ease;
+        }
+
+        input[type="text"]:focus {
+            outline: none;
+            border-color: #4facfe;
+            box-shadow: 0 0 0 3px rgba(79, 172, 254, 0.1);
+        }
+
+        textarea {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.95rem;
+            resize: vertical;
+            min-height: 150px;
+            transition: all 0.3s ease;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: #4facfe;
+            box-shadow: 0 0 0 3px rgba(79, 172, 254, 0.1);
+        }
+
+        .btn-group {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .btn {
+            padding: 14px 24px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+        }
+
+        .btn-secondary:hover {
+            box-shadow: 0 6px 20px rgba(108, 117, 125, 0.4);
+        }
+
+        .btn-export {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+
+        .btn-export:hover {
+            box-shadow: 0 6px 20px rgba(79, 172, 254, 0.4);
+        }
+
+        .example-section {
+            background: linear-gradient(135deg, rgba(79, 172, 254, 0.1) 0%, rgba(0, 242, 254, 0.1) 100%);
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 4px solid #4facfe;
+        }
+
+        .example-section h4 {
+            font-size: 1em;
+            margin-bottom: 10px;
+            color: #333;
+            font-weight: 600;
+        }
+
+        .example-section code {
+            display: block;
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            overflow-x: auto;
+            white-space: pre;
+            border: 1px solid #e1e5e9;
+        }
+
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+            gap: 25px;
+            margin-top: 20px;
+        }
+
+        .chart-container {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            position: relative;
+        }
+
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #e1e5e9;
+        }
+
+        .chart-header h4 {
+            color: #333;
+            font-size: 1.2em;
+            font-weight: 600;
+        }
+
+        .chart-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .icon-btn {
+            background: white;
+            border: 2px solid #e1e5e9;
+            cursor: pointer;
+            font-size: 1.3rem;
+            padding: 8px 12px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .icon-btn:hover {
+            transform: scale(1.1);
+            border-color: #4facfe;
+            box-shadow: 0 2px 8px rgba(79, 172, 254, 0.3);
+        }
+
+        .chart-canvas-wrapper {
+            position: relative;
+            height: 450px;
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+            /* 确保canvas能够正确响应 */
+            min-height: 300px;
+        }
+
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 400px;
+            color: #999;
+            text-align: center;
+        }
+
+        .empty-state .icon {
+            font-size: 5rem;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+
+        .empty-state p {
+            font-size: 1.2rem;
+        }
+
+        /* 移动端适配 */
+        @media (max-width: 1024px) {
+            .charts-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+         @media (max-width: 768px) {
+             body {
+                 padding: 5px;
+             }
+
+             .container {
+                 border-radius: 10px;
+             }
+
+             .header {
+                 padding: 15px 10px;
+                 border-radius: 10px 10px 0 0;
+             }
+
+             .header h1 {
+                 font-size: 1.8em;
+             }
+
+             .header p {
+                 font-size: 0.95em;
+             }
+
+             .content {
+                 padding: 12px 8px;
+             }
+
+             .section {
+                 margin-bottom: 15px;
+             }
+
+             .section-title {
+                 font-size: 1.2em;
+                 margin-bottom: 12px;
+             }
+
+             /* 图表类型按钮等比例缩小 */
+             .chart-types {
+                 transform: scale(0.85);
+                 transform-origin: center;
+                 margin: -15px -10px 0 -10px;
+             }
+
+             .multi-select-hint {
+                 font-size: 0.85rem;
+                 margin-top: 8px;
+             }
+
+             .chart-types-section,
+             .config-section {
+                 padding: 12px;
+                 margin-bottom: 12px;
+                 border-radius: 10px;
+             }
+
+             .form-group {
+                 margin-bottom: 12px;
+             }
+
+             input[type="text"],
+             textarea {
+                 padding: 10px;
+                 font-size: 0.95em;
+             }
+
+             textarea {
+                 min-height: 120px;
+             }
+
+             .btn-group {
+                 grid-template-columns: 1fr;
+                 gap: 8px;
+                 margin-bottom: 12px;
+             }
+
+             .btn {
+                 padding: 12px 18px;
+                 font-size: 0.95em;
+             }
+
+             .example-section {
+                 padding: 10px;
+                 margin-top: 12px;
+             }
+
+             .example-section code {
+                 padding: 10px;
+                 font-size: 0.85rem;
+             }
+
+             .charts-grid {
+                 grid-template-columns: 1fr;
+                 gap: 12px;
+                 margin-top: 12px;
+             }
+
+             /* 图表容器等比例缩小 */
+             .chart-container {
+                 transform: scale(0.9);
+                 transform-origin: center top;
+                 margin-bottom: -30px;
+                 padding: 12px;
+                 border-radius: 10px;
+             }
+
+             .chart-header {
+                 flex-direction: row;
+                 flex-wrap: wrap;
+                 margin-bottom: 12px;
+                 padding-bottom: 10px;
+             }
+
+             .chart-header h4 {
+                 font-size: 1em;
+             }
+
+             .icon-btn {
+                 font-size: 1.2rem;
+                 padding: 6px 10px;
+             }
+
+             .chart-canvas-wrapper {
+                 padding: 10px;
+                 border-radius: 8px;
+             }
+         }
+
+         @media (max-width: 480px) {
+             body {
+                 padding: 3px;
+             }
+
+             .container {
+                 border-radius: 8px;
+             }
+
+             .header {
+                 padding: 12px 8px;
+                 border-radius: 8px 8px 0 0;
+             }
+
+             .header h1 {
+                 font-size: 1.5em;
+                 margin-bottom: 5px;
+             }
+
+             .header p {
+                 font-size: 0.9em;
+             }
+
+             .content {
+                 padding: 8px 5px;
+             }
+
+             .section {
+                 margin-bottom: 10px;
+             }
+
+             .section-title {
+                 font-size: 1.1em;
+                 margin-bottom: 8px;
+                 gap: 6px;
+             }
+
+             /* 小屏手机进一步缩小 */
+             .chart-types {
+                 transform: scale(0.75);
+                 margin: -20px -15px -5px -15px;
+             }
+
+             .multi-select-hint {
+                 font-size: 0.8rem;
+                 margin-top: 5px;
+             }
+
+             .chart-types-section,
+             .config-section {
+                 padding: 10px 8px;
+                 margin-bottom: 10px;
+                 border-radius: 8px;
+             }
+
+             .form-group {
+                 margin-bottom: 10px;
+             }
+
+             .form-group label {
+                 margin-bottom: 6px;
+                 font-size: 0.95em;
+             }
+
+             input[type="text"],
+             textarea {
+                 padding: 8px 10px;
+                 font-size: 0.9em;
+                 border-radius: 6px;
+             }
+
+             textarea {
+                 min-height: 100px;
+             }
+
+             .btn-group {
+                 gap: 6px;
+                 margin-bottom: 10px;
+             }
+
+             .btn {
+                 padding: 10px 16px;
+                 font-size: 0.9em;
+                 border-radius: 8px;
+             }
+
+             .example-section {
+                 padding: 8px;
+                 margin-top: 10px;
+                 border-radius: 6px;
+             }
+
+             .example-section h4 {
+                 font-size: 0.9em;
+                 margin-bottom: 6px;
+             }
+
+             .example-section code {
+                 padding: 8px;
+                 font-size: 0.8rem;
+                 border-radius: 5px;
+             }
+
+             .charts-grid {
+                 gap: 10px;
+                 margin-top: 10px;
+             }
+
+             .chart-container {
+                 transform: scale(0.85);
+                 margin-bottom: -50px;
+                 padding: 10px 8px;
+                 border-radius: 8px;
+             }
+
+             .chart-header {
+                 flex-direction: column;
+                 align-items: flex-start;
+                 margin-bottom: 10px;
+                 padding-bottom: 8px;
+                 gap: 8px;
+             }
+
+             .chart-header h4 {
+                 font-size: 0.95em;
+             }
+
+             .icon-btn {
+                 font-size: 1.1rem;
+                 padding: 5px 8px;
+                 border-radius: 6px;
+             }
+
+             .chart-canvas-wrapper {
+                 padding: 8px;
+                 border-radius: 6px;
+             }
+
+             .empty-state {
+                 min-height: 300px;
+             }
+
+             .empty-state .icon {
+                 font-size: 3.5rem;
+                 margin-bottom: 15px;
+             }
+
+             .empty-state p {
+                 font-size: 1rem;
+             }
+         }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📊 报表展示工具</h1>
+            <p>支持多种图表类型同时展示，PNG导出白色背景</p>
+        </div>
+
+        <div class="content">
+            <!-- 图表类型选择 -->
+            <div class="chart-types-section">
+                <h3 class="section-title">📈 选择图表类型</h3>
+                <div class="chart-types">
+                    <button class="chart-type-btn selected" data-type="bar">
+                        <span class="icon">📊</span>
+                        <span>柱状图</span>
+                    </button>
+                    <button class="chart-type-btn" data-type="line">
+                        <span class="icon">📈</span>
+                        <span>折线图</span>
+                    </button>
+                    <button class="chart-type-btn" data-type="pie">
+                        <span class="icon">🥧</span>
+                        <span>饼图</span>
+                    </button>
+                    <button class="chart-type-btn" data-type="doughnut">
+                        <span class="icon">🍩</span>
+                        <span>环形图</span>
+                    </button>
+                    <button class="chart-type-btn" data-type="radar">
+                        <span class="icon">🎯</span>
+                        <span>雷达图</span>
+                    </button>
+                    <button class="chart-type-btn" data-type="polarArea">
+                        <span class="icon">🌐</span>
+                        <span>极区图</span>
+                    </button>
+                </div>
+                <div class="multi-select-hint">💡 可以同时选择多种图表类型进行对比展示</div>
+            </div>
+
+            <!-- 数据输入 -->
+            <div class="config-section">
+                <h3 class="section-title">📝 数据配置</h3>
+                
+                <div class="form-group">
+                    <label>图表标题前缀</label>
+                    <input type="text" id="chartTitle" placeholder="请输入图表标题" value="数据报表">
+                </div>
+
+                <div class="form-group">
+                    <label>标签（横坐标，逗号分隔）</label>
+                    <input type="text" id="labelsInput" placeholder="例如: 一月,二月,三月,四月..." value="一月,二月,三月,四月,五月,六月,七月,八月,九月,十月,十一月,十二月">
+                </div>
+
+                <div class="form-group">
+                    <label>数据值（纵坐标，每行一组数据）</label>
+                    <textarea id="dataInput" placeholder="每行一组数据，逗号分隔&#10;例如：&#10;销售额: 12,19,3,5,2,3&#10;成本: 8,11,7,8,3,7">销售额: 65,59,80,81,56,72,88,95,102,78,85,92
+成本: 28,48,40,39,42,55,48,52,58,45,50,62</textarea>
+                </div>
+
+                <div class="btn-group">
+                    <button class="btn" onclick="generateCharts()">🎨 生成图表</button>
+                    <button class="btn btn-secondary" onclick="clearAll()">🗑️ 清空所有</button>
+                    <button class="btn btn-export" onclick="exportAllCharts('png')">💾 导出所有PNG</button>
+                    <button class="btn btn-export" onclick="exportAllCharts('json')">📄 导出JSON数据</button>
+                </div>
+
+                <div class="example-section">
+                    <h4>💡 使用示例</h4>
+                    <code>标签: 一月,二月,三月,四月,五月,六月,七月,八月,九月,十月,十一月,十二月
+
+数据: 
+销售额: 65,59,80,81,56,72,88,95,102,78,85,92
+成本: 28,48,40,39,42,55,48,52,58,45,50,62</code>
+                </div>
+            </div>
+
+            <!-- 图表展示区域 -->
+            <div class="section">
+                <h3 class="section-title">📊 图表展示</h3>
+                <div id="chartsContainer" class="charts-grid">
+                    <div class="empty-state">
+                        <div class="icon">📊</div>
+                        <p>选择图表类型并点击"生成图表"按钮开始创建</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let charts = [];
+        let selectedChartTypes = new Set(['bar']);
+
+        // 颜色主题
+        const colorSchemes = {
+            default: [
+                'rgba(102, 126, 234, 0.8)',
+                'rgba(237, 100, 166, 0.8)',
+                'rgba(255, 159, 64, 0.8)',
+                'rgba(75, 192, 192, 0.8)',
+                'rgba(153, 102, 255, 0.8)',
+                'rgba(255, 99, 132, 0.8)',
+                'rgba(54, 162, 235, 0.8)',
+                'rgba(255, 206, 86, 0.8)',
+                'rgba(231, 233, 237, 0.8)',
+                'rgba(120, 200, 120, 0.8)'
+            ]
+        };
+
+        const chartTypeNames = {
+            'bar': '柱状图',
+            'line': '折线图',
+            'pie': '饼图',
+            'doughnut': '环形图',
+            'radar': '雷达图',
+            'polarArea': '极区图'
+        };
+
+        // 初始化图表类型选择（多选）
+        document.querySelectorAll('.chart-type-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const type = this.dataset.type;
+                if (selectedChartTypes.has(type)) {
+                    selectedChartTypes.delete(type);
+                    this.classList.remove('selected');
+                } else {
+                    selectedChartTypes.add(type);
+                    this.classList.add('selected');
+                }
+            });
+        });
+
+        function parseData() {
+            const labelsText = document.getElementById('labelsInput').value.trim();
+            const dataText = document.getElementById('dataInput').value.trim();
+
+            if (!labelsText || !dataText) {
+                alert('请输入标签和数据！');
+                return null;
+            }
+
+            // 解析标签
+            const labels = labelsText.split(',').map(s => s.trim()).filter(s => s);
+
+            // 解析数据
+            const lines = dataText.split('\n').filter(line => line.trim());
+            const datasets = [];
+
+            lines.forEach((line, index) => {
+                let datasetLabel = `数据系列 ${index + 1}`;
+                let values = line;
+
+                // 检查是否有标签（格式：标签: 数据）
+                if (line.includes(':')) {
+                    const parts = line.split(':');
+                    datasetLabel = parts[0].trim();
+                    values = parts[1].trim();
+                } else {
+                    values = line.trim();
+                }
+
+                // 解析数值
+                const data = values.split(',').map(s => {
+                    const num = parseFloat(s.trim());
+                    return isNaN(num) ? 0 : num;
+                });
+
+                datasets.push({
+                    label: datasetLabel,
+                    data: data
+                });
+            });
+
+            return { labels, datasets };
+        }
+
+        function createChartConfig(type, labels, datasets, title) {
+            // 检测是否为移动端
+            const isMobile = window.innerWidth <= 768;
+            const isSmallMobile = window.innerWidth <= 480;
+
+            // 根据屏幕尺寸调整字体大小
+            const titleFontSize = isSmallMobile ? 14 : isMobile ? 16 : 18;
+            const legendFontSize = isSmallMobile ? 9 : isMobile ? 10 : 12;
+            const axisFontSize = isSmallMobile ? 8 : isMobile ? 9 : 11;
+            const tooltipTitleSize = isSmallMobile ? 11 : isMobile ? 12 : 13;
+            const tooltipBodySize = isSmallMobile ? 10 : isMobile ? 11 : 12;
+            const titlePadding = isSmallMobile ? 8 : isMobile ? 10 : 15;
+            const legendPadding = isSmallMobile ? 6 : isMobile ? 8 : 12;
+
+            // 为每个数据集分配颜色
+            const processedDatasets = datasets.map((dataset, index) => {
+                const color = colorSchemes.default[index % colorSchemes.default.length];
+                const borderColor = color.replace('0.8', '1');
+
+                return {
+                    label: dataset.label,
+                    data: dataset.data,
+                    backgroundColor: type === 'pie' || type === 'doughnut' || type === 'polarArea' 
+                        ? colorSchemes.default.slice(0, dataset.data.length)
+                        : color,
+                    borderColor: borderColor,
+                    borderWidth: isMobile ? 1.5 : 2,
+                    tension: 0.4,
+                    // 移动端优化：减小点的大小
+                    pointRadius: type === 'line' ? (isSmallMobile ? 2 : isMobile ? 3 : 4) : undefined,
+                    pointHoverRadius: type === 'line' ? (isSmallMobile ? 4 : isMobile ? 5 : 6) : undefined
+                };
+            });
+
+            const config = {
+                type: type,
+                data: {
+                    labels: labels,
+                    datasets: processedDatasets
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: title,
+                            font: {
+                                size: titleFontSize,
+                                weight: 'bold'
+                            },
+                            padding: titlePadding
+                        },
+                        legend: {
+                            display: true,
+                            position: isMobile ? 'bottom' : 'top',
+                            labels: {
+                                padding: legendPadding,
+                                font: {
+                                    size: legendFontSize
+                                },
+                                boxWidth: isSmallMobile ? 10 : isMobile ? 12 : 15,
+                                boxHeight: isSmallMobile ? 10 : isMobile ? 12 : 15,
+                                // 移动端使用更紧凑的布局
+                                usePointStyle: isMobile
+                            }
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                            padding: isMobile ? 8 : 12,
+                            cornerRadius: 8,
+                            titleFont: {
+                                size: tooltipTitleSize
+                            },
+                            bodyFont: {
+                                size: tooltipBodySize
+                            },
+                            // 移动端优化：确保tooltip不超出屏幕
+                            displayColors: !isSmallMobile,
+                            boxWidth: isSmallMobile ? 8 : 12,
+                            boxHeight: isSmallMobile ? 8 : 12
+                        }
+                    },
+                    // 移动端减小内边距
+                    layout: {
+                        padding: isSmallMobile ? 5 : isMobile ? 8 : 10
+                    }
+                }
+            };
+
+            // 为不同类型的图表添加特定配置
+            if (type === 'bar' || type === 'line') {
+                config.options.scales = {
+                    y: {
+                        beginAtZero: true,
+                        grid: {
+                            color: 'rgba(0, 0, 0, 0.05)',
+                            // 移动端减少网格线
+                            drawTicks: !isSmallMobile
+                        },
+                        ticks: {
+                            font: {
+                                size: axisFontSize
+                            },
+                            // 移动端自动调整刻度数量
+                            maxTicksLimit: isSmallMobile ? 5 : isMobile ? 6 : 8,
+                            padding: isMobile ? 4 : 8
+                        }
+                    },
+                    x: {
+                        grid: {
+                            display: false
+                        },
+                        ticks: {
+                            font: {
+                                size: axisFontSize
+                            },
+                            // 移动端标签可能需要旋转
+                            maxRotation: isMobile ? 45 : 0,
+                            minRotation: isMobile ? 45 : 0,
+                            autoSkip: true,
+                            autoSkipPadding: isMobile ? 10 : 20,
+                            padding: isMobile ? 4 : 8
+                        }
+                    }
+                };
+            }
+
+            if (type === 'radar') {
+                config.options.scales = {
+                    r: {
+                        beginAtZero: true,
+                        grid: {
+                            color: 'rgba(0, 0, 0, 0.1)'
+                        },
+                        ticks: {
+                            font: {
+                                size: axisFontSize
+                            },
+                            backdropColor: 'transparent',
+                            maxTicksLimit: isSmallMobile ? 4 : isMobile ? 5 : 6
+                        },
+                        pointLabels: {
+                            font: {
+                                size: axisFontSize
+                            },
+                            // 移动端减小标签与图表的距离
+                            padding: isMobile ? 4 : 8
+                        }
+                    }
+                };
+            }
+
+            // 对于饼图和环形图，只使用第一个数据集
+            if (type === 'pie' || type === 'doughnut' || type === 'polarArea') {
+                if (processedDatasets.length > 1) {
+                    config.data.datasets = [processedDatasets[0]];
+                }
+                
+                // 移动端优化饼图标签
+                if (isMobile) {
+                    config.options.plugins.legend.position = 'bottom';
+                    config.options.plugins.legend.labels.padding = legendPadding;
+                }
+            }
+
+            return config;
+        }
+
+        function generateCharts() {
+            if (selectedChartTypes.size === 0) {
+                alert('请至少选择一种图表类型！');
+                return;
+            }
+
+            const parsedData = parseData();
+            if (!parsedData) return;
+
+            const { labels, datasets } = parsedData;
+            const chartTitlePrefix = document.getElementById('chartTitle').value || '数据报表';
+
+            // 清空现有图表
+            charts.forEach(chart => chart.destroy());
+            charts = [];
+
+            const container = document.getElementById('chartsContainer');
+            container.innerHTML = '';
+
+            // 为每种选中的图表类型创建一个图表
+            selectedChartTypes.forEach(type => {
+                const chartId = `chart_${type}_${Date.now()}`;
+                const chartDiv = document.createElement('div');
+                chartDiv.className = 'chart-container';
+                chartDiv.innerHTML = `
+                    <div class="chart-header">
+                        <h4>${chartTitlePrefix} - ${chartTypeNames[type]}</h4>
+                        <div class="chart-actions">
+                            <button class="icon-btn" onclick="exportSingleChart('${chartId}', 'png')" title="导出PNG">💾</button>
+                            <button class="icon-btn" onclick="removeSingleChart('${chartId}')" title="删除此图表">🗑️</button>
+                        </div>
+                    </div>
+                    <div class="chart-canvas-wrapper">
+                        <canvas id="${chartId}"></canvas>
+                    </div>
+                `;
+                container.appendChild(chartDiv);
+
+                const ctx = document.getElementById(chartId).getContext('2d');
+                const config = createChartConfig(type, labels, datasets, `${chartTitlePrefix} - ${chartTypeNames[type]}`);
+                const chart = new Chart(ctx, config);
+                chart.chartId = chartId;
+                charts.push(chart);
+            });
+        }
+
+        function exportSingleChart(chartId, format) {
+            const chart = charts.find(c => c.chartId === chartId);
+            if (!chart) {
+                alert('未找到图表！');
+                return;
+            }
+
+            if (format === 'png') {
+                // 创建一个临时canvas，添加白色背景和边框
+                const canvas = chart.canvas;
+                const borderWidth = 10; // 边框宽度
+                const tempCanvas = document.createElement('canvas');
+                
+                // 增加边框空间：每边10px，所以宽高各增加20px
+                tempCanvas.width = canvas.width + (borderWidth * 2);
+                tempCanvas.height = canvas.height + (borderWidth * 2);
+                const tempCtx = tempCanvas.getContext('2d');
+                
+                // 填充白色背景（包括边框区域）
+                tempCtx.fillStyle = '#ffffff';
+                tempCtx.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
+                
+                // 在偏移位置绘制图表（留出边框空间）
+                tempCtx.drawImage(canvas, borderWidth, borderWidth);
+                
+                // 下载
+                const link = document.createElement('a');
+                link.download = `${chartId}_${Date.now()}.png`;
+                link.href = tempCanvas.toDataURL('image/png');
+                link.click();
+            }
+        }
+
+        function removeSingleChart(chartId) {
+            const index = charts.findIndex(c => c.chartId === chartId);
+            if (index !== -1) {
+                charts[index].destroy();
+                charts.splice(index, 1);
+                const chartContainer = document.getElementById(chartId).closest('.chart-container');
+                chartContainer.remove();
+
+                // 如果没有图表了，显示空状态
+                if (charts.length === 0) {
+                    document.getElementById('chartsContainer').innerHTML = `
+                        <div class="empty-state">
+                            <div class="icon">📊</div>
+                            <p>选择图表类型并点击"生成图表"按钮开始创建</p>
+                        </div>
+                    `;
+                }
+            }
+        }
+
+        function exportAllCharts(format) {
+            if (charts.length === 0) {
+                alert('请先生成图表！');
+                return;
+            }
+
+            if (format === 'png') {
+                charts.forEach((chart, index) => {
+                    setTimeout(() => {
+                        exportSingleChart(chart.chartId, 'png');
+                    }, index * 300);
+                });
+            } else if (format === 'json') {
+                const allData = charts.map(chart => ({
+                    type: chart.config.type,
+                    title: chart.config.options.plugins.title.text,
+                    labels: chart.data.labels,
+                    datasets: chart.data.datasets.map(ds => ({
+                        label: ds.label,
+                        data: ds.data
+                    }))
+                }));
+
+                const blob = new Blob([JSON.stringify(allData, null, 2)], { type: 'application/json' });
+                const link = document.createElement('a');
+                link.download = `charts_data_${Date.now()}.json`;
+                link.href = URL.createObjectURL(blob);
+                link.click();
+            }
+        }
+
+        function clearAll() {
+            if (charts.length === 0 && !document.getElementById('labelsInput').value && !document.getElementById('dataInput').value) {
+                return;
+            }
+
+            if (charts.length > 0 && !confirm('确定要清空所有数据和图表吗？')) {
+                return;
+            }
+
+            document.getElementById('labelsInput').value = '';
+            document.getElementById('dataInput').value = '';
+            document.getElementById('chartTitle').value = '数据报表';
+            
+            charts.forEach(chart => chart.destroy());
+            charts = [];
+            
+            document.getElementById('chartsContainer').innerHTML = `
+                <div class="empty-state">
+                    <div class="icon">📊</div>
+                    <p>选择图表类型并点击"生成图表"按钮开始创建</p>
+                </div>
+            `;
+        }
+
+        // 窗口大小改变时重新生成图表（防抖处理）
+        let resizeTimer;
+        window.addEventListener('resize', () => {
+            clearTimeout(resizeTimer);
+            resizeTimer = setTimeout(() => {
+                if (charts.length > 0) {
+                    // 保存当前数据和选择的图表类型
+                    const currentLabels = document.getElementById('labelsInput').value;
+                    const currentData = document.getElementById('dataInput').value;
+                    
+                    if (currentLabels && currentData) {
+                        // 重新生成图表以适应新的屏幕尺寸
+                        generateCharts();
+                    }
+                }
+            }, 300); // 300ms防抖延迟
+        });
+
+        // 页面加载时生成初始图表
+        window.addEventListener('load', () => {
+            generateCharts();
+        });
+    </script>
+</body>
+</html>

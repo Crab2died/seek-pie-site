@@ -386,6 +386,8 @@
 
             .btn {
                 width: 100%;
+                padding: 10px 20px;
+                font-size: 0.95em;
             }
         }
 
@@ -396,6 +398,16 @@
 
             .content {
                 padding: 15px 12px;
+            }
+
+            .crypto-tab {
+                padding: 10px 16px;
+                font-size: 0.95em;
+            }
+
+            .btn {
+                padding: 8px 16px;
+                font-size: 0.9em;
             }
         }
     </style>
@@ -682,8 +694,8 @@
         </div>
     </div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jsencrypt/3.3.2/jsencrypt.min.js"></script>
+    <script src="libs/crypto-js.min.js"></script>
+    <script src="libs/jsencrypt.min.js"></script>
     <script>
         // 初始化字符计数
         document.querySelectorAll('textarea').forEach(textarea => {

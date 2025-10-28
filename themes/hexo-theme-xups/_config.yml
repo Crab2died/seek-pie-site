@@ -113,65 +113,77 @@ friends:
   enable: true
   list:
     1:
-      name: 🧮科学计算器
-      title: 🧮科学计算器
-      link: /tools/scientific-calculator.html
-    2:
       name: ⏰时间转换工具
       title: ⏰时间转换工具
       link: /tools/time-converter.html
-    3:
+    2:
       name: 💱汇率转换工具
       title: 💱汇率转换工具
       link: /tools/exchange-rate.html
-    4:
+    3:
       name: 🏦贷款计算器
       title: 🏦贷款计算器
       link: /tools/loan-calculator.html
-    7:
+    4:
       name: 💰个税计算器
       title: 💰个税计算器
       link: /tools/tax-calculator.html
-    8:
+    5:
       name: 🔢进制转换工具
       title: 🔢进制转换工具
       link: /tools/number-converter.html
-    9:
+    6:
       name: 🔐编解码工具
       title: 🔐编解码工具
       link: /tools/encoder-decoder.html
-    10:
+    7:
       name: 🔒加解密工具
       title: 🔒加解密工具
       link: /tools/crypto-tool.html
-    11:
+    8:
+      name: 🔑JWT解析工具
+      title: 🔑JWT解析工具
+      link: /tools/jwt-tool.html
+    9:
       name: 📏单位转换工具
       title: 📏单位转换工具
       link: /tools/unit-converter.html
-    12:
+    10:
       name: 🔍正则表达式工具
       title: 🔍正则表达式工具
       link: /tools/regex-tool.html
-    13:
+    11:
       name: ⏰Cron表达式生成工具
       title: ⏰Cron表达式生成工具
       link: /tools/cron-tool.html
-    14:
+    12:
       name: 📦解压缩工具
       title: 📦解压缩工具
       link: /tools/compression-tool.html
-    15:
+    13:
       name: ✨代码格式化工具
       title: ✨代码格式化工具
       link: /tools/formatter-tool.html
-    16:
+    14:
       name: 📊CSV展示工具
       title: 📊CSV展示工具
       link: /tools/csv-tool.html
-    17:
+    15:
       name: 📋JSON数组展示工具
       title: 📋JSON数组展示工具
       link: /tools/json-array-tool.html
+    16:
+      name: 📊报表展示工具
+      title: 📊报表展示工具
+      link: /tools/chart-tool.html
+    17:
+      name: 📱二维码条形码工具
+      title: 📱二维码条形码工具
+      link: /tools/qrcode-barcode-tool.html
+    18:
+      name: 🚀API调试工具
+      title: 🚀API调试工具
+      link: /tools/api-test-tool.html
 
 
 #----------------------------

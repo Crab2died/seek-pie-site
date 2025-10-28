@@ -19,7 +19,7 @@
         }
 
         .container {
-            max-width: 1200px;
+            max-width: 1400px;
             margin: 0 auto;
             background: white;
             border-radius: 15px;
@@ -143,6 +143,11 @@
         .data-stats {
             color: #666;
             font-size: 0.9em;
+            padding: 15px 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            /* margin-top: 20px; */
+            text-align: center;
         }
 
         .controls {
@@ -193,15 +198,25 @@
 
         .table-container {
             overflow-x: auto;
+            max-height: 600px;
+            overflow-y: auto;
             border-radius: 10px;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-            margin-bottom: 30px;
+            /* margin-bottom: 30px; */
+            position: relative;
         }
 
         table {
             width: 100%;
             border-collapse: collapse;
             background: white;
+            position: relative;
+        }
+
+        thead {
+            position: sticky;
+            top: 0;
+            z-index: 10;
         }
 
         th {
@@ -210,13 +225,9 @@
             padding: 15px 12px;
             text-align: left;
             font-weight: 500;
-            position: sticky;
-            top: 0;
-            z-index: 10;
             cursor: pointer;
             user-select: none;
             transition: background-color 0.3s ease;
-            position: relative;
             white-space: nowrap;
         }
 
@@ -226,6 +237,7 @@
 
         th.sortable {
             padding-right: 30px;
+            position: relative;
         }
 
         .sort-icon {
@@ -435,6 +447,158 @@
             background: #5a6268 !important;
         }
 
+        .column-management {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 2px solid #e9ecef;
+        }
+
+        .column-controls-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+
+        .column-select-all {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .column-select-all label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            padding: 8px 12px;
+            background: white;
+            border: 2px solid #dee2e6;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+        }
+
+        .column-select-all label:hover {
+            border-color: #4facfe;
+            background: #f8f9ff;
+        }
+
+        .column-select-all input[type="checkbox"] {
+            cursor: pointer;
+            width: 18px;
+            height: 18px;
+            accent-color: #4facfe;
+        }
+
+        .column-select-all span {
+            font-weight: 500;
+            color: #495057;
+            user-select: none;
+        }
+
+        .btn-sort-column {
+            padding: 8px 16px;
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-sort-column:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(79, 172, 254, 0.4);
+            background: linear-gradient(135deg, #3d9aed 0%, #00e0ed 100%);
+        }
+
+        .btn-toggle-columns {
+            padding: 8px 16px;
+            background: linear-gradient(135deg, #4fd6cf 0%, #d8567f 100%);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-toggle-columns:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(168, 237, 234, 0.4);
+            background: linear-gradient(135deg, #74dfd9 0%, #a5506b 100%);
+        }
+
+        #columnControlsRow {
+            display: none;
+            margin-top: 15px;
+        }
+
+        #columnControlsRow.show {
+            display: flex;
+        }
+
+        #columnControls {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .column-toggle {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            background: white;
+            border: 2px solid #dee2e6;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            min-width: 201px;
+        }
+
+        .column-toggle:hover {
+            border-color: #4facfe;
+        }
+
+        .column-toggle.active {
+            background: #4facfe;
+            color: white;
+            border-color: #4facfe;
+        }
+
+        .column-toggle > span:not(.drag-handle) {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            max-width: 100px;
+            display: inline-block;
+            vertical-align: middle;
+        }
+
+        .drag-handle {
+            cursor: move;
+            color: #6c757d;
+            margin-right: 4px;
+            user-select: none;
+        }
+
+        .column-toggle.dragging {
+            opacity: 0.5;
+        }
+
         /* 平板和中等屏幕 */
         @media (max-width: 1024px) {
             .upload-section {
@@ -454,6 +618,38 @@
 
             .container {
                 border-radius: 12px;
+            }
+
+            .column-management {
+                padding: 15px;
+                margin-bottom: 15px;
+            }
+
+            .column-controls-header {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .column-select-all {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .column-select-all label,
+            .btn-sort-column,
+            .btn-toggle-columns {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .column-toggle {
+                min-width: 120px;
+                padding: 6px 10px;
+                font-size: 0.85em;
+            }
+
+            .column-toggle > span:not(.drag-handle) {
+                max-width: 80px;
             }
 
             .header {
@@ -517,6 +713,8 @@
             .data-stats {
                 font-size: 0.85em;
                 text-align: center;
+                padding: 12px 15px;
+                margin-top: 15px;
             }
 
             .controls {
@@ -558,7 +756,7 @@
 
             .table-container {
                 border-radius: 8px;
-                margin-bottom: 20px;
+                /* margin-bottom: 20px; */
             }
 
             th {
@@ -614,6 +812,26 @@
                 border-radius: 10px;
             }
 
+            .column-management {
+                padding: 12px;
+            }
+
+            .column-toggle {
+                min-width: 100px;
+                padding: 5px 8px;
+                font-size: 0.8em;
+            }
+
+            .column-toggle > span:not(.drag-handle) {
+                max-width: 60px;
+            }
+
+            .btn-sort-column,
+            .btn-toggle-columns {
+                font-size: 0.85em;
+                padding: 8px 12px;
+            }
+
             .header {
                 padding: 15px 12px;
             }
@@ -664,6 +882,8 @@
 
             .data-stats {
                 font-size: 0.8em;
+                padding: 10px 12px;
+                margin-top: 12px;
             }
 
             .page-size-selector label {
@@ -735,6 +955,8 @@
 
             .data-stats {
                 font-size: 0.75em;
+                padding: 8px 10px;
+                margin-top: 10px;
             }
 
             .export-btn {
@@ -787,10 +1009,31 @@
         </div>
 
         <div class="data-section" id="dataSection">
+            <div class="column-management">
+                <div class="column-controls-header">
+                    <div class="column-select-all">
+                        <label>
+                            <input type="checkbox" id="selectAllCheckbox">
+                            <span>全选/全不选列</span>
+                        </label>
+                        <button class="btn-sort-column" id="sortColumnsBtn">
+                            <span id="sortColumnsIcon">🔤</span> 按列名排序
+                        </button>
+                        <button class="btn-toggle-columns" id="toggleColumnsBtn">
+                            <span id="toggleColumnsIcon">👁️</span> 显示列管理
+                        </button>
+                    </div>
+                </div>
+                <div id="columnControlsRow">
+                    <div id="columnControls">
+                        <!-- 列控制按钮将在这里动态生成 -->
+                    </div>
+                </div>
+            </div>
+
             <div class="data-header">
                 <div>
                     <div class="data-title">数据展示</div>
-                    <div class="data-stats" id="dataStats"></div>
                 </div>
                 <div class="controls">
                     <div class="page-size-selector">
@@ -821,6 +1064,8 @@
                 </table>
             </div>
 
+            <div class="data-stats" id="dataStats"></div>
+
             <div class="pagination" id="pagination"></div>
         </div>
     </div>
@@ -836,6 +1081,10 @@
                 this.headers = [];
                 this.searchTerm = '';
                 this.sortColumns = []; // 数组，存储多个排序列 [{column: '列名', direction: 'asc/desc'}]
+                this.visibleColumns = []; // 可见的列
+                this.columnOrder = []; // 列的显示顺序
+                this.columnControlsVisible = false; // 列管理面板是否显示
+                this.columnSortOrder = 'none'; // 列名排序状态：'none' | 'asc' | 'desc'
                 
                 this.initializeElements();
                 this.bindEvents();
@@ -858,6 +1107,11 @@
                 this.exportCsvBtn = document.getElementById('exportCsv');
                 this.exportJsonBtn = document.getElementById('exportJson');
                 this.clearSortBtn = document.getElementById('clearSort');
+                this.selectAllCheckbox = document.getElementById('selectAllCheckbox');
+                this.sortColumnsBtn = document.getElementById('sortColumnsBtn');
+                this.toggleColumnsBtn = document.getElementById('toggleColumnsBtn');
+                this.columnControlsRow = document.getElementById('columnControlsRow');
+                this.columnControls = document.getElementById('columnControls');
             }
 
             bindEvents() {
@@ -906,6 +1160,11 @@
                 
                 // 清除排序事件
                 this.clearSortBtn.addEventListener('click', () => this.clearAllSorts());
+                
+                // 列管理事件
+                this.selectAllCheckbox.addEventListener('change', () => this.toggleAllColumns());
+                this.sortColumnsBtn.addEventListener('click', () => this.sortColumnsByName());
+                this.toggleColumnsBtn.addEventListener('click', () => this.toggleColumnControls());
             }
 
             handleFileSelect(file) {
@@ -970,6 +1229,13 @@
                 this.filteredData = [...this.csvData];
                 this.originalFilteredData = [...this.csvData];
                 this.currentPage = 1;
+                
+                // 初始化列配置
+                this.visibleColumns = [...this.headers];
+                this.columnOrder = [...this.headers];
+                
+                // 生成列控制按钮
+                this.generateColumnControls();
             }
 
             parseCSVLine(line) {
@@ -1151,7 +1417,10 @@
                 this.tableHead.innerHTML = '';
                 const tr = document.createElement('tr');
                 
-                this.headers.forEach(header => {
+                // 只显示可见的列，并按照columnOrder的顺序
+                this.columnOrder.forEach(header => {
+                    if (!this.visibleColumns.includes(header)) return;
+                    
                     const th = document.createElement('th');
                     th.className = 'sortable';
                     
@@ -1197,7 +1466,7 @@
                 if (this.filteredData.length === 0) {
                     const tr = document.createElement('tr');
                     const td = document.createElement('td');
-                    td.colSpan = this.headers.length;
+                    td.colSpan = this.visibleColumns.length;
                     td.className = 'no-data';
                     td.innerHTML = `
                         <div class="no-data-icon">📊</div>
@@ -1215,7 +1484,10 @@
                     const row = this.filteredData[i];
                     const tr = document.createElement('tr');
                     
-                    this.headers.forEach(header => {
+                    // 只显示可见的列，并按照columnOrder的顺序
+                    this.columnOrder.forEach(header => {
+                        if (!this.visibleColumns.includes(header)) return;
+                        
                         const td = document.createElement('td');
                         const cellValue = row[header] || '';
                         td.textContent = cellValue;
@@ -1362,6 +1634,147 @@
 
             hideError() {
                 this.errorMessage.classList.remove('show');
+            }
+
+            // 列管理相关方法
+            generateColumnControls() {
+                this.columnControls.innerHTML = '';
+
+                this.columnOrder.forEach(column => {
+                    const button = document.createElement('div');
+                    button.className = `column-toggle ${this.visibleColumns.includes(column) ? 'active' : ''}`;
+                    button.innerHTML = `
+                        <span class="drag-handle">⋮⋮</span>
+                        <input type="checkbox" ${this.visibleColumns.includes(column) ? 'checked' : ''}>
+                        <span title="${column}">${column}</span>
+                    `;
+                    button.draggable = true;
+                    button.dataset.column = column;
+                    
+                    // 点击按钮切换列显示
+                    const checkbox = button.querySelector('input[type="checkbox"]');
+                    checkbox.addEventListener('change', (e) => {
+                        e.stopPropagation();
+                        this.toggleColumn(column);
+                    });
+                    
+                    // 拖拽事件
+                    button.addEventListener('dragstart', (e) => this.handleDragStart(e));
+                    button.addEventListener('dragover', (e) => this.handleDragOver(e));
+                    button.addEventListener('drop', (e) => this.handleDrop(e));
+                    button.addEventListener('dragend', (e) => this.handleDragEnd(e));
+                    
+                    this.columnControls.appendChild(button);
+                });
+
+                // 更新全选按钮状态
+                this.updateSelectAllCheckbox();
+            }
+
+            toggleColumn(column) {
+                if (this.visibleColumns.includes(column)) {
+                    this.visibleColumns = this.visibleColumns.filter(col => col !== column);
+                } else {
+                    this.visibleColumns.push(column);
+                }
+                this.renderTable();
+                this.generateColumnControls();
+            }
+
+            toggleAllColumns() {
+                if (this.selectAllCheckbox.checked) {
+                    // 全选
+                    this.visibleColumns = [...this.columnOrder];
+                } else {
+                    // 全不选
+                    this.visibleColumns = [];
+                }
+                this.renderTable();
+                this.generateColumnControls();
+            }
+
+            updateSelectAllCheckbox() {
+                if (!this.selectAllCheckbox) return;
+                
+                const allSelected = this.visibleColumns.length === this.columnOrder.length;
+                const someSelected = this.visibleColumns.length > 0 && this.visibleColumns.length < this.columnOrder.length;
+                
+                if (allSelected) {
+                    this.selectAllCheckbox.checked = true;
+                    this.selectAllCheckbox.indeterminate = false;
+                } else if (someSelected) {
+                    this.selectAllCheckbox.checked = false;
+                    this.selectAllCheckbox.indeterminate = true;
+                } else {
+                    this.selectAllCheckbox.checked = false;
+                    this.selectAllCheckbox.indeterminate = false;
+                }
+            }
+
+            sortColumnsByName() {
+                const sortIcon = document.getElementById('sortColumnsIcon');
+                
+                if (this.columnSortOrder === 'none' || this.columnSortOrder === 'desc') {
+                    // 升序排序
+                    this.columnOrder.sort((a, b) => a.localeCompare(b, 'zh-CN'));
+                    this.columnSortOrder = 'asc';
+                    sortIcon.textContent = '🔤↑';
+                } else {
+                    // 降序排序
+                    this.columnOrder.sort((a, b) => b.localeCompare(a, 'zh-CN'));
+                    this.columnSortOrder = 'desc';
+                    sortIcon.textContent = '🔤↓';
+                }
+                
+                this.renderTable();
+                this.generateColumnControls();
+            }
+
+            toggleColumnControls() {
+                this.columnControlsVisible = !this.columnControlsVisible;
+                
+                if (this.columnControlsVisible) {
+                    this.columnControlsRow.classList.add('show');
+                    this.toggleColumnsBtn.innerHTML = '<span id="toggleColumnsIcon">🙈</span> 隐藏列管理';
+                } else {
+                    this.columnControlsRow.classList.remove('show');
+                    this.toggleColumnsBtn.innerHTML = '<span id="toggleColumnsIcon">👁️</span> 显示列管理';
+                }
+            }
+
+            // 拖拽相关方法
+            handleDragStart(e) {
+                const column = e.target.dataset.column || e.target.closest('.column-toggle').dataset.column;
+                e.dataTransfer.setData('text/plain', column);
+                e.target.classList.add('dragging');
+            }
+
+            handleDragOver(e) {
+                e.preventDefault();
+            }
+
+            handleDrop(e) {
+                e.preventDefault();
+                const target = e.target.closest('.column-toggle');
+                if (!target) return;
+                
+                const draggedColumn = e.dataTransfer.getData('text/plain');
+                const targetColumn = target.dataset.column;
+                
+                if (draggedColumn && targetColumn && draggedColumn !== targetColumn) {
+                    const draggedIndex = this.columnOrder.indexOf(draggedColumn);
+                    const targetIndex = this.columnOrder.indexOf(targetColumn);
+                    
+                    this.columnOrder.splice(draggedIndex, 1);
+                    this.columnOrder.splice(targetIndex, 0, draggedColumn);
+                    
+                    this.generateColumnControls();
+                    this.renderTable();
+                }
+            }
+
+            handleDragEnd(e) {
+                e.target.classList.remove('dragging');
             }
         }
 

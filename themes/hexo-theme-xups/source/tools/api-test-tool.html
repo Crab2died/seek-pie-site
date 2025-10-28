@@ -1,0 +1,3140 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API调试工具</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            font-weight: 300;
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .info-box {
+            background: #e7f3ff;
+            border-left: 4px solid #2196F3;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 25px;
+        }
+
+        .info-box h4 {
+            color: #1976D2;
+            margin-bottom: 8px;
+        }
+
+        .info-box p {
+            color: #666;
+            line-height: 1.6;
+        }
+
+        .info-box code {
+            background: rgba(102, 126, 234, 0.1);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 0.9em;
+            color: #667eea;
+        }
+
+        .section {
+            margin-bottom: 30px;
+        }
+
+        .section-title {
+            font-size: 1.3em;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .request-line {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .method-select {
+            width: 140px;
+            padding: 12px;
+            border: 2px solid #e1e5e9;
+            border-radius: 10px;
+            font-size: 1em;
+            font-weight: 600;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .method-select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .url-input {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid #e1e5e9;
+            border-radius: 10px;
+            font-size: 1em;
+            font-family: 'Consolas', 'Monaco', monospace;
+            transition: all 0.3s ease;
+        }
+
+        .url-input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            min-width: 120px;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+            transform: translateY(-2px);
+        }
+
+        .btn-warning {
+            background: #ffc107;
+            color: #333;
+        }
+
+        .btn-warning:hover {
+            background: #e0a800;
+            transform: translateY(-2px);
+        }
+
+        .btn-small {
+            padding: 6px 12px;
+            font-size: 0.9em;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            border-bottom: 2px solid #e1e5e9;
+            padding-bottom: 10px;
+        }
+
+        .tab {
+            padding: 10px 20px;
+            background: #f8f9fa;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px 8px 0 0;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            color: #666;
+        }
+
+        .tab:hover {
+            background: #e9ecef;
+        }
+
+        .tab.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-color: #667eea;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .key-value-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .key-value-row {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            width: 100%;
+        }
+
+        .key-value-row input[type="text"],
+        .key-value-row input[type="checkbox"] {
+            transition: all 0.3s ease;
+        }
+
+        .key-value-row input[type="text"] {
+            padding: 10px;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            font-size: 0.95em;
+            font-family: 'Consolas', 'Monaco', monospace;
+            background: white;
+            box-sizing: border-box;
+        }
+
+        .key-value-row input[type="text"]:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .key-value-row input[type="checkbox"] {
+            flex-shrink: 0;
+            margin: 0;
+        }
+
+        .key-value-row .delete-btn {
+            flex-shrink: 0;
+            white-space: nowrap;
+        }
+
+        /* 优化datalist下拉框样式 */
+        .key-value-row input[type="text"]::-webkit-calendar-picker-indicator {
+            cursor: pointer;
+            opacity: 0.6;
+            filter: invert(50%);
+        }
+
+        .key-value-row input[type="text"]::-webkit-calendar-picker-indicator:hover {
+            opacity: 1;
+        }
+
+        /* 自定义下拉建议列表 */
+        .autocomplete-wrapper {
+            position: relative;
+            flex: 1;
+            min-width: 0; /* 允许flex子项缩小到内容以下 */
+        }
+
+        .autocomplete-wrapper.wide {
+            flex: 2;
+            min-width: 0;
+        }
+
+        .autocomplete-wrapper input {
+            width: 100%;
+        }
+
+        .autocomplete-suggestions {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 2px solid #667eea;
+            border-top: none;
+            border-radius: 0 0 8px 8px;
+            max-height: 200px;
+            overflow-y: auto;
+            z-index: 1000;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+            display: none;
+        }
+
+        .autocomplete-suggestions.show {
+            display: block;
+        }
+
+        .autocomplete-suggestion {
+            padding: 10px 15px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 0.9em;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .autocomplete-suggestion:last-child {
+            border-bottom: none;
+        }
+
+        .autocomplete-suggestion:hover {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .autocomplete-suggestion.selected {
+            background: #e7f3ff;
+        }
+
+        .key-value-row .key-input {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .key-value-row .value-input {
+            flex: 2;
+            min-width: 0;
+        }
+
+        /* 当input直接在key-value-row中时（没有wrapper包裹） */
+        .key-value-row > .key-input,
+        .key-value-row > .value-input {
+            width: auto;
+        }
+
+        .key-value-row input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+
+        .key-value-row .delete-btn {
+            padding: 8px 12px;
+            background: #dc3545;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: all 0.3s ease;
+        }
+
+        .key-value-row .delete-btn:hover {
+            background: #c82333;
+        }
+
+        textarea {
+            width: 100%;
+            min-height: 200px;
+            padding: 15px;
+            border: 2px solid #e1e5e9;
+            border-radius: 10px;
+            font-size: 0.95em;
+            font-family: 'Consolas', 'Monaco', monospace;
+            resize: vertical;
+            transition: all 0.3s ease;
+            background: #f8f9fa;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .body-type-select {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+
+        .body-type-option {
+            padding: 8px 16px;
+            background: #f8f9fa;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .body-type-option:hover {
+            background: #e9ecef;
+        }
+
+        .body-type-option.active {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        .auth-content {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .auth-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .auth-type-selector {
+            margin-bottom: 25px;
+        }
+
+        .auth-input-group {
+            margin-bottom: 20px;
+        }
+
+        .auth-input-group label {
+            display: block;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 1em;
+        }
+
+        .auth-input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e1e5e9;
+            border-radius: 10px;
+            font-size: 0.95em;
+            font-family: 'Consolas', 'Monaco', monospace;
+            background: #f8f9fa;
+            transition: all 0.3s ease;
+        }
+
+        .auth-input:focus {
+            outline: none;
+            border-color: #667eea;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .auth-input[type="password"] {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .auth-textarea {
+            width: 100%;
+            min-height: 120px;
+            padding: 15px;
+            border: 2px solid #e1e5e9;
+            border-radius: 10px;
+            font-size: 0.95em;
+            font-family: 'Consolas', 'Monaco', monospace;
+            resize: vertical;
+            background: #f8f9fa;
+            transition: all 0.3s ease;
+        }
+
+        .auth-textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .auth-select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e1e5e9;
+            border-radius: 10px;
+            font-size: 0.95em;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .auth-select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .auth-info-box {
+            background: linear-gradient(135deg, #e7f3ff 0%, #f0f7ff 100%);
+            border-left: 4px solid #667eea;
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+
+        .auth-info-box h4 {
+            color: #667eea;
+            margin-bottom: 8px;
+            font-size: 1em;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .auth-info-box p {
+            color: #555;
+            line-height: 1.6;
+            font-size: 0.95em;
+        }
+
+        .auth-warning-box {
+            background: linear-gradient(135deg, #fff3cd 0%, #fff8e1 100%);
+            border-left: 4px solid #ffc107;
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+
+        .auth-warning-box p {
+            color: #856404;
+            line-height: 1.6;
+            font-size: 0.95em;
+            margin: 0;
+        }
+
+        .response-section {
+            margin-top: 30px;
+            display: none;
+        }
+
+        .response-section.show {
+            display: block;
+        }
+
+        .response-status {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+
+        .status-item {
+            flex: 1;
+            min-width: 150px;
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            border: 2px solid #e1e5e9;
+        }
+
+        .status-label {
+            font-size: 0.9em;
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        .status-value {
+            font-size: 1.3em;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .status-value.success {
+            color: #28a745;
+        }
+
+        .status-value.error {
+            color: #dc3545;
+        }
+
+        .response-box {
+            background: #f8f9fa;
+            border: 2px solid #e1e5e9;
+            border-radius: 10px;
+            padding: 20px;
+            position: relative;
+            margin-bottom: 20px;
+        }
+
+        .response-box h3 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+        }
+
+        .response-content {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 0.9em;
+            max-height: 400px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+
+        /* 语法高亮样式 - JSON */
+        .json-key {
+            color: #881391;
+            font-weight: 600;
+        }
+
+        .json-string {
+            color: #1A1AA6;
+        }
+
+        .json-number {
+            color: #1C00CF;
+        }
+
+        .json-boolean {
+            color: #0D22FF;
+            font-weight: 600;
+        }
+
+        .json-null {
+            color: #808080;
+            font-style: italic;
+        }
+
+        /* 语法高亮样式 - XML */
+        .xml-tag {
+            color: #800000;
+        }
+
+        .xml-tag-name {
+            color: #800000;
+            font-weight: 600;
+        }
+
+        .xml-attr {
+            color: #FF0000;
+        }
+
+        .xml-string {
+            color: #0000FF;
+        }
+
+        .xml-punct {
+            color: #000000;
+        }
+
+        /* 语法高亮样式 - HTML */
+        .html-tag {
+            color: #800000;
+        }
+
+        .html-tag-name {
+            color: #800000;
+            font-weight: 600;
+        }
+
+        .html-attr {
+            color: #FF0000;
+        }
+
+        .html-string {
+            color: #0000FF;
+        }
+
+        .html-punct {
+            color: #000000;
+        }
+
+        .html-comment {
+            color: #008000;
+            font-style: italic;
+        }
+
+        .copy-btn {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            padding: 8px 16px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: all 0.3s ease;
+        }
+
+        .copy-btn:hover {
+            background: #5a67d8;
+            transform: scale(1.05);
+        }
+
+        .alert {
+            padding: 15px 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-weight: 500;
+        }
+
+        .alert-danger {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .alert-info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+
+        .history-section {
+            margin-top: 40px;
+            padding-top: 30px;
+            border-top: 2px solid #e1e5e9;
+        }
+
+        .history-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .history-header h3 {
+            color: #333;
+            font-size: 1.3em;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .clear-history-btn {
+            padding: 8px 16px;
+            background: #dc3545;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.95em;
+            transition: all 0.3s ease;
+        }
+
+        .clear-history-btn:hover {
+            background: #c82333;
+            transform: scale(1.05);
+        }
+
+        .history-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .history-item {
+            background: white;
+            border: 2px solid #e1e5e9;
+            border-radius: 10px;
+            padding: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .history-item:hover {
+            border-color: #4facfe;
+            box-shadow: 0 4px 12px rgba(79, 172, 254, 0.2);
+        }
+
+        .history-item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 10px;
+            gap: 10px;
+        }
+
+        .history-item-header > div:first-child {
+            flex: 1;
+            min-width: 0;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .history-item-method {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 5px;
+            font-weight: 600;
+            font-size: 0.85em;
+            flex-shrink: 0;
+        }
+
+        .method-GET {
+            background: #28a745;
+            color: white;
+        }
+
+        .method-POST {
+            background: #ffc107;
+            color: #333;
+        }
+
+        .method-PUT {
+            background: #17a2b8;
+            color: white;
+        }
+
+        .method-DELETE {
+            background: #dc3545;
+            color: white;
+        }
+
+        .method-PATCH {
+            background: #6f42c1;
+            color: white;
+        }
+
+        .history-item-url {
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 0.9em;
+            color: #555;
+            word-break: break-all;
+            overflow-wrap: break-word;
+            word-wrap: break-word;
+            flex: 1;
+            min-width: 0;
+        }
+
+        .history-item-actions {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            flex-shrink: 0;
+        }
+
+        .history-item-date {
+            color: #999;
+            font-size: 0.85em;
+        }
+
+        .delete-history-btn {
+            padding: 4px 10px;
+            background: #dc3545;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.8em;
+            transition: all 0.3s ease;
+        }
+
+        .delete-history-btn:hover {
+            background: #c82333;
+        }
+
+        .history-item-status {
+            margin-top: 8px;
+            font-size: 0.85em;
+            color: #666;
+        }
+
+        .empty-history {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+            font-style: italic;
+        }
+
+        /* 弹窗样式 */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(5px);
+            animation: fadeIn 0.3s ease;
+        }
+
+        .modal.show {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 800px;
+            max-height: 85vh;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            animation: slideUp 0.3s ease;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .modal-header {
+            padding: 25px 30px;
+            border-bottom: 2px solid #e1e5e9;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 15px 15px 0 0;
+        }
+
+        .modal-header h2 {
+            margin: 0;
+            font-size: 1.5em;
+            font-weight: 500;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 2em;
+            color: white;
+            cursor: pointer;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+        }
+
+        .modal-close:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: rotate(90deg);
+        }
+
+        .modal-body {
+            padding: 30px;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .modal-footer {
+            padding: 20px 30px;
+            border-top: 2px solid #e1e5e9;
+            display: flex;
+            gap: 15px;
+            justify-content: flex-end;
+        }
+
+        /* 变量提示样式 */
+        .variable-hint {
+            position: absolute;
+            background: white;
+            border: 2px solid #667eea;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+            max-height: 200px;
+            overflow-y: auto;
+            z-index: 1001;
+            display: none;
+            min-width: 200px;
+        }
+
+        .variable-hint.show {
+            display: block;
+        }
+
+        .variable-hint-item {
+            padding: 10px 15px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border-bottom: 1px solid #f0f0f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .variable-hint-item:last-child {
+            border-bottom: none;
+        }
+
+        .variable-hint-item:hover {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .variable-hint-key {
+            font-weight: 600;
+            font-family: 'Consolas', 'Monaco', monospace;
+        }
+
+        .variable-hint-value {
+            font-size: 0.85em;
+            color: #666;
+            max-width: 150px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .variable-hint-item:hover .variable-hint-value {
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 15px;
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* 移动端优化 */
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+
+            .content {
+                padding: 20px 15px;
+            }
+
+            .header {
+                padding: 20px 15px;
+            }
+
+            .header h1 {
+                font-size: 1.8em;
+            }
+
+            .header p {
+                font-size: 0.95em;
+            }
+
+            .request-line {
+                flex-direction: column;
+            }
+
+            .method-select {
+                width: 100%;
+            }
+
+            .btn {
+                width: 100%;
+            }
+
+            .tabs {
+                flex-direction: column;
+                gap: 8px;
+                border-bottom: none;
+                padding-bottom: 0;
+            }
+
+            .tab {
+                width: 100%;
+                text-align: center;
+                border-radius: 8px;
+            }
+
+            .key-value-row {
+                flex-wrap: wrap;
+            }
+
+            /* Checkbox和删除按钮放在同一行 */
+            .key-value-row input[type="checkbox"] {
+                order: 1;
+                flex-shrink: 0;
+            }
+
+            .key-value-row .delete-btn {
+                order: 2;
+                flex-shrink: 0;
+                min-width: 60px;
+                margin-left: auto;
+            }
+
+            /* 输入框独占一行 - 针对有 autocomplete-wrapper 的（Headers） */
+            .key-value-row .autocomplete-wrapper {
+                order: 3;
+                flex: 1 1 100%;
+                max-width: 100%;
+                margin-top: 8px;
+            }
+
+            .key-value-row .autocomplete-wrapper.wide {
+                order: 4;
+                flex: 1 1 100%;
+                max-width: 100%;
+                margin-top: 8px;
+            }
+
+            /* 如果是在 autocomplete-wrapper 内的输入框，保持100%宽度 */
+            .key-value-row .autocomplete-wrapper .key-input,
+            .key-value-row .autocomplete-wrapper .value-input {
+                width: 100%;
+                order: initial;
+                margin-top: 0;
+            }
+
+            /* 如果input没有包裹在wrapper中（Params, PathVars） */
+            .key-value-row > .key-input {
+                order: 3;
+                flex: 1 1 100%;
+                margin-top: 8px;
+            }
+
+            .key-value-row > .value-input {
+                order: 4;
+                flex: 1 1 100%;
+                margin-top: 8px;
+            }
+
+            .response-status {
+                flex-direction: column;
+            }
+
+            .status-item {
+                min-width: 100%;
+            }
+
+            .history-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+
+            .clear-history-btn {
+                width: 100%;
+            }
+
+            .history-item-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+
+            .history-item-header > div:first-child {
+                width: 100%;
+            }
+
+            .history-item-url {
+                width: 100%;
+            }
+
+            .history-item-actions {
+                width: 100%;
+                justify-content: space-between;
+            }
+
+            .body-type-select {
+                flex-direction: column;
+            }
+
+            .body-type-option {
+                text-align: center;
+            }
+
+            .autocomplete-wrapper {
+                flex: 1 1 100%;
+            }
+
+            .autocomplete-suggestions {
+                font-size: 0.9em;
+                max-height: 150px;
+            }
+
+            .autocomplete-suggestion {
+                padding: 8px 12px;
+            }
+
+            .auth-input, .auth-textarea, .auth-select {
+                font-size: 0.95em;
+            }
+
+            .auth-textarea {
+                min-height: 110px;
+            }
+
+            .auth-input-group {
+                margin-bottom: 18px;
+            }
+
+            .auth-info-box, .auth-warning-box {
+                padding: 13px 16px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .header h1 {
+                font-size: 1.5em;
+            }
+
+            .content {
+                padding: 15px 12px;
+            }
+
+            .section-title {
+                font-size: 1.1em;
+            }
+
+            textarea {
+                min-height: 150px;
+                font-size: 0.85em;
+            }
+
+            .response-content {
+                font-size: 0.85em;
+                max-height: 300px;
+            }
+
+            .autocomplete-wrapper {
+                flex: 1 1 100%;
+                max-width: 100%;
+            }
+
+            .autocomplete-wrapper.wide {
+                flex: 1 1 100%;
+                max-width: 100%;
+            }
+
+            .autocomplete-suggestions {
+                font-size: 0.85em;
+                max-height: 120px;
+            }
+
+            .autocomplete-suggestion {
+                padding: 6px 10px;
+            }
+
+            .auth-input, .auth-textarea, .auth-select {
+                font-size: 0.85em;
+                padding: 10px 12px;
+            }
+
+            .auth-textarea {
+                min-height: 100px;
+            }
+
+            .auth-input-group {
+                margin-bottom: 12px;
+            }
+
+            .auth-input-group label {
+                font-size: 0.9em;
+                margin-bottom: 8px;
+            }
+
+            .auth-info-box, .auth-warning-box {
+                padding: 10px 12px;
+                margin-top: 15px;
+            }
+
+            .auth-info-box h4 {
+                font-size: 0.9em;
+            }
+
+            .auth-info-box p, .auth-warning-box p {
+                font-size: 0.85em;
+            }
+
+            .auth-type-selector {
+                margin-bottom: 20px;
+            }
+
+            .modal-content {
+                width: 95%;
+                max-height: 90vh;
+            }
+
+            .modal-header {
+                padding: 20px 15px;
+            }
+
+            .modal-header h2 {
+                font-size: 1.3em;
+            }
+
+            .modal-body {
+                padding: 20px 15px;
+            }
+
+            .modal-footer {
+                padding: 15px;
+                flex-direction: column;
+            }
+
+            .modal-footer .btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚀 API调试工具</h1>
+            <p>强大的HTTP API测试工具，支持多种请求方法和参数配置</p>
+        </div>
+
+        <div class="content">
+            <div class="info-box">
+                <h4>📘 使用说明</h4>
+                <p>API调试工具，支持发送HTTP请求、配置请求头、参数和请求体。可以测试RESTful API、查看响应结果，并自动保存请求历史记录。</p>
+            </div>
+
+            <!-- 请求配置区域 -->
+            <div class="section">
+                <div class="section-title">📤 请求配置</div>
+                
+                <div class="request-line">
+                    <select id="httpMethod" class="method-select">
+                        <option value="GET">GET</option>
+                        <option value="POST">POST</option>
+                        <option value="PUT">PUT</option>
+                        <option value="DELETE">DELETE</option>
+                        <option value="PATCH">PATCH</option>
+                        <option value="HEAD">HEAD</option>
+                        <option value="OPTIONS">OPTIONS</option>
+                    </select>
+                    <input type="text" id="apiUrl" class="url-input" placeholder="请输入API地址，例如：https://api.example.com/users">
+                    <button class="btn btn-primary" id="sendBtn" onclick="sendRequest()">发送请求</button>
+                </div>
+
+                <div class="button-group">
+                    <button class="btn btn-secondary btn-small" onclick="openVariablesModal()">⚙️ 全局变量</button>
+                    <button class="btn btn-warning btn-small" onclick="clearAll()">🗑️ 清空所有</button>
+                </div>
+            </div>
+
+            <!-- 请求参数标签页 -->
+            <div class="section">
+                <div class="tabs">
+                    <div class="tab active" onclick="switchRequestTab('params')">Query Params</div>
+                    <div class="tab" onclick="switchRequestTab('pathVars')">Path Variables</div>
+                    <div class="tab" onclick="switchRequestTab('authorization')">Authorization</div>
+                    <div class="tab" onclick="switchRequestTab('headers')">Headers</div>
+                    <div class="tab" onclick="switchRequestTab('body')">Body</div>
+                </div>
+
+                <!-- Query Params -->
+                <div id="params" class="tab-content active">
+                    <div class="info-box" style="margin-bottom: 15px;">
+                        <h4>💡 使用提示</h4>
+                        <p>在URL中输入带查询参数的地址会自动解析（鼠标离开输入框后触发），例如：<br>
+                        <code>https://api.example.com/users?id=123&name=John</code><br>
+                        <code>/api/users?id=123&name=John</code> （不需要完整URL）<br>
+                        参数将自动提取到下方列表，URL保持不变。发送请求时会合并URL中的参数和下方列表中的参数。</p>
+                    </div>
+                    <div id="paramsList" class="key-value-list"></div>
+                    <button class="btn btn-secondary btn-small" onclick="addParam()">➕ 添加参数</button>
+                </div>
+
+                <!-- Path Variables -->
+                <div id="pathVars" class="tab-content">
+                    <div class="info-box" style="margin-bottom: 15px;">
+                        <h4>💡 使用提示</h4>
+                        <p>在URL中使用 <code>{变量名}</code> 或 <code>:变量名</code> 格式定义路径参数，例如：<br>
+                        <code>https://api.example.com/users/{userId}/posts/{postId}</code></p>
+                        <p style="margin-top: 8px;">⚠️ 注意：<code>{{'{{'}}变量名}}</code> 格式是全局变量，不会被识别为路径参数</p>
+                    </div>
+                    <div id="pathVarsList" class="key-value-list"></div>
+                    <button class="btn btn-secondary btn-small" onclick="addPathVar()">➕ 添加路径参数</button>
+                </div>
+
+                <!-- Authorization -->
+                <div id="authorization" class="tab-content">
+                    <div class="auth-type-selector">
+                        <div class="input-group">
+                            <label>🔐 认证类型</label>
+                            <select id="authType" class="auth-select" onchange="switchAuthType()">
+                                <option value="none">🚫 No Auth - 无认证</option>
+                                <option value="bearer">🎫 Bearer Token</option>
+                                <option value="basic">🔑 Basic Auth</option>
+                                <option value="apikey">🗝️ API Key</option>
+                                <option value="digest">🔐 Digest Auth</option>
+                                <option value="oauth2">🌐 OAuth 2.0</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- No Auth -->
+                    <div id="authNone" class="auth-content active">
+                        <div class="alert alert-info">
+                            ℹ️ 当前请求不使用任何认证方式
+                        </div>
+                    </div>
+
+                    <!-- Bearer Token -->
+                    <div id="authBearer" class="auth-content" style="display: none;">
+                        <div class="auth-input-group">
+                            <label>🎫 Token</label>
+                            <textarea id="bearerToken" class="auth-textarea" placeholder="请输入Bearer Token，例如：&#10;eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"></textarea>
+                        </div>
+                        <div class="auth-info-box">
+                            <h4>📘 Bearer Token说明</h4>
+                            <p>Bearer Token是最常见的API认证方式，通常用于JWT认证。Token将被自动添加到请求头：<br>
+                            <code>Authorization: Bearer {your_token}</code></p>
+                        </div>
+                    </div>
+
+                    <!-- Basic Auth -->
+                    <div id="authBasic" class="auth-content" style="display: none;">
+                        <div class="auth-input-group">
+                            <label>👤 用户名</label>
+                            <input type="text" id="basicUsername" class="auth-input" placeholder="请输入用户名">
+                        </div>
+                        <div class="auth-input-group">
+                            <label>🔒 密码</label>
+                            <input type="password" id="basicPassword" class="auth-input" placeholder="请输入密码">
+                        </div>
+                        <div class="auth-info-box">
+                            <h4>📘 Basic Auth说明</h4>
+                            <p>Basic Auth使用Base64编码的用户名和密码进行认证。将被自动添加到请求头：<br>
+                            <code>Authorization: Basic {base64(username:password)}</code></p>
+                        </div>
+                    </div>
+
+                    <!-- API Key -->
+                    <div id="authApiKey" class="auth-content" style="display: none;">
+                        <div class="auth-input-group">
+                            <label>📝 Key名称</label>
+                            <input type="text" id="apiKeyName" class="auth-input" placeholder="例如：X-API-Key, api_key, apikey" value="X-API-Key">
+                        </div>
+                        <div class="auth-input-group">
+                            <label>🔑 Key值</label>
+                            <input type="text" id="apiKeyValue" class="auth-input" placeholder="请输入API Key">
+                        </div>
+                        <div class="auth-input-group">
+                            <label>📍 添加位置</label>
+                            <select id="apiKeyLocation" class="auth-select">
+                                <option value="header">Header（请求头）</option>
+                                <option value="query">Query Params（URL参数）</option>
+                            </select>
+                        </div>
+                        <div class="auth-info-box">
+                            <h4>📘 API Key说明</h4>
+                            <p>API Key可以灵活地添加到请求头或URL参数中。<br>
+                            • <strong>Header方式</strong>: <code>{key_name}: {key_value}</code><br>
+                            • <strong>Query方式</strong>: <code>?{key_name}={key_value}</code></p>
+                        </div>
+                    </div>
+
+                    <!-- Digest Auth -->
+                    <div id="authDigest" class="auth-content" style="display: none;">
+                        <div class="auth-input-group">
+                            <label>👤 用户名</label>
+                            <input type="text" id="digestUsername" class="auth-input" placeholder="请输入用户名">
+                        </div>
+                        <div class="auth-input-group">
+                            <label>🔒 密码</label>
+                            <input type="password" id="digestPassword" class="auth-input" placeholder="请输入密码">
+                        </div>
+                        <div class="auth-warning-box">
+                            <p>⚠️ <strong>注意：</strong>Digest Auth需要服务器返回401响应和challenge信息。在浏览器环境中可能不完全支持此认证方式。</p>
+                        </div>
+                    </div>
+
+                    <!-- OAuth 2.0 -->
+                    <div id="authOAuth2" class="auth-content" style="display: none;">
+                        <div class="auth-input-group">
+                            <label>🌐 Access Token</label>
+                            <textarea id="oauth2Token" class="auth-textarea" placeholder="请输入OAuth 2.0 Access Token&#10;例如：ya29.a0AfH6SMBx..."></textarea>
+                        </div>
+                        <div class="auth-input-group">
+                            <label>🏷️ Token类型（可选）</label>
+                            <input type="text" id="oauth2TokenType" class="auth-input" placeholder="默认为 Bearer" value="Bearer">
+                        </div>
+                        <div class="auth-info-box">
+                            <h4>📘 OAuth 2.0说明</h4>
+                            <p>OAuth 2.0是一个授权框架，允许应用程序访问用户资源。Access Token将被添加到请求头：<br>
+                            <code>Authorization: {token_type} {access_token}</code><br><br>
+                            <strong>注意：</strong>完整的OAuth 2.0授权流程（Authorization Code、Implicit等）需要在服务端完成，此处仅支持使用已获取的Access Token。</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Headers -->
+                <div id="headers" class="tab-content">
+                    <div id="headersList" class="key-value-list"></div>
+                    <button class="btn btn-secondary btn-small" onclick="addHeader()">➕ 添加请求头</button>
+                </div>
+
+                <!-- Body -->
+                <div id="body" class="tab-content">
+                    <div class="body-type-select">
+                        <div class="body-type-option active" onclick="switchBodyType('none')">None</div>
+                        <div class="body-type-option" onclick="switchBodyType('json')">JSON</div>
+                        <div class="body-type-option" onclick="switchBodyType('form')">Form Data</div>
+                        <div class="body-type-option" onclick="switchBodyType('text')">Raw Text</div>
+                    </div>
+
+                    <div id="bodyNone" class="body-content active">
+                        <div class="alert alert-info">当前请求不包含Body内容</div>
+                    </div>
+
+                    <div id="bodyJson" class="body-content" style="display: none;">
+                        <textarea id="jsonBody" placeholder='请输入JSON格式的数据，例如：&#10;{&#10;  "name": "John Doe",&#10;  "email": "john@example.com"&#10;}'></textarea>
+                    </div>
+
+                    <div id="bodyForm" class="body-content" style="display: none;">
+                        <div id="formDataList" class="key-value-list"></div>
+                        <button class="btn btn-secondary btn-small" onclick="addFormData()">➕ 添加字段</button>
+                    </div>
+
+                    <div id="bodyText" class="body-content" style="display: none;">
+                        <textarea id="textBody" placeholder="请输入纯文本内容..."></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 响应区域 -->
+            <div id="responseSection" class="response-section">
+                <div class="section-title">📥 响应结果</div>
+
+                <div class="response-status" id="responseStatus"></div>
+
+                <div class="tabs">
+                    <div class="tab active" onclick="switchResponseTab('responseBody')">Response Body</div>
+                    <div class="tab" onclick="switchResponseTab('responseHeaders')">Response Headers</div>
+                </div>
+
+                <div id="responseBody" class="tab-content active">
+                    <div class="response-box">
+                        <h3>响应内容</h3>
+                        <button class="copy-btn" onclick="copyResponse('responseContent')">📋 复制</button>
+                        <div id="responseContent" class="response-content"></div>
+                    </div>
+                </div>
+
+                <div id="responseHeaders" class="tab-content">
+                    <div class="response-box">
+                        <h3>响应头</h3>
+                        <button class="copy-btn" onclick="copyResponse('responseHeadersContent')">📋 复制</button>
+                        <div id="responseHeadersContent" class="response-content"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 历史记录 -->
+            <div class="history-section">
+                <div class="history-header">
+                    <h3>📜 请求历史</h3>
+                    <button class="clear-history-btn" onclick="clearHistory()">清空历史</button>
+                </div>
+                <div id="historyList" class="history-list"></div>
+            </div>
+        </div>
+
+        <!-- 全局变量管理弹窗 -->
+        <div id="variablesModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>⚙️ 全局变量管理</h2>
+                    <button class="modal-close" onclick="closeVariablesModal()">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="info-box" style="margin-bottom: 20px;">
+                        <h4>💡 使用说明</h4>
+                        <p>• 使用 <code>{{'{{'}}变量名}}</code> 格式在任何输入框中引用变量<br>
+                        • 支持在URL、参数、Headers、Body等位置使用<br>
+                        • 例如：URL输入 <code>{{'{{'}}baseUrl}}/users/{{'{{'}}userId}}</code></p>
+                    </div>
+                    <div id="variablesList" class="key-value-list"></div>
+                    <button class="btn btn-secondary btn-small" onclick="addVariable()">➕ 添加变量</button>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-primary" onclick="saveVariables()">💾 保存</button>
+                    <button class="btn btn-secondary" onclick="closeVariablesModal()">取消</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentBodyType = 'none';
+        let paramsCount = 0;
+        let pathVarsCount = 0;
+        let headersCount = 0;
+        let formDataCount = 0;
+        let variablesCount = 0;
+        let isLoadingHistory = false; // 标志位：是否正在加载历史记录
+        let globalVariables = {}; // 全局变量存储
+
+        // 初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            addParam();
+            addHeader();
+            loadHistory();
+            loadGlobalVariables();
+            initVariableHints();
+            
+            // 监听URL变化，鼠标离开时自动检测路径参数和查询参数
+            const urlInput = document.getElementById('apiUrl');
+            urlInput.addEventListener('blur', function() {
+                // 如果正在加载历史记录，不自动解析
+                if (isLoadingHistory) return;
+                
+                autoDetectPathVariables();
+                autoDetectQueryParams();
+            });
+        });
+
+        // ==================== 全局变量管理 ====================
+        
+        // 加载全局变量
+        function loadGlobalVariables() {
+            const stored = localStorage.getItem('api_global_variables');
+            if (stored) {
+                try {
+                    globalVariables = JSON.parse(stored);
+                } catch (e) {
+                    globalVariables = {};
+                }
+            }
+        }
+
+        // 保存全局变量到localStorage
+        function saveGlobalVariablesToStorage() {
+            localStorage.setItem('api_global_variables', JSON.stringify(globalVariables));
+        }
+
+        // 打开变量管理弹窗
+        function openVariablesModal() {
+            const modal = document.getElementById('variablesModal');
+            modal.classList.add('show');
+            
+            // 加载变量到列表
+            const variablesList = document.getElementById('variablesList');
+            variablesList.innerHTML = '';
+            variablesCount = 0;
+            
+            Object.entries(globalVariables).forEach(([key, value]) => {
+                addVariable(key, value);
+            });
+            
+            // 如果没有变量，添加一个空行
+            if (Object.keys(globalVariables).length === 0) {
+                addVariable();
+            }
+        }
+
+        // 关闭变量管理弹窗
+        function closeVariablesModal() {
+            const modal = document.getElementById('variablesModal');
+            modal.classList.remove('show');
+        }
+
+        // 添加变量行
+        function addVariable(key = '', value = '') {
+            const id = variablesCount++;
+            const html = `
+                <div class="key-value-row" id="variable-${id}">
+                    <input type="text" class="key-input" placeholder="变量名" value="${escapeHtml(key)}">
+                    <input type="text" class="value-input" placeholder="变量值" value="${escapeHtml(value)}">
+                    <button class="delete-btn" onclick="deleteRow('variable-${id}')">删除</button>
+                </div>
+            `;
+            document.getElementById('variablesList').insertAdjacentHTML('beforeend', html);
+        }
+
+        // 保存变量
+        function saveVariables() {
+            const variablesList = document.getElementById('variablesList');
+            const rows = variablesList.querySelectorAll('.key-value-row');
+            const newVariables = {};
+            
+            rows.forEach(row => {
+                const keyInput = row.querySelector('.key-input');
+                const valueInput = row.querySelector('.value-input');
+                const key = keyInput ? keyInput.value.trim() : '';
+                const value = valueInput ? valueInput.value.trim() : '';
+                
+                if (key) {
+                    newVariables[key] = value;
+                }
+            });
+            
+            globalVariables = newVariables;
+            saveGlobalVariablesToStorage();
+            closeVariablesModal();
+        }
+
+        // 替换文本中的变量
+        function replaceVariables(text) {
+            if (!text) return text;
+            
+            // 匹配 {{variableName}} 格式
+            return text.replace(/\{\{([^}]+)\}\}/g, (match, varName) => {
+                const trimmedName = varName.trim();
+                if (globalVariables.hasOwnProperty(trimmedName)) {
+                    return globalVariables[trimmedName];
+                }
+                return match; // 如果变量不存在，保持原样
+            });
+        }
+
+        // 初始化变量提示功能
+        function initVariableHints() {
+            // 为所有文本输入框添加变量提示
+            const inputSelectors = [
+                '#apiUrl',
+                '.key-input',
+                '.value-input',
+                '#bearerToken',
+                '#basicUsername',
+                '#basicPassword',
+                '#apiKeyName',
+                '#apiKeyValue',
+                '#oauth2Token',
+                '#oauth2TokenType',
+                '#jsonBody',
+                '#textBody'
+            ];
+            
+            // 使用事件委托来处理动态添加的输入框
+            document.addEventListener('input', function(e) {
+                const target = e.target;
+                
+                // 检查是否是相关的输入框
+                const isRelevantInput = inputSelectors.some(selector => {
+                    if (selector.startsWith('#')) {
+                        return target.id === selector.substring(1);
+                    } else {
+                        return target.classList.contains(selector.substring(1));
+                    }
+                });
+                
+                if (isRelevantInput) {
+                    handleVariableHint(target);
+                }
+            });
+        }
+
+        // 处理变量提示
+        function handleVariableHint(input) {
+            const value = input.value;
+            const cursorPos = input.selectionStart;
+            
+            // 查找最近的 {{ 位置
+            const textBeforeCursor = value.substring(0, cursorPos);
+            const lastBracePos = textBeforeCursor.lastIndexOf('{{');
+            
+            if (lastBracePos !== -1) {
+                // 检查在 {{ 之后是否有 }}
+                const textAfterBrace = textBeforeCursor.substring(lastBracePos + 2);
+                const hasClosingBrace = textAfterBrace.indexOf('}}') !== -1;
+                
+                if (!hasClosingBrace) {
+                    // 显示变量提示
+                    const searchTerm = textAfterBrace.toLowerCase();
+                    showVariableHints(input, searchTerm);
+                    return;
+                }
+            }
+            
+            // 隐藏提示
+            hideVariableHints();
+        }
+
+        // 显示变量提示
+        function showVariableHints(input, searchTerm) {
+            const variables = Object.keys(globalVariables).filter(key =>
+                key.toLowerCase().includes(searchTerm)
+            );
+            
+            if (variables.length === 0) {
+                hideVariableHints();
+                return;
+            }
+            
+            // 创建或获取提示框
+            let hintBox = document.getElementById('variableHintBox');
+            if (!hintBox) {
+                hintBox = document.createElement('div');
+                hintBox.id = 'variableHintBox';
+                hintBox.className = 'variable-hint';
+                document.body.appendChild(hintBox);
+            }
+            
+            // 填充提示内容
+            hintBox.innerHTML = variables.map(key => `
+                <div class="variable-hint-item" onclick="insertVariable('${key}')">
+                    <span class="variable-hint-key">${escapeHtml(key)}</span>
+                    <span class="variable-hint-value">${escapeHtml(globalVariables[key])}</span>
+                </div>
+            `).join('');
+            
+            // 定位提示框
+            const rect = input.getBoundingClientRect();
+            hintBox.style.position = 'fixed';
+            hintBox.style.left = rect.left + 'px';
+            hintBox.style.top = (rect.bottom + 5) + 'px';
+            hintBox.classList.add('show');
+            
+            // 保存当前输入框的引用
+            hintBox.dataset.targetInput = input.id || input.className;
+            window.currentHintInput = input;
+        }
+
+        // 隐藏变量提示
+        function hideVariableHints() {
+            const hintBox = document.getElementById('variableHintBox');
+            if (hintBox) {
+                hintBox.classList.remove('show');
+            }
+        }
+
+        // 插入变量
+        function insertVariable(varName) {
+            const input = window.currentHintInput;
+            if (!input) {
+                hideVariableHints();
+                return;
+            }
+            
+            const value = input.value;
+            const cursorPos = input.selectionStart;
+            const textBeforeCursor = value.substring(0, cursorPos);
+            const textAfterCursor = value.substring(cursorPos);
+            
+            // 查找最近的 {{ 位置
+            const lastBracePos = textBeforeCursor.lastIndexOf('{{');
+            
+            if (lastBracePos !== -1) {
+                const newValue = 
+                    value.substring(0, lastBracePos) +
+                    '{{' + varName + '}}' +
+                    textAfterCursor;
+                
+                input.value = newValue;
+                const newCursorPos = lastBracePos + varName.length + 4; // {{varName}}
+                input.setSelectionRange(newCursorPos, newCursorPos);
+                input.focus();
+            }
+            
+            hideVariableHints();
+        }
+
+        // 点击其他地方隐藏提示
+        document.addEventListener('click', function(e) {
+            const hintBox = document.getElementById('variableHintBox');
+            if (hintBox && !hintBox.contains(e.target)) {
+                hideVariableHints();
+            }
+        });
+
+        // 点击弹窗外部关闭弹窗
+        document.getElementById('variablesModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeVariablesModal();
+            }
+        });
+
+        // 切换请求标签页
+        function switchRequestTab(tabName) {
+            document.querySelectorAll('#params, #pathVars, #authorization, #headers, #body').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelectorAll('.tabs .tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        // 切换认证类型
+        function switchAuthType() {
+            const authType = document.getElementById('authType').value;
+            
+            document.querySelectorAll('.auth-content').forEach(content => {
+                content.classList.remove('active');
+                content.style.display = 'none';
+            });
+
+            const contentMap = {
+                'none': 'authNone',
+                'bearer': 'authBearer',
+                'basic': 'authBasic',
+                'apikey': 'authApiKey',
+                'digest': 'authDigest',
+                'oauth2': 'authOAuth2'
+            };
+
+            const targetContent = document.getElementById(contentMap[authType]);
+            if (targetContent) {
+                targetContent.classList.add('active');
+                targetContent.style.display = 'block';
+            }
+        }
+
+        // 切换响应标签页
+        function switchResponseTab(tabName) {
+            document.querySelectorAll('#responseBody, #responseHeaders').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            const tabs = document.querySelector('#responseSection .tabs').children;
+            Array.from(tabs).forEach(tab => {
+                tab.classList.remove('active');
+            });
+
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        // 切换Body类型
+        function switchBodyType(type) {
+            currentBodyType = type;
+            
+            document.querySelectorAll('.body-type-option').forEach(opt => {
+                opt.classList.remove('active');
+            });
+            event.target.classList.add('active');
+
+            document.querySelectorAll('.body-content').forEach(content => {
+                content.style.display = 'none';
+            });
+
+            const contentMap = {
+                'none': 'bodyNone',
+                'json': 'bodyJson',
+                'form': 'bodyForm',
+                'text': 'bodyText'
+            };
+
+            document.getElementById(contentMap[type]).style.display = 'block';
+
+            // 如果是form类型且没有字段，添加一个
+            if (type === 'form' && formDataCount === 0) {
+                addFormData();
+            }
+        }
+
+        // 添加Query参数
+        function addParam() {
+            const id = paramsCount++;
+            const html = `
+                <div class="key-value-row" id="param-${id}">
+                    <input type="checkbox" checked>
+                    <input type="text" class="key-input" placeholder="参数名">
+                    <input type="text" class="value-input" placeholder="参数值">
+                    <button class="delete-btn" onclick="deleteRow('param-${id}')">删除</button>
+                </div>
+            `;
+            document.getElementById('paramsList').insertAdjacentHTML('beforeend', html);
+        }
+
+        // 添加Path Variable
+        function addPathVar(varName = '', varValue = '') {
+            const id = pathVarsCount++;
+            const html = `
+                <div class="key-value-row" id="pathvar-${id}">
+                    <input type="checkbox" checked>
+                    <input type="text" class="key-input" placeholder="变量名" value="${varName}">
+                    <input type="text" class="value-input" placeholder="变量值" value="${varValue}">
+                    <button class="delete-btn" onclick="deleteRow('pathvar-${id}')">删除</button>
+                </div>
+            `;
+            document.getElementById('pathVarsList').insertAdjacentHTML('beforeend', html);
+        }
+
+        // 自动检测URL中的路径参数
+        function autoDetectPathVariables() {
+            const url = document.getElementById('apiUrl').value;
+            const pathVarsList = document.getElementById('pathVarsList');
+            
+            // 如果URL为空，清空路径变量列表
+            if (!url) {
+                pathVarsList.innerHTML = '';
+                pathVarsCount = 0;
+                return;
+            }
+
+            // 匹配 {variable} 或 :variable 格式
+            // 注意：排除 {{variable}} 格式（全局变量）
+            const curlyBracePattern = /(?<!\{)\{([^}]+)\}(?!\})/g;  // {variable} 但不是 {{variable}}
+            const colonPattern = /:([a-zA-Z_][a-zA-Z0-9_]*)/g;
+            
+            const detectedVars = new Set();
+            
+            // 检测 {variable} 格式（排除全局变量 {{variable}}）
+            let match;
+            while ((match = curlyBracePattern.exec(url)) !== null) {
+                detectedVars.add(match[1]);
+            }
+            
+            // 检测 :variable 格式
+            while ((match = colonPattern.exec(url)) !== null) {
+                detectedVars.add(match[1]);
+            }
+
+            // 获取当前已有的变量
+            const existingVars = new Set();
+            const rows = pathVarsList.querySelectorAll('.key-value-row');
+            rows.forEach(row => {
+                const keyInput = row.querySelector('.key-input');
+                if (keyInput && keyInput.value.trim()) {
+                    existingVars.add(keyInput.value.trim());
+                }
+            });
+
+            // 添加新检测到的变量
+            detectedVars.forEach(varName => {
+                if (!existingVars.has(varName)) {
+                    addPathVar(varName, '');
+                }
+            });
+
+            // 如果检测到路径参数，自动切换到Path Variables标签
+            if (detectedVars.size > 0 && pathVarsList.querySelectorAll('.key-value-row').length > 0) {
+                // 不自动切换，只在控制台提示
+                // console.log('检测到路径参数:', Array.from(detectedVars));
+            }
+        }
+
+        // 自动检测URL中的查询参数
+        function autoDetectQueryParams() {
+            const url = document.getElementById('apiUrl').value.trim();
+            const paramsList = document.getElementById('paramsList');
+            
+            // 如果URL为空，清空参数列表
+            if (!url) {
+                paramsList.innerHTML = '';
+                paramsCount = 0;
+                addParam(); // 添加一个空行
+                return;
+            }
+
+            // 直接查找 ? 后面的参数，不验证URL是否合法
+            const questionMarkIndex = url.indexOf('?');
+            if (questionMarkIndex === -1) {
+                // 没有查询参数
+                return;
+            }
+
+            const queryString = url.substring(questionMarkIndex + 1);
+            if (!queryString) {
+                // 查询字符串为空
+                return;
+            }
+
+            // 手动解析查询参数
+            const searchParams = new URLSearchParams(queryString);
+
+            // 获取当前已有的参数
+            const existingParams = new Map();
+            const rows = paramsList.querySelectorAll('.key-value-row');
+            rows.forEach(row => {
+                const keyInput = row.querySelector('.key-input');
+                const valueInput = row.querySelector('.value-input');
+                if (keyInput && keyInput.value.trim()) {
+                    existingParams.set(keyInput.value.trim(), valueInput ? valueInput.value : '');
+                }
+            });
+
+            // 检查是否有新的参数需要添加
+            let hasNewParams = false;
+            const newParams = [];
+            
+            searchParams.forEach((value, key) => {
+                if (!existingParams.has(key)) {
+                    newParams.push({ key, value });
+                    hasNewParams = true;
+                } else if (existingParams.get(key) !== value) {
+                    // 如果参数存在但值不同，更新值
+                    rows.forEach(row => {
+                        const keyInput = row.querySelector('.key-input');
+                        const valueInput = row.querySelector('.value-input');
+                        if (keyInput && keyInput.value.trim() === key && valueInput) {
+                            valueInput.value = value;
+                        }
+                    });
+                }
+            });
+
+            // 添加新检测到的参数
+            if (hasNewParams) {
+                // 清空第一行空参数（如果存在）
+                if (rows.length === 1) {
+                    const firstRow = rows[0];
+                    const keyInput = firstRow.querySelector('.key-input');
+                    const valueInput = firstRow.querySelector('.value-input');
+                    if (keyInput && valueInput && !keyInput.value.trim() && !valueInput.value.trim()) {
+                        // 第一行是空的，移除它
+                        firstRow.remove();
+                    }
+                }
+
+                // 添加新参数
+                newParams.forEach(param => {
+                    addParam();
+                    const lastRow = paramsList.querySelector('.key-value-row:last-child');
+                    if (lastRow) {
+                        const keyInput = lastRow.querySelector('.key-input');
+                        const valueInput = lastRow.querySelector('.value-input');
+                        if (keyInput && valueInput) {
+                            keyInput.value = param.key;
+                            valueInput.value = param.value;
+                        }
+                    }
+                });
+            }
+        }
+
+        // 常见的Header配置
+        const commonHeaders = {
+            'Content-Type': [
+                'application/json',
+                'application/xml',
+                'application/x-www-form-urlencoded',
+                'multipart/form-data',
+                'text/plain',
+                'text/html',
+                'text/xml'
+            ],
+            'Accept': [
+                'application/json',
+                'application/xml',
+                'text/html',
+                'text/plain',
+                '*/*'
+            ],
+            'Authorization': [
+                'Bearer <token>',
+                'Basic <credentials>',
+                'API-Key <key>'
+            ],
+            'User-Agent': [
+                'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+                'PostmanRuntime/7.28.0',
+                'curl/7.68.0'
+            ],
+            'Accept-Language': [
+                'zh-CN,zh;q=0.9,en;q=0.8',
+                'en-US,en;q=0.9',
+                'zh-CN'
+            ],
+            'Accept-Encoding': [
+                'gzip, deflate, br',
+                'gzip, deflate',
+                'identity'
+            ],
+            'Cache-Control': [
+                'no-cache',
+                'no-store',
+                'max-age=0',
+                'must-revalidate'
+            ],
+            'Connection': [
+                'keep-alive',
+                'close'
+            ],
+            'Cookie': [''],
+            'Origin': [''],
+            'Referer': [''],
+            'X-Requested-With': ['XMLHttpRequest'],
+            'X-API-Key': [''],
+            'X-Auth-Token': ['']
+        };
+
+        // 添加Header
+        function addHeader() {
+            const id = headersCount++;
+            const html = `
+                <div class="key-value-row" id="header-${id}">
+                    <input type="checkbox" checked>
+                    <div class="autocomplete-wrapper">
+                        <input type="text" class="key-input" placeholder="Header名称" 
+                               autocomplete="off"
+                               data-header-id="${id}"
+                               onfocus="showHeaderSuggestions(${id})"
+                               oninput="filterHeaderSuggestions(${id})"
+                               onblur="hideHeaderSuggestions(${id}, 200)">
+                        <div class="autocomplete-suggestions" id="headerNameSuggestions-${id}"></div>
+                    </div>
+                    <div class="autocomplete-wrapper wide">
+                        <input type="text" class="value-input" placeholder="Header值"
+                               autocomplete="off"
+                               data-header-id="${id}"
+                               onfocus="showHeaderValueSuggestions(${id})"
+                               oninput="filterHeaderValueSuggestions(${id})"
+                               onblur="hideHeaderValueSuggestions(${id}, 200)">
+                        <div class="autocomplete-suggestions" id="headerValueSuggestions-${id}"></div>
+                    </div>
+                    <button class="delete-btn" onclick="deleteRow('header-${id}')">删除</button>
+                </div>
+            `;
+            document.getElementById('headersList').insertAdjacentHTML('beforeend', html);
+        }
+
+        // 显示Header名称建议
+        function showHeaderSuggestions(headerId) {
+            const suggestions = document.getElementById(`headerNameSuggestions-${headerId}`);
+            if (!suggestions) return;
+            
+            const headerNames = Object.keys(commonHeaders);
+            suggestions.innerHTML = headerNames
+                .map(name => `<div class="autocomplete-suggestion" onclick="selectHeaderName(${headerId}, '${name}')">${name}</div>`)
+                .join('');
+            suggestions.classList.add('show');
+        }
+
+        // 过滤Header名称建议
+        function filterHeaderSuggestions(headerId) {
+            const row = document.getElementById(`header-${headerId}`);
+            if (!row) return;
+            
+            const input = row.querySelector('.key-input');
+            const suggestions = document.getElementById(`headerNameSuggestions-${headerId}`);
+            if (!input || !suggestions) return;
+            
+            const filter = input.value.toLowerCase();
+            const headerNames = Object.keys(commonHeaders).filter(name => 
+                name.toLowerCase().includes(filter)
+            );
+            
+            if (headerNames.length > 0 && filter) {
+                suggestions.innerHTML = headerNames
+                    .map(name => `<div class="autocomplete-suggestion" onclick="selectHeaderName(${headerId}, '${name}')">${name}</div>`)
+                    .join('');
+                suggestions.classList.add('show');
+            } else if (filter) {
+                suggestions.classList.remove('show');
+            } else {
+                showHeaderSuggestions(headerId);
+            }
+        }
+
+        // 隐藏Header名称建议
+        function hideHeaderSuggestions(headerId, delay = 0) {
+            setTimeout(() => {
+                const suggestions = document.getElementById(`headerNameSuggestions-${headerId}`);
+                if (suggestions) {
+                    suggestions.classList.remove('show');
+                }
+            }, delay);
+        }
+
+        // 选择Header名称
+        function selectHeaderName(headerId, name) {
+            const row = document.getElementById(`header-${headerId}`);
+            if (!row) return;
+            
+            const input = row.querySelector('.key-input');
+            if (input) {
+                input.value = name;
+                hideHeaderSuggestions(headerId);
+                // 自动显示对应的值建议
+                setTimeout(() => {
+                    const valueInput = row.querySelector('.value-input');
+                    if (valueInput) {
+                        valueInput.focus();
+                        showHeaderValueSuggestions(headerId);
+                    }
+                }, 100);
+            }
+        }
+
+        // 显示Header值建议
+        function showHeaderValueSuggestions(headerId) {
+            const row = document.getElementById(`header-${headerId}`);
+            if (!row) return;
+            
+            const keyInput = row.querySelector('.key-input');
+            const suggestions = document.getElementById(`headerValueSuggestions-${headerId}`);
+            if (!keyInput || !suggestions) return;
+            
+            const headerName = keyInput.value.trim();
+            
+            if (commonHeaders[headerName] && commonHeaders[headerName].length > 0) {
+                suggestions.innerHTML = commonHeaders[headerName]
+                    .map(value => {
+                        const escapedValue = value.replace(/'/g, "\\'");
+                        return `<div class="autocomplete-suggestion" onclick="selectHeaderValue(${headerId}, '${escapedValue}')">${value}</div>`;
+                    })
+                    .join('');
+                suggestions.classList.add('show');
+            } else {
+                suggestions.classList.remove('show');
+            }
+        }
+
+        // 过滤Header值建议
+        function filterHeaderValueSuggestions(headerId) {
+            const row = document.getElementById(`header-${headerId}`);
+            if (!row) return;
+            
+            const keyInput = row.querySelector('.key-input');
+            const valueInput = row.querySelector('.value-input');
+            const suggestions = document.getElementById(`headerValueSuggestions-${headerId}`);
+            if (!keyInput || !valueInput || !suggestions) return;
+            
+            const headerName = keyInput.value.trim();
+            const filter = valueInput.value.toLowerCase();
+            
+            if (commonHeaders[headerName]) {
+                const filteredValues = commonHeaders[headerName].filter(value =>
+                    value.toLowerCase().includes(filter)
+                );
+                
+                if (filteredValues.length > 0 && filter) {
+                    suggestions.innerHTML = filteredValues
+                        .map(value => {
+                            const escapedValue = value.replace(/'/g, "\\'");
+                            return `<div class="autocomplete-suggestion" onclick="selectHeaderValue(${headerId}, '${escapedValue}')">${value}</div>`;
+                        })
+                        .join('');
+                    suggestions.classList.add('show');
+                } else if (!filter) {
+                    showHeaderValueSuggestions(headerId);
+                } else {
+                    suggestions.classList.remove('show');
+                }
+            }
+        }
+
+        // 隐藏Header值建议
+        function hideHeaderValueSuggestions(headerId, delay = 0) {
+            setTimeout(() => {
+                const suggestions = document.getElementById(`headerValueSuggestions-${headerId}`);
+                if (suggestions) {
+                    suggestions.classList.remove('show');
+                }
+            }, delay);
+        }
+
+        // 选择Header值
+        function selectHeaderValue(headerId, value) {
+            const row = document.getElementById(`header-${headerId}`);
+            if (!row) return;
+            
+            const input = row.querySelector('.value-input');
+            if (input) {
+                input.value = value;
+                hideHeaderValueSuggestions(headerId);
+            }
+        }
+
+        // 添加Form Data
+        function addFormData() {
+            const id = formDataCount++;
+            const html = `
+                <div class="key-value-row" id="formdata-${id}">
+                    <input type="checkbox" checked>
+                    <input type="text" class="key-input" placeholder="字段名">
+                    <input type="text" class="value-input" placeholder="字段值">
+                    <button class="delete-btn" onclick="deleteRow('formdata-${id}')">删除</button>
+                </div>
+            `;
+            document.getElementById('formDataList').insertAdjacentHTML('beforeend', html);
+        }
+
+        // 删除行
+        function deleteRow(id) {
+            document.getElementById(id).remove();
+        }
+
+        // 获取键值对数据（仅选中的）
+        function getKeyValueData(containerId) {
+            const container = document.getElementById(containerId);
+            const rows = container.querySelectorAll('.key-value-row');
+            const data = {};
+
+            rows.forEach(row => {
+                const checkbox = row.querySelector('input[type="checkbox"]');
+                const keyInput = row.querySelector('.key-input');
+                const valueInput = row.querySelector('.value-input');
+
+                if (checkbox.checked && keyInput.value.trim()) {
+                    data[keyInput.value.trim()] = valueInput.value.trim();
+                }
+            });
+
+            return data;
+        }
+
+        // 获取所有键值对数据（包括未选中的）
+        function getAllKeyValueData(containerId) {
+            const container = document.getElementById(containerId);
+            const rows = container.querySelectorAll('.key-value-row');
+            const data = [];
+
+            rows.forEach(row => {
+                const checkbox = row.querySelector('input[type="checkbox"]');
+                const keyInput = row.querySelector('.key-input');
+                const valueInput = row.querySelector('.value-input');
+
+                const key = keyInput ? keyInput.value.trim() : '';
+                const value = valueInput ? valueInput.value.trim() : '';
+                
+                if (key || value) { // 只保存有内容的行
+                    data.push({
+                        enabled: checkbox ? checkbox.checked : true,
+                        key: key,
+                        value: value
+                    });
+                }
+            });
+
+            return data;
+        }
+
+        // 应用认证信息
+        function applyAuthorization(headers, urlObj) {
+            const authType = document.getElementById('authType').value;
+
+            switch (authType) {
+                case 'bearer':
+                    const bearerToken = replaceVariables(document.getElementById('bearerToken').value.trim());
+                    if (bearerToken) {
+                        headers['Authorization'] = `Bearer ${bearerToken}`;
+                    }
+                    break;
+
+                case 'basic':
+                    const basicUsername = replaceVariables(document.getElementById('basicUsername').value);
+                    const basicPassword = replaceVariables(document.getElementById('basicPassword').value);
+                    if (basicUsername || basicPassword) {
+                        const credentials = btoa(`${basicUsername}:${basicPassword}`);
+                        headers['Authorization'] = `Basic ${credentials}`;
+                    }
+                    break;
+
+                case 'apikey':
+                    const apiKeyName = replaceVariables(document.getElementById('apiKeyName').value.trim());
+                    const apiKeyValue = replaceVariables(document.getElementById('apiKeyValue').value.trim());
+                    const apiKeyLocation = document.getElementById('apiKeyLocation').value;
+                    
+                    if (apiKeyName && apiKeyValue) {
+                        if (apiKeyLocation === 'header') {
+                            headers[apiKeyName] = apiKeyValue;
+                        } else {
+                            urlObj.searchParams.append(apiKeyName, apiKeyValue);
+                        }
+                    }
+                    break;
+
+                case 'digest':
+                    // Digest Auth在浏览器中需要服务器challenge，暂不完全支持
+                    const digestUsername = replaceVariables(document.getElementById('digestUsername').value);
+                    const digestPassword = replaceVariables(document.getElementById('digestPassword').value);
+                    if (digestUsername) {
+                        // 标记使用Digest Auth（实际处理需要服务器配合）
+                        console.log('Digest Auth需要服务器返回401 challenge');
+                    }
+                    break;
+
+                case 'oauth2':
+                    const oauth2Token = replaceVariables(document.getElementById('oauth2Token').value.trim());
+                    const oauth2TokenType = replaceVariables(document.getElementById('oauth2TokenType').value.trim()) || 'Bearer';
+                    if (oauth2Token) {
+                        headers['Authorization'] = `${oauth2TokenType} ${oauth2Token}`;
+                    }
+                    break;
+
+                case 'none':
+                default:
+                    // 不添加认证信息
+                    break;
+            }
+        }
+
+        // 发送请求
+        async function sendRequest() {
+            const originalUrl = document.getElementById('apiUrl').value.trim(); // 保存原始URL
+            let url = replaceVariables(originalUrl); // 替换全局变量
+            const method = document.getElementById('httpMethod').value;
+
+            if (!url) {
+                showError('请输入API地址');
+                return;
+            }
+
+            // 替换路径参数（也要替换路径参数中的变量）
+            const pathVars = getKeyValueData('pathVarsList');
+            Object.keys(pathVars).forEach(key => {
+                const value = replaceVariables(pathVars[key]);
+                // 替换 {variable} 格式
+                url = url.replace(new RegExp(`\\{${key}\\}`, 'g'), value);
+                // 替换 :variable 格式
+                url = url.replace(new RegExp(`:${key}\\b`, 'g'), value);
+            });
+
+            // 验证URL格式
+            try {
+                new URL(url);
+            } catch (e) {
+                showError('请输入有效的URL地址');
+                return;
+            }
+
+            const sendBtn = document.getElementById('sendBtn');
+            sendBtn.disabled = true;
+            sendBtn.innerHTML = '<span class="loading-spinner"></span> 发送中...';
+
+            const startTime = Date.now();
+
+            try {
+                // 构建完整URL（包含query参数，替换变量）
+                const params = getKeyValueData('paramsList');
+                const urlObj = new URL(url);
+                Object.keys(params).forEach(key => {
+                    urlObj.searchParams.append(key, replaceVariables(params[key]));
+                });
+
+                // 构建请求头（替换变量）
+                const headers = getKeyValueData('headersList');
+                const replacedHeaders = {};
+                Object.keys(headers).forEach(key => {
+                    replacedHeaders[key] = replaceVariables(headers[key]);
+                });
+
+                // 应用认证信息
+                applyAuthorization(replacedHeaders, urlObj);
+
+                // 构建请求配置
+                const fetchOptions = {
+                    method: method,
+                    headers: replacedHeaders
+                };
+
+                // 构建请求体（替换变量）
+                if (method !== 'GET' && method !== 'HEAD') {
+                    if (currentBodyType === 'json') {
+                        const jsonBody = document.getElementById('jsonBody').value.trim();
+                        if (jsonBody) {
+                            try {
+                                const replacedJson = replaceVariables(jsonBody);
+                                JSON.parse(replacedJson); // 验证JSON
+                                fetchOptions.body = replacedJson;
+                                if (!replacedHeaders['Content-Type']) {
+                                    fetchOptions.headers['Content-Type'] = 'application/json';
+                                }
+                            } catch (e) {
+                                throw new Error('JSON格式错误：' + e.message);
+                            }
+                        }
+                    } else if (currentBodyType === 'form') {
+                        const formData = getKeyValueData('formDataList');
+                        const formBody = new URLSearchParams();
+                        Object.keys(formData).forEach(key => {
+                            formBody.append(key, replaceVariables(formData[key]));
+                        });
+                        fetchOptions.body = formBody;
+                    } else if (currentBodyType === 'text') {
+                        const textBody = document.getElementById('textBody').value;
+                        if (textBody) {
+                            fetchOptions.body = replaceVariables(textBody);
+                        }
+                    }
+                }
+
+                // 发送请求
+                const response = await fetch(urlObj.toString(), fetchOptions);
+                const endTime = Date.now();
+                const duration = endTime - startTime;
+
+                // 获取响应内容
+                const contentType = response.headers.get('content-type');
+                let responseBody;
+                
+                if (contentType && contentType.includes('application/json')) {
+                    try {
+                        responseBody = await response.json();
+                    } catch (e) {
+                        // JSON解析失败，作为文本处理
+                        responseBody = await response.text();
+                    }
+                } else {
+                    responseBody = await response.text();
+                }
+
+                // 获取响应头
+                const responseHeaders = {};
+                response.headers.forEach((value, key) => {
+                    responseHeaders[key] = value;
+                });
+
+                // 显示响应结果
+                displayResponse(response.status, duration, responseBody, responseHeaders, contentType);
+
+                // 保存到历史记录（保存所有参数，包括未选中的）
+                const allParams = getAllKeyValueData('paramsList');
+                const allPathVars = getAllKeyValueData('pathVarsList');
+                const allHeaders = getAllKeyValueData('headersList');
+                const allFormData = currentBodyType === 'form' ? getAllKeyValueData('formDataList') : [];
+                
+                // 获取认证信息
+                const authData = {
+                    type: document.getElementById('authType').value,
+                    bearerToken: document.getElementById('bearerToken').value,
+                    basicUsername: document.getElementById('basicUsername').value,
+                    basicPassword: document.getElementById('basicPassword').value,
+                    apiKeyName: document.getElementById('apiKeyName').value,
+                    apiKeyValue: document.getElementById('apiKeyValue').value,
+                    apiKeyLocation: document.getElementById('apiKeyLocation').value,
+                    oauth2Token: document.getElementById('oauth2Token').value,
+                    oauth2TokenType: document.getElementById('oauth2TokenType').value
+                };
+                
+                // 获取Body数据
+                const bodyData = {
+                    type: currentBodyType,
+                    jsonBody: document.getElementById('jsonBody').value,
+                    textBody: document.getElementById('textBody').value,
+                    formData: allFormData
+                };
+                
+                // 使用原始URL，不使用处理后的URL
+                saveToHistory(method, originalUrl, response.status, duration, allParams, allPathVars, allHeaders, authData, bodyData);
+
+            } catch (error) {
+                showError('请求失败：' + error.message);
+                document.getElementById('responseSection').classList.remove('show');
+            } finally {
+                sendBtn.disabled = false;
+                sendBtn.textContent = '发送请求';
+            }
+        }
+
+        // 显示响应结果
+        function displayResponse(status, duration, body, headers, contentType) {
+            const responseSection = document.getElementById('responseSection');
+            responseSection.classList.add('show');
+
+            // 显示状态信息
+            const statusClass = status >= 200 && status < 300 ? 'success' : 'error';
+            document.getElementById('responseStatus').innerHTML = `
+                <div class="status-item">
+                    <div class="status-label">状态码</div>
+                    <div class="status-value ${statusClass}">${status}</div>
+                </div>
+                <div class="status-item">
+                    <div class="status-label">响应时间</div>
+                    <div class="status-value">${duration} ms</div>
+                </div>
+                <div class="status-item">
+                    <div class="status-label">响应大小</div>
+                    <div class="status-value">${formatBytes(new Blob([typeof body === 'string' ? body : JSON.stringify(body)]).size)}</div>
+                </div>
+            `;
+
+            // 格式化并显示响应内容
+            const responseContentElement = document.getElementById('responseContent');
+            const formattedContent = formatResponseBody(body, contentType);
+            responseContentElement.innerHTML = formattedContent;
+
+            // 显示响应头（带语法高亮）
+            const formattedHeaders = syntaxHighlightJSON(JSON.stringify(headers, null, 2));
+            document.getElementById('responseHeadersContent').innerHTML = formattedHeaders;
+
+            // 滚动到响应区域
+            responseSection.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+
+        // 格式化响应体
+        function formatResponseBody(body, contentType) {
+            if (!body) return '<span style="color: #999;">无响应内容</span>';
+
+            try {
+                // JSON格式
+                if (contentType && contentType.includes('application/json')) {
+                    const jsonObj = typeof body === 'string' ? JSON.parse(body) : body;
+                    const formattedJson = JSON.stringify(jsonObj, null, 2);
+                    return syntaxHighlightJSON(formattedJson);
+                }
+
+                // XML格式
+                if (contentType && (contentType.includes('application/xml') || contentType.includes('text/xml'))) {
+                    return syntaxHighlightXML(formatXML(body));
+                }
+
+                // HTML格式
+                if (contentType && contentType.includes('text/html')) {
+                    return syntaxHighlightHTML(body);
+                }
+
+                // 尝试自动检测JSON
+                if (typeof body === 'string' && (body.trim().startsWith('{') || body.trim().startsWith('['))) {
+                    try {
+                        const jsonObj = JSON.parse(body);
+                        const formattedJson = JSON.stringify(jsonObj, null, 2);
+                        return syntaxHighlightJSON(formattedJson);
+                    } catch (e) {
+                        // 不是有效的JSON，继续作为纯文本处理
+                    }
+                }
+
+                // 纯文本
+                return `<pre style="margin: 0; white-space: pre-wrap; word-wrap: break-word;">${escapeHtml(body)}</pre>`;
+            } catch (e) {
+                return `<pre style="margin: 0; white-space: pre-wrap; word-wrap: break-word;">${escapeHtml(String(body))}</pre>`;
+            }
+        }
+
+        // JSON语法高亮
+        function syntaxHighlightJSON(json) {
+            json = json.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            return '<pre style="margin: 0;">' + json.replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g, function (match) {
+                let cls = 'json-number';
+                if (/^"/.test(match)) {
+                    if (/:$/.test(match)) {
+                        cls = 'json-key';
+                    } else {
+                        cls = 'json-string';
+                    }
+                } else if (/true|false/.test(match)) {
+                    cls = 'json-boolean';
+                } else if (/null/.test(match)) {
+                    cls = 'json-null';
+                }
+                return '<span class="' + cls + '">' + match + '</span>';
+            }) + '</pre>';
+        }
+
+        // XML格式化
+        function formatXML(xml) {
+            const PADDING = '  ';
+            const reg = /(>)(<)(\/*)/g;
+            let pad = 0;
+            xml = xml.replace(reg, '$1\r\n$2$3');
+            return xml.split('\r\n').map((node) => {
+                let indent = 0;
+                if (node.match(/.+<\/\w[^>]*>$/)) {
+                    indent = 0;
+                } else if (node.match(/^<\/\w/)) {
+                    if (pad !== 0) {
+                        pad -= 1;
+                    }
+                } else if (node.match(/^<\w([^>]*[^\/])?>.*$/)) {
+                    indent = 1;
+                } else {
+                    indent = 0;
+                }
+                const padding = PADDING.repeat(pad);
+                pad += indent;
+                return padding + node;
+            }).join('\r\n');
+        }
+
+        // XML语法高亮
+        function syntaxHighlightXML(xml) {
+            xml = escapeHtml(xml);
+            xml = xml.replace(/(&lt;\/?)([\w-]+)/g, '<span class="xml-tag">$1</span><span class="xml-tag-name">$2</span>');
+            xml = xml.replace(/([\w-]+)(=)/g, '<span class="xml-attr">$1</span><span class="xml-punct">$2</span>');
+            xml = xml.replace(/(".*?")/g, '<span class="xml-string">$1</span>');
+            return '<pre style="margin: 0;">' + xml + '</pre>';
+        }
+
+        // HTML语法高亮
+        function syntaxHighlightHTML(html) {
+            html = escapeHtml(html);
+            html = html.replace(/(&lt;\/?)([\w-]+)/g, '<span class="html-tag">$1</span><span class="html-tag-name">$2</span>');
+            html = html.replace(/([\w-]+)(=)/g, '<span class="html-attr">$1</span><span class="html-punct">$2</span>');
+            html = html.replace(/(".*?")/g, '<span class="html-string">$1</span>');
+            html = html.replace(/(&lt;!--.*?--&gt;)/g, '<span class="html-comment">$1</span>');
+            return '<pre style="margin: 0; white-space: pre-wrap; word-wrap: break-word;">' + html + '</pre>';
+        }
+
+        // 显示错误
+        function showError(message) {
+            const responseSection = document.getElementById('responseSection');
+            responseSection.classList.add('show');
+            document.getElementById('responseStatus').innerHTML = `
+                <div class="alert alert-danger">❌ ${message}</div>
+            `;
+        }
+
+        // 复制响应内容
+        function copyResponse(elementId) {
+            const content = document.getElementById(elementId).textContent;
+            navigator.clipboard.writeText(content).then(() => {
+                const button = event.target;
+                const originalText = button.textContent;
+                button.textContent = '✅ 已复制';
+                button.style.background = '#28a745';
+                
+                setTimeout(() => {
+                    button.textContent = originalText;
+                    button.style.background = '#667eea';
+                }, 2000);
+            }).catch(err => {
+                alert('复制失败：' + err);
+            });
+        }
+
+        // 格式化字节大小
+        function formatBytes(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
+        }
+
+        // 清空所有
+        function clearAll() {
+            document.getElementById('apiUrl').value = '';
+            document.getElementById('paramsList').innerHTML = '';
+            document.getElementById('pathVarsList').innerHTML = '';
+            document.getElementById('headersList').innerHTML = '';
+            document.getElementById('formDataList').innerHTML = '';
+            document.getElementById('jsonBody').value = '';
+            document.getElementById('textBody').value = '';
+            document.getElementById('responseSection').classList.remove('show');
+            
+            // 清空认证信息
+            document.getElementById('authType').value = 'none';
+            document.getElementById('bearerToken').value = '';
+            document.getElementById('basicUsername').value = '';
+            document.getElementById('basicPassword').value = '';
+            document.getElementById('apiKeyName').value = 'X-API-Key';
+            document.getElementById('apiKeyValue').value = '';
+            document.getElementById('apiKeyLocation').value = 'header';
+            document.getElementById('digestUsername').value = '';
+            document.getElementById('digestPassword').value = '';
+            document.getElementById('oauth2Token').value = '';
+            document.getElementById('oauth2TokenType').value = 'Bearer';
+            switchAuthType();
+            
+            paramsCount = 0;
+            pathVarsCount = 0;
+            headersCount = 0;
+            formDataCount = 0;
+            
+            addParam();
+            addHeader();
+        }
+
+        // ==================== 历史记录管理 ====================
+        const MAX_HISTORY = 20;
+
+        function saveToHistory(method, url, status, duration, params, pathVars, headers, authData, bodyData) {
+            const storageKey = 'api_test_history';
+            let history = JSON.parse(localStorage.getItem(storageKey) || '[]');
+            
+            const record = {
+                id: Date.now(),
+                method: method,
+                url: url,
+                status: status,
+                duration: duration,
+                params: params,  // 数组格式，包含enabled状态
+                pathVars: pathVars,  // 数组格式
+                headers: headers,  // 数组格式
+                authData: authData,  // 认证信息对象
+                bodyData: bodyData,  // Body数据对象
+                timestamp: new Date().toLocaleString('zh-CN')
+            };
+            
+            history.unshift(record);
+            
+            if (history.length > MAX_HISTORY) {
+                history = history.slice(0, MAX_HISTORY);
+            }
+            
+            localStorage.setItem(storageKey, JSON.stringify(history));
+            loadHistory();
+        }
+
+        function loadHistory() {
+            const storageKey = 'api_test_history';
+            const history = JSON.parse(localStorage.getItem(storageKey) || '[]');
+            const historyContainer = document.getElementById('historyList');
+            
+            if (history.length === 0) {
+                historyContainer.innerHTML = '<div class="empty-history">📭 暂无请求历史</div>';
+                return;
+            }
+            
+            historyContainer.innerHTML = history.map(record => {
+                const statusClass = record.status >= 200 && record.status < 300 ? 'success' : 'error';
+                return `
+                    <div class="history-item" onclick="loadHistoryItem(${record.id})">
+                        <div class="history-item-header">
+                            <div>
+                                <span class="history-item-method method-${record.method}">${record.method}</span>
+                                <span class="history-item-url">${escapeHtml(record.url)}</span>
+                            </div>
+                            <div class="history-item-actions">
+                                <span class="history-item-date">${record.timestamp}</span>
+                                <button class="delete-history-btn" onclick="deleteHistoryItem(${record.id}, event)">删除</button>
+                            </div>
+                        </div>
+                        <div class="history-item-status">
+                            状态: <span class="${statusClass}">${record.status}</span> | 
+                            耗时: ${record.duration}ms
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function loadHistoryItem(recordId) {
+            const storageKey = 'api_test_history';
+            const history = JSON.parse(localStorage.getItem(storageKey) || '[]');
+            const record = history.find(r => r.id === recordId);
+            
+            if (!record) return;
+
+            // 设置标志位，防止自动解析URL
+            isLoadingHistory = true;
+
+            // 设置方法和URL（使用原始URL，不自动解析）
+            document.getElementById('httpMethod').value = record.method;
+            document.getElementById('apiUrl').value = record.url;
+
+            // 加载Query Params（包括未选中的）
+            document.getElementById('paramsList').innerHTML = '';
+            paramsCount = 0;
+            if (Array.isArray(record.params) && record.params.length > 0) {
+                // 新格式：数组格式，包含enabled状态
+                record.params.forEach(param => {
+                    addParam();
+                    const row = document.querySelector('#paramsList .key-value-row:last-child');
+                    const checkbox = row.querySelector('input[type="checkbox"]');
+                    const keyInput = row.querySelector('.key-input');
+                    const valueInput = row.querySelector('.value-input');
+                    if (checkbox) checkbox.checked = param.enabled;
+                    if (keyInput) keyInput.value = param.key;
+                    if (valueInput) valueInput.value = param.value;
+                });
+            } else if (record.params && typeof record.params === 'object') {
+                // 旧格式：对象格式，兼容处理
+                Object.entries(record.params).forEach(([key, value]) => {
+                    addParam();
+                    const row = document.querySelector('#paramsList .key-value-row:last-child');
+                    row.querySelector('.key-input').value = key;
+                    row.querySelector('.value-input').value = value;
+                });
+            } else {
+                addParam();
+            }
+
+            // 加载Path Variables（包括未选中的）
+            document.getElementById('pathVarsList').innerHTML = '';
+            pathVarsCount = 0;
+            if (Array.isArray(record.pathVars) && record.pathVars.length > 0) {
+                record.pathVars.forEach(pathVar => {
+                    addPathVar(pathVar.key, pathVar.value);
+                    const row = document.querySelector('#pathVarsList .key-value-row:last-child');
+                    const checkbox = row.querySelector('input[type="checkbox"]');
+                    if (checkbox) checkbox.checked = pathVar.enabled;
+                });
+            } else if (record.pathVars && typeof record.pathVars === 'object') {
+                // 旧格式兼容
+                Object.entries(record.pathVars).forEach(([key, value]) => {
+                    addPathVar(key, value);
+                });
+            }
+
+            // 加载Headers（包括未选中的）
+            document.getElementById('headersList').innerHTML = '';
+            headersCount = 0;
+            if (Array.isArray(record.headers) && record.headers.length > 0) {
+                record.headers.forEach(header => {
+                    addHeader();
+                    const row = document.querySelector('#headersList .key-value-row:last-child');
+                    const checkbox = row.querySelector('input[type="checkbox"]');
+                    const keyInput = row.querySelector('.key-input');
+                    const valueInput = row.querySelector('.value-input');
+                    if (checkbox) checkbox.checked = header.enabled;
+                    if (keyInput) keyInput.value = header.key;
+                    if (valueInput) valueInput.value = header.value;
+                });
+            } else if (record.headers && typeof record.headers === 'object') {
+                // 旧格式兼容
+                Object.entries(record.headers).forEach(([key, value]) => {
+                    addHeader();
+                    const row = document.querySelector('#headersList .key-value-row:last-child');
+                    row.querySelector('.key-input').value = key;
+                    row.querySelector('.value-input').value = value;
+                });
+            } else {
+                addHeader();
+            }
+
+            // 加载认证信息
+            if (record.authData) {
+                document.getElementById('authType').value = record.authData.type || 'none';
+                document.getElementById('bearerToken').value = record.authData.bearerToken || '';
+                document.getElementById('basicUsername').value = record.authData.basicUsername || '';
+                document.getElementById('basicPassword').value = record.authData.basicPassword || '';
+                document.getElementById('apiKeyName').value = record.authData.apiKeyName || 'X-API-Key';
+                document.getElementById('apiKeyValue').value = record.authData.apiKeyValue || '';
+                document.getElementById('apiKeyLocation').value = record.authData.apiKeyLocation || 'header';
+                document.getElementById('oauth2Token').value = record.authData.oauth2Token || '';
+                document.getElementById('oauth2TokenType').value = record.authData.oauth2TokenType || 'Bearer';
+                switchAuthType();
+            }
+
+            // 加载Body数据
+            if (record.bodyData) {
+                currentBodyType = record.bodyData.type || 'none';
+                document.getElementById('jsonBody').value = record.bodyData.jsonBody || '';
+                document.getElementById('textBody').value = record.bodyData.textBody || '';
+                
+                // 切换到对应的body类型
+                document.querySelectorAll('.body-type-option').forEach(opt => opt.classList.remove('active'));
+                const bodyTypeMap = {
+                    'none': 0,
+                    'json': 1,
+                    'form': 2,
+                    'text': 3
+                };
+                const bodyTypeOptions = document.querySelectorAll('.body-type-option');
+                if (bodyTypeOptions[bodyTypeMap[currentBodyType]]) {
+                    bodyTypeOptions[bodyTypeMap[currentBodyType]].classList.add('active');
+                }
+                
+                // 显示对应的body内容
+                document.querySelectorAll('.body-content').forEach(content => {
+                    content.style.display = 'none';
+                });
+                const bodyContentMap = {
+                    'none': 'bodyNone',
+                    'json': 'bodyJson',
+                    'form': 'bodyForm',
+                    'text': 'bodyText'
+                };
+                const bodyContent = document.getElementById(bodyContentMap[currentBodyType]);
+                if (bodyContent) {
+                    bodyContent.style.display = 'block';
+                }
+                
+                // 加载Form Data
+                if (currentBodyType === 'form' && Array.isArray(record.bodyData.formData)) {
+                    document.getElementById('formDataList').innerHTML = '';
+                    formDataCount = 0;
+                    record.bodyData.formData.forEach(formItem => {
+                        addFormData();
+                        const row = document.querySelector('#formDataList .key-value-row:last-child');
+                        const checkbox = row.querySelector('input[type="checkbox"]');
+                        const keyInput = row.querySelector('.key-input');
+                        const valueInput = row.querySelector('.value-input');
+                        if (checkbox) checkbox.checked = formItem.enabled;
+                        if (keyInput) keyInput.value = formItem.key;
+                        if (valueInput) valueInput.value = formItem.value;
+                    });
+                }
+            }
+
+            // 滚动到顶部
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+
+            // 重置标志位，恢复自动解析功能
+            setTimeout(() => {
+                isLoadingHistory = false;
+            }, 100);
+        }
+
+        function deleteHistoryItem(recordId, event) {
+            if (event) {
+                event.stopPropagation();
+            }
+            
+            if (confirm('确定要删除这条历史记录吗？')) {
+                const storageKey = 'api_test_history';
+                let history = JSON.parse(localStorage.getItem(storageKey) || '[]');
+                history = history.filter(r => r.id !== recordId);
+                localStorage.setItem(storageKey, JSON.stringify(history));
+                loadHistory();
+            }
+        }
+
+        function clearHistory() {
+            if (confirm('确定要清空所有历史记录吗？此操作不可恢复。')) {
+                const storageKey = 'api_test_history';
+                localStorage.removeItem(storageKey);
+                loadHistory();
+            }
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+    </script>
+</body>
+</html>
+
+

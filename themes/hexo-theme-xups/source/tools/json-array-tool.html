@@ -547,12 +547,20 @@
             overflow-x: auto;
             max-height: 600px;
             overflow-y: auto;
+            position: relative;
         }
 
         table {
             width: 100%;
             border-collapse: collapse;
             /* font-size: 14px; */
+            position: relative;
+        }
+
+        thead {
+            position: sticky;
+            top: 0;
+            z-index: 10;
         }
 
         th {
@@ -561,9 +569,6 @@
             padding: 15px 12px;
             text-align: left;
             font-weight: 600;
-            position: sticky;
-            top: 0;
-            z-index: 10;
             cursor: pointer;
             user-select: none;
             transition: background-color 0.3s ease;
@@ -666,7 +671,7 @@
             justify-content: center;
             align-items: center;
             gap: 10px;
-            margin-top: 20px;
+            margin: 20px 0;
         }
 
         .pagination button {
