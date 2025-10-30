@@ -117,9 +117,9 @@ friends:
       title: ⏰时间转换工具
       link: /tools/time-converter.html
     2:
-      name: 💱汇率转换工具
-      title: 💱汇率转换工具
-      link: /tools/exchange-rate.html
+      name: 🚀API调试工具
+      title: 🚀API调试工具
+      link: /tools/api-test-tool.html
     3:
       name: 🏦贷款计算器
       title: 🏦贷款计算器
@@ -181,9 +181,9 @@ friends:
       title: 📱二维码条形码工具
       link: /tools/qrcode-barcode-tool.html
     18:
-      name: 🚀API调试工具
-      title: 🚀API调试工具
-      link: /tools/api-test-tool.html
+      name: 💱汇率转换工具
+      title: 💱汇率转换工具
+      link: /tools/exchange-rate.html
 
 
 #----------------------------

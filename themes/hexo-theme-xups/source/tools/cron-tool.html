@@ -3,7 +3,41 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cron表达式生成工具</title>
+    <title>Cron表达式生成工具 - 在线Cron表达式生成器 | 支持Quartz、Spring</title>
+    
+    <!-- SEO Meta Tags -->
+    <meta name="description" content="免费在线Cron表达式生成工具，支持可视化配置定时任务Cron表达式。支持Quartz和Spring格式，提供常用表达式模板，操作简单，适合开发者使用。">
+    <meta name="keywords" content="Cron表达式,Cron生成器,定时任务,Quartz,Spring,在线Cron工具,定时器配置">
+    <meta name="author" content="多功能工具箱">
+    <meta name="robots" content="index, follow">
+    <meta name="language" content="zh-CN">
+    <!-- Canonical URL -->
+    <link rel="canonical" href="https://www.seekpie.com/tools/cron-tool.html">
+    
+    <!-- Structured Data (JSON-LD) -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "Cron表达式生成工具",
+      "description": "免费在线Cron表达式生成工具，支持可视化配置定时任务",
+      "url": "https://www.seekpie.com/tools/cron-tool.html",
+      "applicationCategory": "DeveloperApplication",
+      "operatingSystem": "All",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "CNY"
+      },
+      "featureList": [
+        "可视化配置",
+        "Quartz格式支持",
+        "Spring格式支持",
+        "常用表达式模板",
+        "实时预览"
+      ]
+    }
+    </script>
     <style>
         * {
             margin: 0;
@@ -322,6 +356,26 @@
             transform: translateY(-2px);
         }
 
+        .btn-parse {
+            background: #fd7e14;
+            color: white;
+        }
+
+        .btn-parse:hover {
+            background: #e96d06;
+            transform: translateY(-2px);
+        }
+
+        .btn-save {
+            background: #6f42c1;
+            color: white;
+        }
+
+        .btn-save:hover {
+            background: #5a32a3;
+            transform: translateY(-2px);
+        }
+
         .templates-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -363,31 +417,6 @@
             font-size: 0.9em;
             color: #666;
             line-height: 1.4;
-        }
-
-        .alert {
-            padding: 15px 20px;
-            border-radius: 10px;
-            margin-bottom: 20px;
-            font-weight: 500;
-        }
-
-        .alert-info {
-            background: #d1ecf1;
-            color: #0c5460;
-            border: 1px solid #bee5eb;
-        }
-
-        .alert-success {
-            background: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
-        }
-
-        .alert-danger {
-            background: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
         }
 
         .next-runs {
@@ -789,9 +818,9 @@
 
             <!-- 操作按钮 -->
             <div class="button-group">
-                <button class="btn btn-primary" onclick="copyCron()">📋 复制表达式</button>
-                <button class="btn btn-success" onclick="parseCronInput()">🔄 解析表达式</button>
-                <button class="btn btn-success" onclick="saveCron()">💾 保存到历史</button>
+                <button class="btn btn-primary" onclick="copyCron(event)">📋 复制表达式</button>
+                <button class="btn btn-primary" onclick="parseCronInput(event)">🔄 解析表达式</button>
+                <button class="btn btn-primary" onclick="saveCron(event)">💾 保存到历史</button>
                 <button class="btn btn-secondary" onclick="resetAll()">🔄 重置</button>
             </div>
 
@@ -1064,62 +1093,62 @@
             <div class="section">
                 <div class="section-title">📚 常用Cron表达式模板</div>
                 <div class="templates-grid">
-                    <div class="template-card" onclick="loadTemplate('everySecond')">
+                    <div class="template-card" onclick="loadTemplate('everySecond', event)">
                         <div class="template-card-title">⏱️ 每秒执行</div>
                         <div class="template-card-cron">* * * * * ?</div>
                         <div class="template-card-desc">每秒执行一次任务</div>
                     </div>
-                    <div class="template-card" onclick="loadTemplate('everyMinute')">
+                    <div class="template-card" onclick="loadTemplate('everyMinute', event)">
                         <div class="template-card-title">⏰ 每分钟执行</div>
                         <div class="template-card-cron">0 * * * * ?</div>
                         <div class="template-card-desc">每分钟整点执行</div>
                     </div>
-                    <div class="template-card" onclick="loadTemplate('everyHour')">
+                    <div class="template-card" onclick="loadTemplate('everyHour', event)">
                         <div class="template-card-title">🕐 每小时执行</div>
                         <div class="template-card-cron">0 0 * * * ?</div>
                         <div class="template-card-desc">每小时整点执行</div>
                     </div>
-                    <div class="template-card" onclick="loadTemplate('everyDay')">
+                    <div class="template-card" onclick="loadTemplate('everyDay', event)">
                         <div class="template-card-title">📅 每天执行</div>
                         <div class="template-card-cron">0 0 0 * * ?</div>
                         <div class="template-card-desc">每天凌晨0点执行</div>
                     </div>
-                    <div class="template-card" onclick="loadTemplate('workday')">
+                    <div class="template-card" onclick="loadTemplate('workday', event)">
                         <div class="template-card-title">💼 工作日执行</div>
                         <div class="template-card-cron">0 0 9 ? * MON-FRI</div>
                         <div class="template-card-desc">周一至周五上午9点执行</div>
                     </div>
-                    <div class="template-card" onclick="loadTemplate('weekend')">
+                    <div class="template-card" onclick="loadTemplate('weekend', event)">
                         <div class="template-card-title">🎉 周末执行</div>
                         <div class="template-card-cron">0 0 10 ? * SAT,SUN</div>
                         <div class="template-card-desc">周六周日上午10点执行</div>
                     </div>
-                    <div class="template-card" onclick="loadTemplate('monthly')">
+                    <div class="template-card" onclick="loadTemplate('monthly', event)">
                         <div class="template-card-title">📆 每月执行</div>
                         <div class="template-card-cron">0 0 0 1 * ?</div>
                         <div class="template-card-desc">每月1号凌晨0点执行</div>
                     </div>
-                    <div class="template-card" onclick="loadTemplate('quarterly')">
+                    <div class="template-card" onclick="loadTemplate('quarterly', event)">
                         <div class="template-card-title">📊 每季度执行</div>
                         <div class="template-card-cron">0 0 0 1 1,4,7,10 ?</div>
                         <div class="template-card-desc">每季度第一天执行</div>
                     </div>
-                    <div class="template-card" onclick="loadTemplate('yearly')">
+                    <div class="template-card" onclick="loadTemplate('yearly', event)">
                         <div class="template-card-title">🎆 每年执行</div>
                         <div class="template-card-cron">0 0 0 1 1 ?</div>
                         <div class="template-card-desc">每年1月1日凌晨0点执行</div>
                     </div>
-                    <div class="template-card" onclick="loadTemplate('interval5m')">
+                    <div class="template-card" onclick="loadTemplate('interval5m', event)">
                         <div class="template-card-title">⏲️ 每5分钟</div>
                         <div class="template-card-cron">0 */5 * * * ?</div>
                         <div class="template-card-desc">每5分钟执行一次</div>
                     </div>
-                    <div class="template-card" onclick="loadTemplate('interval30m')">
+                    <div class="template-card" onclick="loadTemplate('interval30m', event)">
                         <div class="template-card-title">⏳ 每30分钟</div>
                         <div class="template-card-cron">0 */30 * * * ?</div>
                         <div class="template-card-desc">每30分钟执行一次</div>
                     </div>
-                    <div class="template-card" onclick="loadTemplate('businessHours')">
+                    <div class="template-card" onclick="loadTemplate('businessHours', event)">
                         <div class="template-card-title">🏢 工作时间</div>
                         <div class="template-card-cron">0 0 9-18 ? * MON-FRI</div>
                         <div class="template-card-desc">工作日9-18点每小时执行</div>
@@ -1204,26 +1233,67 @@
         }
 
         // 解析用户输入的Cron表达式
-        function parseCronInput() {
+        function parseCronInput(event) {
             const cronDisplay = document.getElementById('cronDisplay');
             const inputCron = cronDisplay.textContent.trim();
+            const button = event ? event.target : null;
             
             if (!inputCron) {
-                showAlert('❌ 请输入Cron表达式', 'danger');
+                if (button) {
+                    const originalText = button.textContent;
+                    const originalBg = button.style.background || '';
+                    button.textContent = '❌ 请输入表达式';
+                    button.style.background = '#dc3545';
+                    
+                    setTimeout(() => {
+                        button.textContent = originalText;
+                        button.style.background = originalBg;
+                    }, 2000);
+                }
                 return;
             }
             
             const parts = inputCron.split(/\s+/);
             if (parts.length !== 6) {
-                showAlert('❌ Cron表达式格式错误，应包含6个字段（秒 分 时 日 月 周）', 'danger');
+                if (button) {
+                    const originalText = button.textContent;
+                    const originalBg = button.style.background || '';
+                    button.textContent = '❌ 格式错误';
+                    button.style.background = '#dc3545';
+                    
+                    setTimeout(() => {
+                        button.textContent = originalText;
+                        button.style.background = originalBg;
+                    }, 2000);
+                }
                 return;
             }
             
             try {
                 parseCron(inputCron);
-                showAlert('✅ 已成功解析并加载配置', 'success');
+                if (button) {
+                    const originalText = button.textContent;
+                    const originalBg = button.style.background || '';
+                    button.textContent = '✅ 解析成功';
+                    button.style.background = '#28a745';
+                    
+                    setTimeout(() => {
+                        button.textContent = originalText;
+                        button.style.background = originalBg;
+                    }, 2000);
+                }
             } catch (error) {
-                showAlert('❌ 解析失败：' + error.message, 'danger');
+                if (button) {
+                    const originalText = button.textContent;
+                    const originalBg = button.style.background || '';
+                    button.textContent = '❌ 解析失败';
+                    button.style.background = '#dc3545';
+                    
+                    setTimeout(() => {
+                        button.textContent = originalText;
+                        button.style.background = originalBg;
+                    }, 2000);
+                }
             }
         }
 
@@ -1955,19 +2025,42 @@
         }
 
         // 复制Cron表达式
-        function copyCron() {
+        function copyCron(event) {
             const cronText = document.getElementById('cronDisplay').textContent;
+            const button = event ? event.target : null;
+            
             navigator.clipboard.writeText(cronText).then(() => {
-                showAlert('✅ Cron表达式已复制到剪贴板', 'success');
+                if (button) {
+                    const originalText = button.textContent;
+                    const originalBg = button.style.background || '';
+                    button.textContent = '✅ 已复制';
+                    button.style.background = '#28a745';
+                    
+                    setTimeout(() => {
+                        button.textContent = originalText;
+                        button.style.background = originalBg;
+                    }, 2000);
+                }
             }).catch(() => {
-                showAlert('❌ 复制失败，请手动复制', 'danger');
+                if (button) {
+                    const originalText = button.textContent;
+                    const originalBg = button.style.background || '';
+                    button.textContent = '❌ 复制失败';
+                    button.style.background = '#dc3545';
+                    
+                    setTimeout(() => {
+                        button.textContent = originalText;
+                        button.style.background = originalBg;
+                    }, 2000);
+                }
             });
         }
 
         // 保存到历史
-        function saveCron() {
+        function saveCron(event) {
             const cron = document.getElementById('cronDisplay').textContent;
             const desc = document.getElementById('cronDescription').textContent;
+            const button = event ? event.target : null;
             
             const history = getHistory();
             const record = {
@@ -1985,40 +2078,50 @@
 
             localStorage.setItem('cron_history', JSON.stringify(history));
             loadHistory();
-            showAlert('✅ 已保存到历史记录', 'success');
+            
+            if (button) {
+                const originalText = button.textContent;
+                const originalBg = button.style.background || '';
+                button.textContent = '✅ 已保存';
+                button.style.background = '#28a745';
+                
+                setTimeout(() => {
+                    button.textContent = originalText;
+                    button.style.background = originalBg;
+                }, 2000);
+            }
         }
 
         // 重置所有
         function resetAll() {
-            if (confirm('确定要重置所有配置吗？')) {
-                // 重置状态
-                cronState.second = { type: 'every', value: '*' };
-                cronState.minute = { type: 'every', value: '*' };
-                cronState.hour = { type: 'every', value: '*' };
-                cronState.day = { type: 'every', value: '*' };
-                cronState.month = { type: 'every', value: '*' };
-                cronState.week = { type: 'any', value: '?' };
+            // 直接重置，不显示确认提示
+            // 重置状态
+            cronState.second = { type: 'every', value: '*' };
+            cronState.minute = { type: 'every', value: '*' };
+            cronState.hour = { type: 'every', value: '*' };
+            cronState.day = { type: 'every', value: '*' };
+            cronState.month = { type: 'every', value: '*' };
+            cronState.week = { type: 'any', value: '?' };
 
-                // 重置UI
-                document.querySelectorAll('.type-btn').forEach(btn => btn.classList.remove('active'));
-                document.querySelectorAll('.cron-field').forEach((field, idx) => {
-                    const firstBtn = field.querySelector('.type-btn');
-                    if (firstBtn) firstBtn.classList.add('active');
-                });
-                document.querySelectorAll('.cron-field-config').forEach(config => {
-                    config.classList.remove('active');
-                });
-                document.querySelectorAll('.checkbox-item').forEach(item => {
-                    item.classList.remove('checked');
-                    item.querySelector('input[type="checkbox"]').checked = false;
-                });
+            // 重置UI
+            document.querySelectorAll('.type-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.cron-field').forEach((field, idx) => {
+                const firstBtn = field.querySelector('.type-btn');
+                if (firstBtn) firstBtn.classList.add('active');
+            });
+            document.querySelectorAll('.cron-field-config').forEach(config => {
+                config.classList.remove('active');
+            });
+            document.querySelectorAll('.checkbox-item').forEach(item => {
+                item.classList.remove('checked');
+                item.querySelector('input[type="checkbox"]').checked = false;
+            });
 
-                updateCron();
-            }
+            updateCron();
         }
 
         // 加载模板
-        function loadTemplate(templateName) {
+        function loadTemplate(templateName, event) {
             const templates = {
                 everySecond: { cron: '* * * * * ?' },
                 everyMinute: { cron: '0 * * * * ?' },
@@ -2037,7 +2140,21 @@
             const template = templates[templateName];
             if (template) {
                 parseCron(template.cron);
-                showAlert('✅ 已加载模板', 'success');
+                
+                // 显示卡片反馈效果
+                if (event) {
+                    const card = event.currentTarget || event.target.closest('.template-card');
+                    if (card) {
+                        const originalBg = card.style.background || '';
+                        card.style.background = '#d4edda';
+                        card.style.borderColor = '#28a745';
+                        
+                        setTimeout(() => {
+                            card.style.background = originalBg;
+                            card.style.borderColor = '';
+                        }, 500);
+                    }
+                }
             }
         }
 
@@ -2045,7 +2162,7 @@
         function parseCron(cron) {
             const parts = cron.trim().split(/\s+/);
             if (parts.length !== 6) {
-                showAlert('❌ 无效的Cron表达式格式', 'danger');
+                // 静默失败，不显示提示
                 return;
             }
 
@@ -2267,56 +2384,6 @@
             }
         }
 
-        // 显示提示
-        function showAlert(message, type = 'info') {
-            const alertDiv = document.createElement('div');
-            alertDiv.className = `alert alert-${type}`;
-            alertDiv.textContent = message;
-            alertDiv.style.position = 'fixed';
-            alertDiv.style.top = '20%';
-            alertDiv.style.left = '50%';
-            alertDiv.style.transform = 'translate(-50%, -20px)';
-            alertDiv.style.zIndex = '9999';
-            alertDiv.style.minWidth = '300px';
-            alertDiv.style.maxWidth = '90vw';
-            alertDiv.style.textAlign = 'center';
-            alertDiv.style.opacity = '0';
-            alertDiv.style.transition = 'all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)';
-            
-            // 添加半透明背景遮罩
-            const backdrop = document.createElement('div');
-            backdrop.style.position = 'fixed';
-            backdrop.style.top = '0';
-            backdrop.style.left = '0';
-            backdrop.style.width = '100%';
-            backdrop.style.height = '100%';
-            backdrop.style.backgroundColor = 'rgba(0, 0, 0, 0.3)';
-            backdrop.style.zIndex = '9998';
-            backdrop.style.opacity = '0';
-            backdrop.style.transition = 'opacity 0.3s';
-            backdrop.style.backdropFilter = 'blur(3px)';
-            
-            document.body.appendChild(backdrop);
-            document.body.appendChild(alertDiv);
-            
-            // 触发动画
-            requestAnimationFrame(() => {
-                backdrop.style.opacity = '1';
-                alertDiv.style.opacity = '1';
-                alertDiv.style.transform = 'translate(-50%, 0)';
-            });
-            
-            setTimeout(() => {
-                alertDiv.style.opacity = '0';
-                alertDiv.style.transform = 'translate(-50%, -20px)';
-                backdrop.style.opacity = '0';
-                setTimeout(() => {
-                    alertDiv.remove();
-                    backdrop.remove();
-                }, 300);
-            }, 2000);
-        }
-
         // 获取历史记录
         function getHistory() {
             const historyStr = localStorage.getItem('cron_history');
@@ -2339,7 +2406,7 @@
             }
 
             historyList.innerHTML = history.map(record => `
-                <div class="history-item" onclick="loadFromHistory(${record.id})">
+                <div class="history-item" onclick="loadFromHistory(${record.id}, event)">
                     <div class="history-item-header">
                         <div class="history-item-cron">${record.cron}</div>
                         <div class="history-item-actions">
@@ -2353,12 +2420,24 @@
         }
 
         // 从历史加载
-        function loadFromHistory(id) {
+        function loadFromHistory(id, event) {
             const history = getHistory();
             const record = history.find(r => r.id === id);
             if (record) {
                 parseCron(record.cron);
-                showAlert('✅ 已从历史记录加载配置', 'success');
+                
+                // 显示历史项反馈效果
+                if (event) {
+                    const item = event.currentTarget || event.target.closest('.history-item');
+                    if (item) {
+                        const originalBg = item.style.background || '';
+                        item.style.background = '#d4edda';
+                        
+                        setTimeout(() => {
+                            item.style.background = originalBg;
+                        }, 500);
+                    }
+                }
             }
         }
 
@@ -2366,20 +2445,18 @@
         function deleteHistoryItem(recordId, event) {
             event.stopPropagation();
             
-            if (confirm('确定要删除这条历史记录吗？')) {
-                let history = getHistory();
-                history = history.filter(r => r.id !== recordId);
-                localStorage.setItem('cron_history', JSON.stringify(history));
-                loadHistory();
-            }
+            // 直接删除，不显示确认提示
+            let history = getHistory();
+            history = history.filter(r => r.id !== recordId);
+            localStorage.setItem('cron_history', JSON.stringify(history));
+            loadHistory();
         }
 
         // 清空历史记录
         function clearHistory() {
-            if (confirm('确定要清空所有历史记录吗？此操作不可恢复。')) {
-                localStorage.removeItem('cron_history');
-                loadHistory();
-            }
+            // 直接清空，不显示确认提示
+            localStorage.removeItem('cron_history');
+            loadHistory();
         }
     </script>
 </body>

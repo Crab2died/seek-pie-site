@@ -3,12 +3,61 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>API调试工具</title>
+    <title>API调试工具 - 在线HTTP API测试工具 | 支持GET/POST/PUT/DELETE请求 | Protobuf支持</title>
+    
+    <!-- SEO Meta Tags -->
+    <meta name="description" content="免费在线API调试工具，支持HTTP/HTTPS请求测试。支持GET、POST、PUT、DELETE等多种请求方法，支持JSON、Form Data、Protobuf等多种Body格式，可配置请求头、参数，查看响应结果，保存历史记录。">
+    <meta name="keywords" content="API测试,API调试,HTTP测试,REST API,接口测试,在线API工具,Postman替代,API开发工具,Protobuf测试,Protocol Buffer">
+    <meta name="author" content="多功能工具箱">
+    <meta name="robots" content="index, follow">
+    <meta name="language" content="zh-CN">
+    <!-- Canonical URL -->
+    <link rel="canonical" href="https://www.seekpie.com/tools/api-test-tool.html">
+    
+    <!-- Structured Data (JSON-LD) -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "API调试工具",
+      "description": "免费在线HTTP API测试工具，支持多种请求方法和参数配置",
+      "url": "https://www.seekpie.com/tools/api-test-tool.html",
+      "applicationCategory": "DeveloperApplication",
+      "operatingSystem": "All",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "CNY"
+      },
+      "featureList": [
+        "支持GET/POST/PUT/DELETE等请求方法",
+        "自定义请求头",
+        "配置请求参数",
+        "JSON/表单数据/Protobuf支持",
+        "Protocol Buffer编解码",
+        "响应结果查看",
+        "历史记录保存"
+      ]
+    }
+    </script>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            /* 移动端触摸优化 */
+            -webkit-tap-highlight-color: rgba(0, 0, 0, 0.1);
+        }
+        
+        /* 所有可滚动区域添加平滑滚动 */
+        textarea,
+        pre,
+        .response-content,
+        .history-list,
+        .modal-body,
+        [style*="overflow-y: auto"],
+        [style*="overflow: auto"] {
+            -webkit-overflow-scrolling: touch;
         }
 
         body {
@@ -16,6 +65,9 @@
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             padding: 20px;
+            /* 移动端滚动优化 */
+            -webkit-overflow-scrolling: touch;
+            scroll-behavior: smooth;
         }
 
         .container {
@@ -87,7 +139,313 @@
             margin-bottom: 15px;
             display: flex;
             align-items: center;
+            justify-content: space-between;
             gap: 10px;
+        }
+
+        .config-actions {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .config-actions .btn-small {
+            padding: 5px 10px;
+            font-size: 0.6em;
+            white-space: nowrap;
+        }
+
+        /* 通用间距类 */
+        .mb-15 {
+            margin-bottom: 15px;
+        }
+
+        .mb-10 {
+            margin-bottom: 10px;
+        }
+
+        .mb-8 {
+            margin-bottom: 8px;
+        }
+
+        .mt-8 {
+            margin-top: 8px;
+        }
+
+        .mt-10 {
+            margin-top: 10px;
+        }
+
+        .mt-15 {
+            margin-top: 15px;
+        }
+
+        .mt-20 {
+            margin-top: 20px;
+        }
+
+        /* 隐藏类 */
+        .hidden {
+            display: none;
+        }
+
+        /* 提示框样式 */
+        .info-tip {
+            background: #e7f3ff;
+            border-left: 4px solid #2196F3;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            font-size: 0.9em;
+        }
+
+        .warning-tip {
+            background: #fff9e6;
+            border-left: 4px solid #ffc107;
+            padding: 10px 15px;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            color: #856404;
+            font-size: 0.9em;
+        }
+
+        /* Proto相关样式 */
+        .proto-textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 0.9em;
+        }
+
+        .proto-select {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1em;
+        }
+
+        .proto-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #555;
+        }
+
+        .proto-message-type-group {
+            display: none;
+            margin-bottom: 15px;
+        }
+
+        .proto-encoded-preview {
+            display: none;
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 10px;
+        }
+
+        .proto-encoded-content {
+            padding: 10px;
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 5px;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 0.85em;
+            word-break: break-all;
+            max-height: 100px;
+            overflow-y: auto;
+        }
+
+        /* Protobuf配置区域 */
+        .protobuf-config-wrapper {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .protobuf-config-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        .protobuf-config-title {
+            margin: 0;
+            color: #4facfe;
+            font-size: 1.2em;
+        }
+
+        .protobuf-config-subtitle {
+            font-size: 0.8em;
+            color: #999;
+            font-weight: normal;
+        }
+
+        .protobuf-toggle-icon {
+            font-size: 1.5em;
+            transition: transform 0.3s;
+        }
+
+        .protobuf-config-content {
+            display: none;
+            margin-top: 15px;
+        }
+
+        .protobuf-status {
+            padding: 8px 12px;
+            border-radius: 5px;
+            font-size: 0.9em;
+            display: none;
+        }
+
+        /* 按钮组 */
+        .button-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .button-group-mb {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 15px;
+        }
+
+        /* 表单组 */
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        /* 响应头显示相关 */
+        .response-headers-section {
+            margin-bottom: 15px;
+        }
+
+        .response-headers-title {
+            color: #4facfe;
+            margin-bottom: 10px;
+            font-size: 1em;
+        }
+
+        .response-headers-count {
+            margin-bottom: 10px;
+            font-size: 0.9em;
+            color: #666;
+        }
+
+        .no-content {
+            color: #999;
+            font-style: italic;
+            padding: 10px 0;
+        }
+
+        .browser-headers-section {
+            margin-top: 20px;
+            padding: 12px;
+            background: #f8f9fa;
+            border-radius: 5px;
+        }
+
+        .browser-headers-title {
+            color: #666;
+            margin-bottom: 10px;
+            font-size: 0.95em;
+        }
+
+        .browser-headers-content {
+            font-size: 0.85em;
+            color: #666;
+            line-height: 1.8;
+        }
+
+        .browser-note {
+            margin-top: 8px;
+            padding-top: 8px;
+            border-top: 1px solid #e0e0e0;
+            font-size: 0.8em;
+            color: #999;
+            font-style: italic;
+        }
+
+        /* CORS警告区域 */
+        .cors-warning-section {
+            margin-top: 20px;
+            padding: 12px;
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            border-radius: 5px;
+        }
+
+        .cors-warning-title {
+            color: #856404;
+            margin-bottom: 10px;
+            font-size: 0.95em;
+        }
+
+        .cors-warning-content {
+            font-size: 0.85em;
+            color: #856404;
+            line-height: 1.8;
+        }
+
+        .cors-example {
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid #ffc107;
+            font-size: 0.85em;
+            color: #856404;
+        }
+
+        .cors-code-block {
+            margin-top: 8px;
+            padding: 8px;
+            background: rgba(255,255,255,0.5);
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 0.9em;
+        }
+
+        .cors-code {
+            color: #d63384;
+        }
+
+        .cors-code-note {
+            font-size: 0.85em;
+            color: #666;
+        }
+
+        /* 响应说明区域 */
+        .response-info-section {
+            margin-top: 15px;
+            padding: 12px;
+            background: #e7f3ff;
+            border-left: 4px solid #2196F3;
+            border-radius: 5px;
+        }
+
+        .response-info-title {
+            color: #1976D2;
+            margin-bottom: 10px;
+            font-size: 0.95em;
+        }
+
+        .response-info-content {
+            font-size: 0.85em;
+            color: #1976D2;
+            line-height: 1.8;
+        }
+
+        /* 预格式化文本 */
+        .pre-wrap {
+            margin: 0;
+            white-space: pre-wrap;
+            word-wrap: break-word;
         }
 
         .request-line {
@@ -304,6 +662,7 @@
             border-radius: 0 0 8px 8px;
             max-height: 200px;
             overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
             z-index: 1000;
             box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
             display: none;
@@ -1050,6 +1409,44 @@
             gap: 10px;
             flex-wrap: wrap;
             margin-top: 15px;
+            align-items: center;
+        }
+        
+        .env-selector-group {
+            display: flex;
+            align-items: center;
+            background: #f8f9fa;
+            padding: 8px 12px;
+            border-radius: 8px;
+            border: 1px solid #e0e0e0;
+        }
+        
+        .env-select {
+            padding: 6px 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            min-width: 150px;
+        }
+        
+        .env-select:hover {
+            border-color: #4facfe;
+        }
+        
+        .env-select:focus {
+            outline: none;
+            border-color: #4facfe;
+            box-shadow: 0 0 0 3px rgba(79, 172, 254, 0.1);
+        }
+        
+        .env-management {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #e0e0e0;
         }
 
         .loading-spinner {
@@ -1099,6 +1496,77 @@
             .btn {
                 width: 100%;
             }
+            
+            /* 环境选择器移动端优化 */
+            .button-group {
+                flex-direction: column;
+                gap: 12px;
+                width: 100%;
+            }
+            
+            .env-selector-group {
+                width: 100%;
+                justify-content: space-between;
+            }
+            
+            .env-selector-group label {
+                font-size: 14px;
+            }
+            
+            .env-select {
+                flex: 1;
+                min-width: 0;
+                font-size: 13px;
+            }
+            
+            .button-group > .btn {
+                width: 100%;
+            }
+            
+            /* 模态框移动端优化 */
+            .modal-content {
+                width: 95%;
+                max-width: 95%;
+                margin: 20px auto;
+                max-height: 90vh;
+                overflow-y: auto;
+            }
+            
+            .modal-header {
+                padding: 15px;
+            }
+            
+            .modal-header h2 {
+                font-size: 1.3em;
+            }
+            
+            .modal-body {
+                padding: 15px;
+            }
+            
+            .modal-footer {
+                padding: 15px;
+                flex-direction: column;
+                gap: 8px;
+            }
+            
+            .modal-footer .btn {
+                width: 100%;
+            }
+            
+            /* 环境管理区域移动端优化 */
+            .env-management > div {
+                flex-direction: column !important;
+                gap: 10px !important;
+            }
+            
+            .env-management select {
+                max-width: 100% !important;
+            }
+            
+            .env-management .btn {
+                width: 100%;
+            }
 
             .tabs {
                 flex-direction: column;
@@ -1111,6 +1579,20 @@
                 width: 100%;
                 text-align: center;
                 border-radius: 8px;
+            }
+
+            /* 提示框字体缩小 */
+            .info-box {
+                font-size: 13px;
+            }
+
+            .info-box h4 {
+                font-size: 14px;
+            }
+
+            .info-box code {
+                font-size: 12px;
+                word-break: break-all;
             }
 
             .key-value-row {
@@ -1196,6 +1678,7 @@
 
             .history-item-url {
                 width: 100%;
+                word-break: break-all;
             }
 
             .history-item-actions {
@@ -1239,6 +1722,21 @@
             .auth-info-box, .auth-warning-box {
                 padding: 13px 16px;
             }
+            
+            /* Response标签页移动端优化 */
+            .response-tabs {
+                flex-wrap: wrap;
+            }
+            
+            .response-tabs .response-tab {
+                flex: 1 1 calc(50% - 5px);
+                min-width: calc(50% - 5px);
+            }
+            
+            /* 变量提示移动端优化 */
+            .variable-hint-popup {
+                max-width: 90%;
+            }
         }
 
         @media (max-width: 480px) {
@@ -1252,6 +1750,17 @@
 
             .section-title {
                 font-size: 1.1em;
+                flex-wrap: wrap;
+            }
+
+            .config-actions {
+                width: 100%;
+                justify-content: flex-end;
+            }
+
+            .config-actions .btn-small {
+                flex: 1;
+                min-width: 120px;
             }
 
             textarea {
@@ -1343,6 +1852,223 @@
             .modal-footer .btn {
                 width: 100%;
             }
+            
+            /* 环境选择器超小屏优化 */
+            .env-selector-group label {
+                font-size: 12px;
+            }
+            
+            .env-select {
+                font-size: 12px;
+                padding: 5px 8px;
+            }
+            
+            /* 输入框字体大小 */
+            .key-input, .value-input {
+                font-size: 14px;
+            }
+            
+            /* 按钮字体大小 */
+            .btn {
+                font-size: 14px;
+                padding: 10px 16px;
+            }
+            
+            /* Response标签页超小屏优化 */
+            .response-tabs .response-tab {
+                flex: 1 1 100%;
+                min-width: 100%;
+                font-size: 13px;
+            }
+            
+            /* 快速创建环境按钮移动端优化 */
+            .modal-body > div > div[style*="display: flex; gap: 8px;"] .btn-small {
+                flex: 1 1 calc(50% - 4px);
+                min-width: calc(50% - 4px);
+            }
+            
+            /* 历史记录项移动端优化 */
+            .history-item-method {
+                font-size: 11px;
+                padding: 3px 8px;
+            }
+
+            .history-item-url {
+                font-size: 12px;
+            }
+
+            .history-item-date {
+                font-size: 11px;
+            }
+
+            .delete-history-btn {
+                font-size: 12px;
+                padding: 4px 10px;
+            }
+
+            .history-item-status {
+                font-size: 12px;
+            }
+
+            .btn-small {
+                font-size: 13px;
+                padding: 7px 13px;
+            }
+
+            .info-box {
+                font-size: 12px;
+            }
+
+            .info-box code {
+                font-size: 11px;
+            }
+
+            .body-type-option {
+                font-size: 13px;
+                padding: 10px;
+            }
+        }
+        
+        /* 新增工具类 - 替代内联样式 */
+        .modal-wide {
+            max-width: 900px;
+        }
+        
+        .modal-medium {
+            max-width: 500px;
+        }
+        
+        .mb-20 {
+            margin-bottom: 20px;
+        }
+        
+        .mb-15 {
+            margin-bottom: 15px;
+        }
+        
+        .mb-10 {
+            margin-bottom: 10px;
+        }
+        
+        .mb-12 {
+            margin-bottom: 12px;
+        }
+        
+        .mb-8 {
+            margin-bottom: 8px;
+        }
+        
+        .pt-15 {
+            padding-top: 15px;
+        }
+        
+        .flex-row {
+            display: flex;
+            align-items: center;
+        }
+        
+        .flex-gap-10 {
+            gap: 10px;
+        }
+        
+        .flex-gap-8 {
+            gap: 8px;
+        }
+        
+        .flex-wrap {
+            flex-wrap: wrap;
+        }
+        
+        .border-top {
+            border-top: 1px solid #e0e0e0;
+        }
+        
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            color: #666;
+        }
+        
+        .form-label-inline {
+            color: #666;
+            font-weight: 500;
+        }
+        
+        .full-width {
+            width: 100%;
+        }
+        
+        .env-select-wrapper {
+            flex: 1;
+            max-width: 300px;
+        }
+        
+        .section-heading {
+            color: #666;
+            margin-bottom: 10px;
+        }
+        
+        .info-note {
+            background: #fff9e6;
+            border-left: 4px solid #ffc107;
+            padding: 8px 12px;
+            margin-bottom: 12px;
+            border-radius: 4px;
+            font-size: 0.85em;
+        }
+        
+        .success-note {
+            background: #d4edda;
+            border-left: 4px solid #28a745;
+            padding: 8px 12px;
+            margin-bottom: 12px;
+            border-radius: 4px;
+            font-size: 0.85em;
+        }
+        
+        .quick-env-buttons {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        
+        .env-label {
+            margin-right: 8px;
+            color: #666;
+        }
+        
+        .btn-disabled-visual {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        /* 触摸设备优化 */
+        @media (hover: none) {
+            /* 增加触摸目标大小 */
+            .btn, .tab, .body-type-option, .delete-btn {
+                min-height: 44px;
+                min-width: 44px;
+            }
+            
+            .key-input, .value-input, input[type="text"], textarea, select {
+                min-height: 44px;
+                font-size: 16px; /* 防止iOS自动缩放 */
+            }
+            
+            /* 移除hover效果 */
+            .btn:hover, .tab:hover, .body-type-option:hover {
+                transform: none;
+            }
+            
+            /* 添加active效果 */
+            .btn:active {
+                transform: scale(0.98);
+                opacity: 0.8;
+            }
+            
+            .tab:active, .body-type-option:active {
+                opacity: 0.8;
+            }
         }
     </style>
 </head>
@@ -1356,12 +2082,18 @@
         <div class="content">
             <div class="info-box">
                 <h4>📘 使用说明</h4>
-                <p>API调试工具，支持发送HTTP请求、配置请求头、参数和请求体。可以测试RESTful API、查看响应结果，并自动保存请求历史记录。</p>
+                <p>API调试工具，支持发送HTTP请求、配置请求头、参数和请求体。支持 JSON、Form Data、Protobuf 等多种 Body 格式。可以测试 RESTful API、Protocol Buffer API、查看响应结果，并自动保存请求历史记录。</p>
             </div>
 
             <!-- 请求配置区域 -->
             <div class="section">
-                <div class="section-title">📤 请求配置</div>
+                <div class="section-title">
+                    <span>📤 请求配置</span>
+                    <div class="config-actions">
+                        <button class="btn-small btn-secondary" onclick="exportConfiguration()" title="导出所有配置">📥 导出配置</button>
+                        <button class="btn-small btn-secondary" onclick="importConfiguration()" title="导入配置">📤 导入配置</button>
+                    </div>
+                </div>
                 
                 <div class="request-line">
                     <select id="httpMethod" class="method-select">
@@ -1378,6 +2110,12 @@
                 </div>
 
                 <div class="button-group">
+                    <div class="env-selector-group">
+                        <label for="environmentSelect" class="env-label">🌍 环境：</label>
+                        <select id="environmentSelect" class="env-select" onchange="switchEnvironment()">
+                            <option value="default">默认环境</option>
+                        </select>
+                    </div>
                     <button class="btn btn-secondary btn-small" onclick="openVariablesModal()">⚙️ 全局变量</button>
                     <button class="btn btn-warning btn-small" onclick="clearAll()">🗑️ 清空所有</button>
                 </div>
@@ -1391,16 +2129,17 @@
                     <div class="tab" onclick="switchRequestTab('authorization')">Authorization</div>
                     <div class="tab" onclick="switchRequestTab('headers')">Headers</div>
                     <div class="tab" onclick="switchRequestTab('body')">Body</div>
+                    <div class="tab" onclick="switchRequestTab('response')">Response</div>
                 </div>
 
                 <!-- Query Params -->
-                <div id="params" class="tab-content active">
-                    <div class="info-box" style="margin-bottom: 15px;">
+                <div id="params" class="tab-content active"> 
+                    <div class="info-box mb-15">
                         <h4>💡 使用提示</h4>
                         <p>在URL中输入带查询参数的地址会自动解析（鼠标离开输入框后触发），例如：<br>
                         <code>https://api.example.com/users?id=123&name=John</code><br>
-                        <code>/api/users?id=123&name=John</code> （不需要完整URL）<br>
-                        参数将自动提取到下方列表，URL保持不变。发送请求时会合并URL中的参数和下方列表中的参数。</p>
+                        <code>{{baseUrl}}/api/users?id=123&name=John</code> <br>
+                        参数将自动提取到下方列表</p>
                     </div>
                     <div id="paramsList" class="key-value-list"></div>
                     <button class="btn btn-secondary btn-small" onclick="addParam()">➕ 添加参数</button>
@@ -1408,11 +2147,11 @@
 
                 <!-- Path Variables -->
                 <div id="pathVars" class="tab-content">
-                    <div class="info-box" style="margin-bottom: 15px;">
+                    <div class="info-box mb-15">
                         <h4>💡 使用提示</h4>
                         <p>在URL中使用 <code>{变量名}</code> 或 <code>:变量名</code> 格式定义路径参数，例如：<br>
-                        <code>https://api.example.com/users/{userId}/posts/{postId}</code></p>
-                        <p style="margin-top: 8px;">⚠️ 注意：<code>{{'{{'}}变量名}}</code> 格式是全局变量，不会被识别为路径参数</p>
+                        <code>{{baseUrl}}/users/{userId}/posts/:postId</code></p>
+                        <p class="mt-8">⚠️ 注意：<code>{{变量名}}</code> 格式是全局变量，不会被识别为路径参数</p>
                     </div>
                     <div id="pathVarsList" class="key-value-list"></div>
                     <button class="btn btn-secondary btn-small" onclick="addPathVar()">➕ 添加路径参数</button>
@@ -1420,6 +2159,9 @@
 
                 <!-- Authorization -->
                 <div id="authorization" class="tab-content">
+                    <div class="info-tip">
+                        <strong>💡 提示：</strong> Authorization 配置会自动保存到本地缓存，刷新页面后自动恢复。
+                    </div>
                     <div class="auth-type-selector">
                         <div class="input-group">
                             <label>🔐 认证类型</label>
@@ -1442,7 +2184,7 @@
                     </div>
 
                     <!-- Bearer Token -->
-                    <div id="authBearer" class="auth-content" style="display: none;">
+                    <div id="authBearer" class="auth-content hidden">
                         <div class="auth-input-group">
                             <label>🎫 Token</label>
                             <textarea id="bearerToken" class="auth-textarea" placeholder="请输入Bearer Token，例如：&#10;eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"></textarea>
@@ -1455,7 +2197,7 @@
                     </div>
 
                     <!-- Basic Auth -->
-                    <div id="authBasic" class="auth-content" style="display: none;">
+                    <div id="authBasic" class="auth-content hidden">
                         <div class="auth-input-group">
                             <label>👤 用户名</label>
                             <input type="text" id="basicUsername" class="auth-input" placeholder="请输入用户名">
@@ -1472,7 +2214,7 @@
                     </div>
 
                     <!-- API Key -->
-                    <div id="authApiKey" class="auth-content" style="display: none;">
+                    <div id="authApiKey" class="auth-content hidden">
                         <div class="auth-input-group">
                             <label>📝 Key名称</label>
                             <input type="text" id="apiKeyName" class="auth-input" placeholder="例如：X-API-Key, api_key, apikey" value="X-API-Key">
@@ -1497,7 +2239,7 @@
                     </div>
 
                     <!-- Digest Auth -->
-                    <div id="authDigest" class="auth-content" style="display: none;">
+                    <div id="authDigest" class="auth-content hidden">
                         <div class="auth-input-group">
                             <label>👤 用户名</label>
                             <input type="text" id="digestUsername" class="auth-input" placeholder="请输入用户名">
@@ -1512,7 +2254,7 @@
                     </div>
 
                     <!-- OAuth 2.0 -->
-                    <div id="authOAuth2" class="auth-content" style="display: none;">
+                    <div id="authOAuth2" class="auth-content hidden">
                         <div class="auth-input-group">
                             <label>🌐 Access Token</label>
                             <textarea id="oauth2Token" class="auth-textarea" placeholder="请输入OAuth 2.0 Access Token&#10;例如：ya29.a0AfH6SMBx..."></textarea>
@@ -1543,23 +2285,133 @@
                         <div class="body-type-option" onclick="switchBodyType('json')">JSON</div>
                         <div class="body-type-option" onclick="switchBodyType('form')">Form Data</div>
                         <div class="body-type-option" onclick="switchBodyType('text')">Raw Text</div>
+                        <div class="body-type-option" onclick="switchBodyType('protobuf')">Protobuf</div>
                     </div>
 
                     <div id="bodyNone" class="body-content active">
                         <div class="alert alert-info">当前请求不包含Body内容</div>
                     </div>
 
-                    <div id="bodyJson" class="body-content" style="display: none;">
+                    <div id="bodyJson" class="body-content hidden">
                         <textarea id="jsonBody" placeholder='请输入JSON格式的数据，例如：&#10;{&#10;  "name": "John Doe",&#10;  "email": "john@example.com"&#10;}'></textarea>
                     </div>
 
-                    <div id="bodyForm" class="body-content" style="display: none;">
+                    <div id="bodyForm" class="body-content hidden">
                         <div id="formDataList" class="key-value-list"></div>
                         <button class="btn btn-secondary btn-small" onclick="addFormData()">➕ 添加字段</button>
                     </div>
 
-                    <div id="bodyText" class="body-content" style="display: none;">
+                    <div id="bodyText" class="body-content hidden">
                         <textarea id="textBody" placeholder="请输入纯文本内容..."></textarea>
+                    </div>
+
+                    <div id="bodyProtobuf" class="body-content hidden">
+                        <div class="alert alert-info mb-15">
+                            <strong>💡 提示：</strong> 将 JSON 数据编码为 Protocol Buffer 格式发送。
+                        </div>
+                        
+                        <!-- Proto 定义 -->
+                        <div class="form-group">
+                            <label class="proto-label">
+                                Proto 定义 (用于请求Body):
+                            </label>
+                            <div id="requestProtoCacheStatus" class="warning-tip hidden">
+                                <span id="requestProtoCacheStatusText"></span>
+                            </div>
+                            <textarea id="requestProtoDefinition" rows="8" class="proto-textarea" placeholder='syntax = "proto3";
+
+message Request {
+  string name = 1;
+  int32 age = 2;
+  string email = 3;
+}'></textarea>
+                        </div>
+                        
+                        <div class="button-group-mb">
+                            <button class="btn btn-primary btn-small" onclick="parseRequestProto()">
+                                🔍 解析 Proto
+                            </button>
+                            <button class="btn btn-secondary btn-small" onclick="clearRequestProto()">
+                                🗑️ 清空
+                            </button>
+                        </div>
+                        
+                        <div id="requestProtoMessageTypeGroup" class="proto-message-type-group">
+                            <label class="proto-label">消息类型：</label>
+                            <select id="requestProtoMessageType" class="proto-select">
+                                <option value="">-- 请先解析 Proto --</option>
+                            </select>
+                        </div>
+                        
+                        <!-- JSON 输入 -->
+                        <div class="form-group">
+                            <label class="proto-label">
+                                JSON 数据 (将被编码为 Protobuf):
+                            </label>
+                            <textarea id="protobufJsonInput" rows="8" class="proto-textarea" placeholder='{
+  "name": "John Doe",
+  "age": 30,
+  "email": "john@example.com"
+}'></textarea>
+                        </div>
+                        
+                        <!-- 编码预览 -->
+                        <div id="protobufEncodedPreview" class="proto-encoded-preview">
+                            <label class="proto-label">编码预览 (Hex):</label>
+                            <div class="proto-encoded-content" id="protobufEncodedHex"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Response -->
+                <div id="response" class="tab-content">
+                    <div class="info-tip">
+                        <strong>💡 提示：</strong> 配置响应数据的解析方式，例如 Protocol Buffer 格式的响应解码。
+                    </div>
+
+                    <!-- Protobuf配置区域 -->
+                    <div class="protobuf-config-wrapper">
+                        <div class="protobuf-config-header" onclick="toggleProtobufConfig()">
+                            <h3 class="protobuf-config-title">
+                                📦 Protocol Buffer 配置 
+                                <span class="protobuf-config-subtitle">(用于解析 protobuf 响应)</span>
+                            </h3>
+                            <span id="protobufToggleIcon" class="protobuf-toggle-icon">▼</span>
+                        </div>
+                        
+                        <div id="protobufConfigContent" class="protobuf-config-content">
+                            <div class="info-tip">
+                                <strong>💡 提示：</strong> 当API返回 <code>application/x-protobuf</code> 或 <code>application/protobuf</code> 格式的响应时，需要配置Proto定义才能自动解码。
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="proto-label">Proto 定义：</label>
+                                <textarea id="protoDefinition" rows="8" class="proto-textarea" placeholder='syntax = "proto3";
+
+message Response {
+  int32 code = 1;
+  string message = 2;
+  bytes data = 3;
+}'></textarea>
+                            </div>
+                            
+                            <div class="form-group proto-message-type-group" id="protobufMessageTypeGroup">
+                                <label class="proto-label">消息类型：</label>
+                                <select id="protobufMessageTypeSelect" class="proto-select">
+                                    <option value="">-- 请先解析 Proto --</option>
+                                </select>
+                            </div>
+                            
+                            <div class="button-group">
+                                <button class="btn btn-primary btn-small" onclick="parseProtoDefinition()">
+                                    🔍 解析 Proto
+                                </button>
+                                <button class="btn btn-secondary btn-small" onclick="clearProtoDefinition()">
+                                    🗑️ 清空
+                                </button>
+                                <span id="protobufStatus" class="protobuf-status"></span>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -1572,21 +2424,36 @@
 
                 <div class="tabs">
                     <div class="tab active" onclick="switchResponseTab('responseBody')">Response Body</div>
+                    <div class="tab" onclick="switchResponseTab('requestHeaders')">Request Headers</div>
                     <div class="tab" onclick="switchResponseTab('responseHeaders')">Response Headers</div>
                 </div>
 
                 <div id="responseBody" class="tab-content active">
                     <div class="response-box">
                         <h3>响应内容</h3>
-                        <button class="copy-btn" onclick="copyResponse('responseContent')">📋 复制</button>
+                        <button class="copy-btn" onclick="copyResponse('responseContent', event)">📋 复制</button>
                         <div id="responseContent" class="response-content"></div>
+                    </div>
+                </div>
+
+                <div id="requestHeaders" class="tab-content">
+                    <div class="response-box">
+                        <h3>请求头</h3>
+                        <div class="info-note">
+                            <strong>ℹ️ 说明：</strong> 显示所有配置的请求头。浏览器还会自动添加一些标准头（如User-Agent、Accept、Origin等），这些头由浏览器控制，无法通过JavaScript获取完整列表。
+                        </div>
+                        <button class="copy-btn" onclick="copyResponse('requestHeadersContent', event)">📋 复制</button>
+                        <div id="requestHeadersContent" class="response-content"></div>
                     </div>
                 </div>
 
                 <div id="responseHeaders" class="tab-content">
                     <div class="response-box">
                         <h3>响应头</h3>
-                        <button class="copy-btn" onclick="copyResponse('responseHeadersContent')">📋 复制</button>
+                        <div class="success-note">
+                            <strong>✅ 说明：</strong> 显示服务器返回的所有可访问的HTTP响应头。包括标准头（如content-type、date）和自定义头（需服务器CORS配置）。某些头（如Set-Cookie）因浏览器安全策略无法通过JavaScript访问。
+                        </div>
+                        <button class="copy-btn" onclick="copyResponse('responseHeadersContent', event)">📋 复制</button>
                         <div id="responseHeadersContent" class="response-content"></div>
                     </div>
                 </div>
@@ -1600,28 +2467,79 @@
                 </div>
                 <div id="historyList" class="history-list"></div>
             </div>
+            
+            <!-- 隐藏的文件输入 -->
+            <input type="file" id="configFileInput" accept=".json" class="hidden" onchange="handleConfigFileSelect(event)">
         </div>
 
         <!-- 全局变量管理弹窗 -->
         <div id="variablesModal" class="modal">
-            <div class="modal-content">
+            <div class="modal-content modal-wide">
                 <div class="modal-header">
                     <h2>⚙️ 全局变量管理</h2>
                     <button class="modal-close" onclick="closeVariablesModal()">&times;</button>
                 </div>
                 <div class="modal-body">
-                    <div class="info-box" style="margin-bottom: 20px;">
+                    <div class="info-box mb-20">
                         <h4>💡 使用说明</h4>
-                        <p>• 使用 <code>{{'{{'}}变量名}}</code> 格式在任何输入框中引用变量<br>
+                        <p>• 使用 <code>{{变量名}}</code> 格式在任何输入框中引用变量<br>
                         • 支持在URL、参数、Headers、Body等位置使用<br>
-                        • 例如：URL输入 <code>{{'{{'}}baseUrl}}/users/{{'{{'}}userId}}</code></p>
+                        • 例如：URL输入 <code>{{baseUrl}}/users/{{userId}}</code><br>
+                        • 不同环境可以配置不同的变量值（如开发、测试、生产环境）</p>
                     </div>
-                    <div id="variablesList" class="key-value-list"></div>
-                    <button class="btn btn-secondary btn-small" onclick="addVariable()">➕ 添加变量</button>
+                    
+                    <!-- 环境管理区域 -->
+                    <div class="env-management mb-20">
+                        <div class="flex-row flex-gap-10 mb-15">
+                            <label class="form-label-inline">🌍 当前环境：</label>
+                            <select id="modalEnvironmentSelect" class="env-select env-select-wrapper" onchange="switchModalEnvironment()">
+                            </select>
+                            <button class="btn btn-secondary btn-small" onclick="showAddEnvironmentDialog()">➕ 新建环境</button>
+                            <button class="btn btn-warning btn-small" onclick="deleteCurrentEnvironment()" id="deleteEnvBtn">🗑️ 删除环境</button>
+                        </div>
+                    </div>
+                    
+                    <div class="border-top pt-15">
+                        <h4 class="section-heading">环境变量列表</h4>
+                        <div id="variablesList" class="key-value-list"></div>
+                        <button class="btn btn-secondary btn-small" onclick="addVariable()">➕ 添加变量</button>
+                    </div>
                 </div>
                 <div class="modal-footer">
                     <button class="btn btn-primary" onclick="saveVariables()">💾 保存</button>
                     <button class="btn btn-secondary" onclick="closeVariablesModal()">取消</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 新建环境弹窗 -->
+        <div id="addEnvironmentModal" class="modal">
+            <div class="modal-content modal-medium">
+                <div class="modal-header">
+                    <h2>➕ 新建环境</h2>
+                    <button class="modal-close" onclick="closeAddEnvironmentDialog()">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-15">
+                        <label class="form-label">环境名称：</label>
+                        <input type="text" id="newEnvironmentName" class="key-input full-width" placeholder="例如：开发环境、测试环境、生产环境" onkeypress="if(event.key==='Enter') addNewEnvironment()">
+                    </div>
+                    <div class="mb-15">
+                        <label class="form-label">快速创建常用环境：</label>
+                        <div class="quick-env-buttons">
+                            <button class="btn btn-secondary btn-small" onclick="document.getElementById('newEnvironmentName').value='开发环境'; document.getElementById('newEnvironmentName').focus();">开发环境</button>
+                            <button class="btn btn-secondary btn-small" onclick="document.getElementById('newEnvironmentName').value='测试环境'; document.getElementById('newEnvironmentName').focus();">测试环境</button>
+                            <button class="btn btn-secondary btn-small" onclick="document.getElementById('newEnvironmentName').value='预发布环境'; document.getElementById('newEnvironmentName').focus();">预发布环境</button>
+                            <button class="btn btn-secondary btn-small" onclick="document.getElementById('newEnvironmentName').value='生产环境'; document.getElementById('newEnvironmentName').focus();">生产环境</button>
+                        </div>
+                    </div>
+                    <div class="info-box">
+                        <p>💡 提示：环境名称将用于区分不同的变量配置，建议使用有意义的名称。</p>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-primary" onclick="addNewEnvironment()">✓ 创建</button>
+                    <button class="btn btn-secondary" onclick="closeAddEnvironmentDialog()">取消</button>
                 </div>
             </div>
         </div>
@@ -1634,16 +2552,31 @@
         let headersCount = 0;
         let formDataCount = 0;
         let variablesCount = 0;
+        
+        // Protobuf 相关变量
+        let protobufRoot = null;
+        let protobufMessageType = null;
         let isLoadingHistory = false; // 标志位：是否正在加载历史记录
         let globalVariables = {}; // 全局变量存储
+        let currentEnvironment = 'default'; // 当前选中的环境
+        let environments = {}; // 环境存储：{ envName: { variables: {...} } }
 
         // 初始化
         document.addEventListener('DOMContentLoaded', function() {
+            // 先初始化基本界面
             addParam();
             addHeader();
-            loadHistory();
+            
+            // 加载各种配置（顺序很重要）
             loadGlobalVariables();
+            loadAuthorizationConfig(); // 加载Authorization配置（必须在initAuthorizationAutoSave之前）
+            
+            // 加载历史记录
+            loadHistory();
+            
+            // 初始化交互功能
             initVariableHints();
+            initAuthorizationAutoSave(); // 初始化Authorization自动保存
             
             // 监听URL变化，鼠标离开时自动检测路径参数和查询参数
             const urlInput = document.getElementById('apiUrl');
@@ -1654,31 +2587,256 @@
                 autoDetectPathVariables();
                 autoDetectQueryParams();
             });
+            
+            console.log('API测试工具初始化完成');
         });
 
         // ==================== 全局变量管理 ====================
         
-        // 加载全局变量
+        // 加载全局变量和环境配置
         function loadGlobalVariables() {
-            const stored = localStorage.getItem('api_global_variables');
-            if (stored) {
+            // 加载环境配置
+            const storedEnvironments = localStorage.getItem('api_environments');
+            if (storedEnvironments) {
                 try {
-                    globalVariables = JSON.parse(stored);
+                    environments = JSON.parse(storedEnvironments);
                 } catch (e) {
-                    globalVariables = {};
+                    environments = {};
                 }
             }
+            
+            // 迁移旧的全局变量数据（兼容旧版本）
+            if (Object.keys(environments).length === 0) {
+                const oldVariables = localStorage.getItem('api_global_variables');
+                if (oldVariables) {
+                    try {
+                        const oldVars = JSON.parse(oldVariables);
+                        environments['default'] = { variables: oldVars };
+                        console.log('已迁移旧的全局变量数据到默认环境');
+                    } catch (e) {
+                        environments['default'] = { variables: {} };
+                    }
+                } else {
+                    environments['default'] = { variables: {} };
+                }
+            }
+            
+            // 如果没有任何环境，创建默认环境
+            if (Object.keys(environments).length === 0) {
+                environments['default'] = { variables: {} };
+            }
+            
+            // 加载当前选中的环境
+            const storedCurrentEnv = localStorage.getItem('api_current_environment');
+            if (storedCurrentEnv && environments[storedCurrentEnv]) {
+                currentEnvironment = storedCurrentEnv;
+            } else {
+                currentEnvironment = 'default';
+            }
+            
+            // 设置当前环境的全局变量
+            globalVariables = environments[currentEnvironment]?.variables || {};
+            
+            // 更新环境选择器
+            updateEnvironmentSelector();
         }
 
         // 保存全局变量到localStorage
         function saveGlobalVariablesToStorage() {
-            localStorage.setItem('api_global_variables', JSON.stringify(globalVariables));
+            // 保存当前环境的变量
+            if (!environments[currentEnvironment]) {
+                environments[currentEnvironment] = { variables: {} };
+            }
+            environments[currentEnvironment].variables = globalVariables;
+            
+            // 保存所有环境配置
+            localStorage.setItem('api_environments', JSON.stringify(environments));
+            
+            // 保存当前选中的环境
+            localStorage.setItem('api_current_environment', currentEnvironment);
+        }
+        
+        // 更新环境选择器
+        function updateEnvironmentSelector() {
+            const mainSelect = document.getElementById('environmentSelect');
+            const modalSelect = document.getElementById('modalEnvironmentSelect');
+            
+            // 生成环境选项HTML
+            const optionsHTML = Object.keys(environments).map(envName => {
+                const displayName = envName === 'default' ? '默认环境' : envName;
+                const varCount = Object.keys(environments[envName]?.variables || {}).length;
+                return `<option value="${escapeHtml(envName)}" ${envName === currentEnvironment ? 'selected' : ''}>${escapeHtml(displayName)} (${varCount}个变量)</option>`;
+            }).join('');
+            
+            if (mainSelect) mainSelect.innerHTML = optionsHTML;
+            if (modalSelect) modalSelect.innerHTML = optionsHTML;
+        }
+        
+        // 切换环境
+        function switchEnvironment() {
+            const select = document.getElementById('environmentSelect');
+            const newEnv = select.value;
+            
+            if (newEnv && environments[newEnv]) {
+                currentEnvironment = newEnv;
+                globalVariables = environments[currentEnvironment].variables || {};
+                saveGlobalVariablesToStorage();
+                
+                // 显示切换提示
+                showSuccess(`已切换到环境：${newEnv === 'default' ? '默认环境' : newEnv}`);
+            }
+        }
+        
+        // 切换模态框中的环境
+        function switchModalEnvironment() {
+            const select = document.getElementById('modalEnvironmentSelect');
+            const newEnv = select.value;
+            
+            if (newEnv && environments[newEnv]) {
+                currentEnvironment = newEnv;
+                globalVariables = environments[currentEnvironment].variables || {};
+                
+                // 重新加载变量列表
+                const variablesList = document.getElementById('variablesList');
+                variablesList.innerHTML = '';
+                variablesCount = 0;
+                
+                Object.entries(globalVariables).forEach(([key, value]) => {
+                    addVariable(key, value);
+                });
+                
+                // 如果没有变量，添加一个空行
+                if (Object.keys(globalVariables).length === 0) {
+                    addVariable();
+                }
+                
+                // 同步主选择器
+                const mainSelect = document.getElementById('environmentSelect');
+                if (mainSelect) mainSelect.value = newEnv;
+                
+                // 更新删除按钮状态
+                updateDeleteEnvButtonState();
+            }
+        }
+        
+        // 显示新建环境对话框
+        function showAddEnvironmentDialog() {
+            document.getElementById('addEnvironmentModal').classList.add('show');
+            document.getElementById('newEnvironmentName').value = '';
+            document.getElementById('newEnvironmentName').focus();
+        }
+        
+        // 关闭新建环境对话框
+        function closeAddEnvironmentDialog() {
+            document.getElementById('addEnvironmentModal').classList.remove('show');
+        }
+        
+        // 添加新环境
+        function addNewEnvironment() {
+            const nameInput = document.getElementById('newEnvironmentName');
+            const envName = nameInput.value.trim();
+            
+            if (!envName) {
+                showError('请输入环境名称');
+                return;
+            }
+            
+            if (environments[envName]) {
+                showError('该环境名称已存在');
+                return;
+            }
+            
+            // 创建新环境
+            environments[envName] = { variables: {} };
+            
+            // 切换到新环境
+            currentEnvironment = envName;
+            globalVariables = {};
+            
+            // 保存到localStorage
+            saveGlobalVariablesToStorage();
+            
+            // 更新选择器
+            updateEnvironmentSelector();
+            
+            // 刷新变量列表
+            const variablesList = document.getElementById('variablesList');
+            variablesList.innerHTML = '';
+            variablesCount = 0;
+            addVariable();
+            
+            // 更新删除按钮状态
+            updateDeleteEnvButtonState();
+            
+            // 关闭对话框
+            closeAddEnvironmentDialog();
+            
+            showSuccess(`环境 "${envName}" 创建成功`);
+        }
+        
+        // 删除当前环境
+        function deleteCurrentEnvironment() {
+            if (currentEnvironment === 'default') {
+                showError('默认环境不能删除');
+                return;
+            }
+            
+            if (!confirm(`确定要删除环境 "${currentEnvironment}" 吗？此操作将删除该环境下的所有变量配置。`)) {
+                return;
+            }
+            
+            // 删除环境
+            delete environments[currentEnvironment];
+            
+            // 切换到默认环境
+            currentEnvironment = 'default';
+            globalVariables = environments['default'].variables || {};
+            
+            // 保存到localStorage
+            saveGlobalVariablesToStorage();
+            
+            // 更新选择器
+            updateEnvironmentSelector();
+            
+            // 刷新变量列表
+            const variablesList = document.getElementById('variablesList');
+            variablesList.innerHTML = '';
+            variablesCount = 0;
+            
+            Object.entries(globalVariables).forEach(([key, value]) => {
+                addVariable(key, value);
+            });
+            
+            if (Object.keys(globalVariables).length === 0) {
+                addVariable();
+            }
+            
+            // 更新删除按钮状态
+            updateDeleteEnvButtonState();
+            
+            showSuccess('环境删除成功');
+        }
+        
+        // 更新删除环境按钮状态
+        function updateDeleteEnvButtonState() {
+            const deleteBtn = document.getElementById('deleteEnvBtn');
+            if (deleteBtn) {
+                deleteBtn.disabled = currentEnvironment === 'default';
+                if (currentEnvironment === 'default') {
+                    deleteBtn.classList.add('btn-disabled-visual');
+                } else {
+                    deleteBtn.classList.remove('btn-disabled-visual');
+                }
+            }
         }
 
         // 打开变量管理弹窗
         function openVariablesModal() {
             const modal = document.getElementById('variablesModal');
             modal.classList.add('show');
+            
+            // 更新环境选择器
+            updateEnvironmentSelector();
             
             // 加载变量到列表
             const variablesList = document.getElementById('variablesList');
@@ -1693,6 +2851,9 @@
             if (Object.keys(globalVariables).length === 0) {
                 addVariable();
             }
+            
+            // 更新删除环境按钮状态
+            updateDeleteEnvButtonState();
         }
 
         // 关闭变量管理弹窗
@@ -1733,7 +2894,13 @@
             
             globalVariables = newVariables;
             saveGlobalVariablesToStorage();
+            
+            // 更新环境选择器以显示最新的变量数量
+            updateEnvironmentSelector();
+            
             closeVariablesModal();
+            
+            showSuccess('变量保存成功');
         }
 
         // 替换文本中的变量
@@ -1909,7 +3076,7 @@
 
         // 切换请求标签页
         function switchRequestTab(tabName) {
-            document.querySelectorAll('#params, #pathVars, #authorization, #headers, #body').forEach(tab => {
+            document.querySelectorAll('#params, #pathVars, #authorization, #headers, #body, #response').forEach(tab => {
                 tab.classList.remove('active');
             });
             document.querySelectorAll('.tabs .tab').forEach(tab => {
@@ -1943,11 +3110,182 @@
                 targetContent.classList.add('active');
                 targetContent.style.display = 'block';
             }
+            
+            // 切换认证类型时也保存配置
+            saveAuthorizationConfig();
+        }
+
+        // ==================== Authorization 缓存管理 ====================
+        
+        // 保存Authorization配置到localStorage
+        function saveAuthorizationConfig() {
+            // 如果正在加载历史记录，不自动保存
+            if (isLoadingHistory) {
+                console.log('⏸️ 正在加载历史记录，跳过Authorization保存');
+                return;
+            }
+            
+            try {
+                const authConfig = {
+                    type: document.getElementById('authType').value,
+                    bearerToken: document.getElementById('bearerToken').value,
+                    basicUsername: document.getElementById('basicUsername').value,
+                    basicPassword: document.getElementById('basicPassword').value,
+                    apiKeyName: document.getElementById('apiKeyName').value,
+                    apiKeyValue: document.getElementById('apiKeyValue').value,
+                    apiKeyLocation: document.getElementById('apiKeyLocation').value,
+                    oauth2Token: document.getElementById('oauth2Token').value,
+                    oauth2TokenType: document.getElementById('oauth2TokenType').value,
+                    digestUsername: document.getElementById('digestUsername').value,
+                    digestPassword: document.getElementById('digestPassword').value,
+                    timestamp: new Date().toISOString()
+                };
+                
+                localStorage.setItem('api_test_authorization', JSON.stringify(authConfig));
+                console.log('💾 Authorization配置已保存 (类型:', authConfig.type + ')');
+            } catch (error) {
+                console.warn('❌ 保存Authorization配置失败:', error);
+            }
+        }
+        
+        // 从localStorage加载Authorization配置
+        function loadAuthorizationConfig() {
+            try {
+                const savedConfig = localStorage.getItem('api_test_authorization');
+                if (!savedConfig) {
+                    console.log('📭 未找到缓存的Authorization配置');
+                    return;
+                }
+                
+                const authConfig = JSON.parse(savedConfig);
+                console.log('📦 找到缓存的Authorization配置:', authConfig);
+                
+                // 暂时关闭自动保存标志
+                const wasLoadingHistory = isLoadingHistory;
+                isLoadingHistory = true;
+                
+                // 恢复认证类型
+                const authTypeElement = document.getElementById('authType');
+                if (authTypeElement) {
+                    authTypeElement.value = authConfig.type || 'none';
+                    console.log('✓ 认证类型已恢复:', authConfig.type);
+                }
+                
+                // 恢复各种认证方式的配置
+                const bearerTokenElement = document.getElementById('bearerToken');
+                if (bearerTokenElement) bearerTokenElement.value = authConfig.bearerToken || '';
+                
+                const basicUsernameElement = document.getElementById('basicUsername');
+                if (basicUsernameElement) basicUsernameElement.value = authConfig.basicUsername || '';
+                
+                const basicPasswordElement = document.getElementById('basicPassword');
+                if (basicPasswordElement) basicPasswordElement.value = authConfig.basicPassword || '';
+                
+                const apiKeyNameElement = document.getElementById('apiKeyName');
+                if (apiKeyNameElement) apiKeyNameElement.value = authConfig.apiKeyName || '';
+                
+                const apiKeyValueElement = document.getElementById('apiKeyValue');
+                if (apiKeyValueElement) apiKeyValueElement.value = authConfig.apiKeyValue || '';
+                
+                const apiKeyLocationElement = document.getElementById('apiKeyLocation');
+                if (apiKeyLocationElement) apiKeyLocationElement.value = authConfig.apiKeyLocation || 'header';
+                
+                const oauth2TokenElement = document.getElementById('oauth2Token');
+                if (oauth2TokenElement) oauth2TokenElement.value = authConfig.oauth2Token || '';
+                
+                const oauth2TokenTypeElement = document.getElementById('oauth2TokenType');
+                if (oauth2TokenTypeElement) oauth2TokenTypeElement.value = authConfig.oauth2TokenType || 'Bearer';
+                
+                const digestUsernameElement = document.getElementById('digestUsername');
+                if (digestUsernameElement) digestUsernameElement.value = authConfig.digestUsername || '';
+                
+                const digestPasswordElement = document.getElementById('digestPassword');
+                if (digestPasswordElement) digestPasswordElement.value = authConfig.digestPassword || '';
+                
+                // 切换到对应的认证类型显示（不触发保存）
+                const authType = authTypeElement ? authTypeElement.value : 'none';
+                document.querySelectorAll('.auth-content').forEach(content => {
+                    content.classList.remove('active');
+                    content.style.display = 'none';
+                });
+                const contentMap = {
+                    'none': 'authNone',
+                    'bearer': 'authBearer',
+                    'basic': 'authBasic',
+                    'apikey': 'authApiKey',
+                    'digest': 'authDigest',
+                    'oauth2': 'authOAuth2'
+                };
+                const targetContent = document.getElementById(contentMap[authType]);
+                if (targetContent) {
+                    targetContent.classList.add('active');
+                    targetContent.style.display = 'block';
+                    console.log('✓ 认证类型UI已切换:', authType);
+                }
+                
+                // 恢复原来的标志状态
+                setTimeout(() => {
+                    isLoadingHistory = wasLoadingHistory;
+                }, 100);
+                
+                console.log('✅ Authorization配置已完全恢复');
+            } catch (error) {
+                console.error('❌ 加载Authorization配置失败:', error);
+            }
+        }
+        
+        // 初始化Authorization自动保存
+        function initAuthorizationAutoSave() {
+            // 为所有Authorization相关的输入框添加change和input事件
+            const authInputIds = [
+                'authType',
+                'bearerToken',
+                'basicUsername',
+                'basicPassword',
+                'apiKeyName',
+                'apiKeyValue',
+                'apiKeyLocation',
+                'oauth2Token',
+                'oauth2TokenType',
+                'digestUsername',
+                'digestPassword'
+            ];
+            
+            let boundCount = 0;
+            authInputIds.forEach(id => {
+                const element = document.getElementById(id);
+                if (element) {
+                    // 使用防抖，避免频繁保存
+                    let saveTimer;
+                    const autoSave = () => {
+                        clearTimeout(saveTimer);
+                        saveTimer = setTimeout(() => {
+                            saveAuthorizationConfig();
+                        }, 500); // 500ms后保存
+                    };
+                    
+                    element.addEventListener('input', autoSave);
+                    element.addEventListener('change', autoSave);
+                    boundCount++;
+                }
+            });
+            
+            console.log(`✅ Authorization自动保存已初始化 (绑定了 ${boundCount} 个输入框)`);
+        }
+        
+        // 清除Authorization缓存
+        function clearAuthorizationCache() {
+            try {
+                localStorage.removeItem('api_test_authorization');
+                console.log('🗑️ Authorization缓存已清除');
+            } catch (error) {
+                console.warn('❌ 清除Authorization缓存失败:', error);
+            }
         }
 
         // 切换响应标签页
         function switchResponseTab(tabName) {
-            document.querySelectorAll('#responseBody, #responseHeaders').forEach(tab => {
+            document.querySelectorAll('#responseBody, #requestHeaders, #responseHeaders').forEach(tab => {
                 tab.classList.remove('active');
             });
             
@@ -1977,7 +3315,8 @@
                 'none': 'bodyNone',
                 'json': 'bodyJson',
                 'form': 'bodyForm',
-                'text': 'bodyText'
+                'text': 'bodyText',
+                'protobuf': 'bodyProtobuf'
             };
 
             document.getElementById(contentMap[type]).style.display = 'block';
@@ -2156,6 +3495,14 @@
                         }
                     }
                 });
+            }
+
+            // 从URL中移除query params（只保留基础URL）
+            const baseUrl = url.substring(0, questionMarkIndex);
+            const urlInput = document.getElementById('apiUrl');
+            if (urlInput && searchParams.toString()) {
+                urlInput.value = baseUrl;
+                console.log('✂️ Query params已从URL中移除并移至参数列表');
             }
         }
 
@@ -2604,6 +3951,17 @@
                         if (textBody) {
                             fetchOptions.body = replaceVariables(textBody);
                         }
+                    } else if (currentBodyType === 'protobuf') {
+                        // Protocol Buffer 编码
+                        const protobufBody = await encodeProtobufRequest();
+                        if (protobufBody) {
+                            fetchOptions.body = protobufBody;
+                            if (!replacedHeaders['Content-Type']) {
+                                fetchOptions.headers['Content-Type'] = 'application/x-protobuf';
+                            }
+                        } else {
+                            throw new Error('Protobuf 编码失败：请检查 Proto 定义和 JSON 数据');
+                        }
                     }
                 }
 
@@ -2623,18 +3981,37 @@
                         // JSON解析失败，作为文本处理
                         responseBody = await response.text();
                     }
+                } else if (contentType && (contentType.includes('application/x-protobuf') || contentType.includes('application/protobuf'))) {
+                    // Protobuf响应，获取二进制数据
+                    const arrayBuffer = await response.arrayBuffer();
+                    responseBody = {
+                        __isProtobuf: true,
+                        data: new Uint8Array(arrayBuffer)
+                    };
                 } else {
                     responseBody = await response.text();
                 }
 
-                // 获取响应头
+                // 获取响应头（获取所有HTTP返回的响应头）
                 const responseHeaders = {};
+                let headerCount = 0;
+                
+                // 使用forEach遍历所有可访问的响应头
                 response.headers.forEach((value, key) => {
                     responseHeaders[key] = value;
+                    headerCount++;
                 });
+                
+                console.log(`📥 接收到 ${headerCount} 个HTTP响应头:`, responseHeaders);
+                
+                // 注意：某些响应头（如Set-Cookie）由于浏览器安全策略，无法通过JavaScript访问
+                // 如果需要访问自定义响应头，服务器需要设置：Access-Control-Expose-Headers
 
-                // 显示响应结果
-                displayResponse(response.status, duration, responseBody, responseHeaders, contentType);
+                // 保存实际发送的请求头（包括浏览器自动添加的）
+                const actualRequestHeaders = { ...fetchOptions.headers };
+                
+                // 显示响应结果（传递请求头信息）
+                displayResponse(response.status, duration, responseBody, responseHeaders, contentType, actualRequestHeaders);
 
                 // 保存到历史记录（保存所有参数，包括未选中的）
                 const allParams = getAllKeyValueData('paramsList');
@@ -2660,11 +4037,16 @@
                     type: currentBodyType,
                     jsonBody: document.getElementById('jsonBody').value,
                     textBody: document.getElementById('textBody').value,
-                    formData: allFormData
+                    formData: allFormData,
+                    protobufData: currentBodyType === 'protobuf' ? {
+                        protoDefinition: document.getElementById('requestProtoDefinition')?.value || '',
+                        messageType: document.getElementById('requestProtoMessageType')?.value || '',
+                        jsonInput: document.getElementById('protobufJsonInput')?.value || ''
+                    } : null
                 };
                 
                 // 使用原始URL，不使用处理后的URL
-                saveToHistory(method, originalUrl, response.status, duration, allParams, allPathVars, allHeaders, authData, bodyData);
+                saveToHistory(method, originalUrl, response.status, duration, allParams, allPathVars, allHeaders, authData, bodyData, responseBody, responseHeaders, contentType, actualRequestHeaders);
 
             } catch (error) {
                 showError('请求失败：' + error.message);
@@ -2676,7 +4058,7 @@
         }
 
         // 显示响应结果
-        function displayResponse(status, duration, body, headers, contentType) {
+        function displayResponse(status, duration, body, responseHeaders, contentType, requestHeaders) {
             const responseSection = document.getElementById('responseSection');
             responseSection.classList.add('show');
 
@@ -2702,9 +4084,98 @@
             const formattedContent = formatResponseBody(body, contentType);
             responseContentElement.innerHTML = formattedContent;
 
-            // 显示响应头（带语法高亮）
-            const formattedHeaders = syntaxHighlightJSON(JSON.stringify(headers, null, 2));
-            document.getElementById('responseHeadersContent').innerHTML = formattedHeaders;
+            // 显示请求头（带语法高亮和说明）
+            if (requestHeaders) {
+                // 计算配置的请求头数量
+                const configuredHeaderCount = Object.keys(requestHeaders).length;
+                
+                // 构建完整的请求头展示
+                let requestHeadersDisplay = '<div style="margin-bottom: 15px;">';
+                requestHeadersDisplay += '<h4 style="color: #4facfe; margin-bottom: 10px; font-size: 1em;">📤 已配置的请求头</h4>';
+                requestHeadersDisplay += `<div style="margin-bottom: 10px; font-size: 0.9em; color: #666;">共 ${configuredHeaderCount} 个自定义请求头</div>`;
+                
+                if (configuredHeaderCount > 0) {
+                    requestHeadersDisplay += syntaxHighlightJSON(JSON.stringify(requestHeaders, null, 2));
+                } else {
+                    requestHeadersDisplay += '<div style="color: #999; font-style: italic; padding: 10px 0;">未配置自定义请求头</div>';
+                }
+                requestHeadersDisplay += '</div>';
+                
+                // 添加浏览器自动添加的常见请求头说明
+                requestHeadersDisplay += '<div style="margin-top: 20px; padding: 12px; background: #f8f9fa; border-radius: 5px;">';
+                requestHeadersDisplay += '<h4 style="color: #666; margin-bottom: 10px; font-size: 0.95em;">🌐 浏览器自动添加的常见请求头（仅供参考）</h4>';
+                requestHeadersDisplay += '<div style="font-size: 0.85em; color: #666; line-height: 1.8;">';
+                requestHeadersDisplay += '• <strong>User-Agent:</strong> 浏览器标识和版本信息<br>';
+                requestHeadersDisplay += '• <strong>Accept:</strong> 可接受的响应内容类型（如text/html, application/json）<br>';
+                requestHeadersDisplay += '• <strong>Accept-Language:</strong> 可接受的语言（如zh-CN, en-US）<br>';
+                requestHeadersDisplay += '• <strong>Accept-Encoding:</strong> 可接受的压缩编码（如gzip, deflate, br）<br>';
+                requestHeadersDisplay += '• <strong>Connection:</strong> 连接类型（通常为keep-alive）<br>';
+                requestHeadersDisplay += '• <strong>Origin:</strong> 请求来源域名（跨域请求时）<br>';
+                requestHeadersDisplay += '• <strong>Referer:</strong> 引用页面的完整URL<br>';
+                requestHeadersDisplay += '• <strong>Sec-Fetch-Site/Mode/Dest:</strong> 浏览器安全策略相关的头信息<br>';
+                requestHeadersDisplay += '• <strong>Cache-Control:</strong> 缓存控制指令';
+                requestHeadersDisplay += '</div>';
+                requestHeadersDisplay += '<div style="margin-top: 8px; padding-top: 8px; border-top: 1px solid #e0e0e0; font-size: 0.8em; color: #999; font-style: italic;">';
+                requestHeadersDisplay += '💡 <strong>说明：</strong> 上述请求头由浏览器根据HTTP协议和安全策略自动管理和添加，开发者无法通过JavaScript完全控制或获取这些头的实际值。实际发送的请求头数量可能更多。';
+                requestHeadersDisplay += '</div>';
+                requestHeadersDisplay += '</div>';
+                
+                document.getElementById('requestHeadersContent').innerHTML = requestHeadersDisplay;
+            }
+
+            // 显示响应头（带语法高亮，显示所有HTTP返回的响应头）
+            let responseHeadersContent = '<div style="margin-bottom: 15px;">';
+            responseHeadersContent += '<h4 style="color: #28a745; margin-bottom: 10px; font-size: 1em;">📥 服务器返回的所有响应头</h4>';
+            
+            // 计算响应头数量
+            const headerCount = Object.keys(responseHeaders).length;
+            responseHeadersContent += `<div style="margin-bottom: 10px; font-size: 0.9em; color: #666;">✅ 成功获取 ${headerCount} 个HTTP响应头</div>`;
+            
+            if (headerCount > 0) {
+                responseHeadersContent += syntaxHighlightJSON(JSON.stringify(responseHeaders, null, 2));
+            } else {
+                responseHeadersContent += '<div style="color: #999; font-style: italic; padding: 10px 0;">未获取到响应头信息</div>';
+            }
+            responseHeadersContent += '</div>';
+            
+            // 添加安全策略说明
+            responseHeadersContent += '<div style="margin-top: 20px; padding: 12px; background: #fff3cd; border-left: 4px solid #ffc107; border-radius: 5px;">';
+            responseHeadersContent += '<h4 style="color: #856404; margin-bottom: 10px; font-size: 0.95em;">⚠️ 浏览器安全策略限制</h4>';
+            responseHeadersContent += '<div style="font-size: 0.85em; color: #856404; line-height: 1.8;">';
+            responseHeadersContent += '<p style="margin: 0 0 10px 0;"><strong>由于浏览器安全策略，以下响应头无法通过JavaScript访问：</strong></p>';
+            responseHeadersContent += '• <strong>Set-Cookie / Set-Cookie2:</strong> Cookie设置头（浏览器自动处理）<br>';
+            responseHeadersContent += '• <strong>自定义响应头：</strong> 需要服务器设置 <code>Access-Control-Expose-Headers</code><br>';
+            responseHeadersContent += '</div>';
+            responseHeadersContent += '<div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #ffc107; font-size: 0.85em; color: #856404;">';
+            responseHeadersContent += '<strong>💡 如何访问自定义响应头：</strong><br>';
+            responseHeadersContent += '<div style="margin-top: 8px; padding: 8px; background: rgba(255,255,255,0.5); border-radius: 4px; font-family: monospace; font-size: 0.9em;">';
+            responseHeadersContent += '服务器需要添加以下响应头：<br>';
+            responseHeadersContent += '<code style="color: #d63384;">Access-Control-Expose-Headers: X-Custom-Header, X-Request-ID</code><br>';
+            responseHeadersContent += '<span style="font-size: 0.85em; color: #666;">(列出所有需要暴露的自定义头，用逗号分隔)</span>';
+            responseHeadersContent += '</div>';
+            responseHeadersContent += '<div style="margin-top: 8px; font-size: 0.9em;">';
+            responseHeadersContent += '或使用通配符（生产环境不推荐）：<br>';
+            responseHeadersContent += '<code style="color: #d63384;">Access-Control-Expose-Headers: *</code>';
+            responseHeadersContent += '</div>';
+            responseHeadersContent += '</div>';
+            responseHeadersContent += '</div>';
+            
+            // 常见的响应头说明
+            responseHeadersContent += '<div style="margin-top: 15px; padding: 12px; background: #e7f3ff; border-left: 4px solid #2196F3; border-radius: 5px;">';
+            responseHeadersContent += '<h4 style="color: #1976D2; margin-bottom: 10px; font-size: 0.95em;">📚 常见HTTP响应头说明</h4>';
+            responseHeadersContent += '<div style="font-size: 0.85em; color: #1976D2; line-height: 1.8;">';
+            responseHeadersContent += '• <strong>content-type:</strong> 响应内容的媒体类型<br>';
+            responseHeadersContent += '• <strong>content-length:</strong> 响应内容的字节大小<br>';
+            responseHeadersContent += '• <strong>date:</strong> 响应生成的日期和时间<br>';
+            responseHeadersContent += '• <strong>server:</strong> 服务器软件信息<br>';
+            responseHeadersContent += '• <strong>cache-control:</strong> 缓存控制指令<br>';
+            responseHeadersContent += '• <strong>etag:</strong> 资源的特定版本标识符<br>';
+            responseHeadersContent += '• <strong>access-control-*:</strong> CORS跨域相关头<br>';
+            responseHeadersContent += '• <strong>x-*:</strong> 通常为自定义响应头（需CORS配置）';
+            responseHeadersContent += '</div>';
+            responseHeadersContent += '</div>';
+            
+            document.getElementById('responseHeadersContent').innerHTML = responseHeadersContent;
 
             // 滚动到响应区域
             responseSection.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
@@ -2715,6 +4186,11 @@
             if (!body) return '<span style="color: #999;">无响应内容</span>';
 
             try {
+                // Protobuf格式
+                if (body.__isProtobuf) {
+                    return formatProtobufResponse(body.data);
+                }
+
                 // JSON格式
                 if (contentType && contentType.includes('application/json')) {
                     const jsonObj = typeof body === 'string' ? JSON.parse(body) : body;
@@ -2748,6 +4224,81 @@
             } catch (e) {
                 return `<pre style="margin: 0; white-space: pre-wrap; word-wrap: break-word;">${escapeHtml(String(body))}</pre>`;
             }
+        }
+
+        // 格式化Protobuf响应
+        function formatProtobufResponse(uint8Array) {
+            let result = '<div style="margin-bottom: 20px;">';
+            
+            // 显示原始数据信息
+            result += '<div style="background: #fff9e6; border-left: 4px solid #ffc107; padding: 10px; margin-bottom: 15px; border-radius: 4px;">';
+            result += '<strong>📦 Protocol Buffer 响应</strong><br>';
+            result += `数据大小: ${uint8Array.length} 字节<br>`;
+            
+            // 如果有proto定义，尝试解码
+            if (protobufRoot && protobufMessageType) {
+                result += `使用消息类型: <span style="color: #2196F3;">${protobufMessageType}</span>`;
+                result += '</div>';
+                
+                try {
+                    const MessageType = protobufRoot.lookupType(protobufMessageType);
+                    const message = MessageType.decode(uint8Array);
+                    // 保持数据类型与proto定义一致：不转换long/enum/bytes
+                    const jsonResult = MessageType.toObject(message, {
+                        longs: Number,      // int64保持为Number类型
+                        enums: Number,      // enum保持为Number类型
+                        bytes: Array,       // bytes保持为Array类型
+                        defaults: false,    // 不填充默认值，只返回实际存在的字段
+                        arrays: true,       // 保留数组
+                        objects: true,      // 保留对象
+                        oneofs: true        // 包含oneof字段
+                    });
+                    
+                    // 格式化的JSON字符串
+                    const formattedJson = JSON.stringify(jsonResult, null, 2);
+                    
+                    result += '<div style="margin-bottom: 15px;">';
+                    result += '<h4 style="color: #28a745; margin-bottom: 10px;">✅ 解码成功 (JSON格式)</h4>';
+                    result += '<div style="background: #e7f3ff; border-left: 3px solid #2196F3; padding: 8px 12px; margin-bottom: 10px; border-radius: 4px; font-size: 0.85em;">';
+                    result += '<strong>💡 提示：</strong> 点击"📋 复制"按钮将只复制解码后的JSON内容，不包括下方的原始十六进制数据。';
+                    result += '</div>';
+                    // 使用data-copyable属性标记这是可复制的内容
+                    result += '<div class="protobuf-decoded-content" data-copyable="true">';
+                    result += syntaxHighlightJSON(formattedJson);
+                    result += '</div>';
+                    result += '</div>';
+                } catch (error) {
+                    result += '<div style="background: #fff5f5; border-left: 4px solid #fc8181; padding: 10px; margin-bottom: 15px; border-radius: 4px;">';
+                    result += '<strong style="color: #c53030;">❌ 解码失败</strong><br>';
+                    result += `错误信息: ${escapeHtml(error.message)}`;
+                    result += '</div>';
+                }
+            } else {
+                result += '<br>⚠️ 未配置 Proto 定义，无法自动解码';
+                result += '</div>';
+            }
+            
+            // 显示十六进制数据（不可复制）
+            result += '<div style="margin-top: 15px;" class="protobuf-raw-content" data-copyable="false">';
+            result += '<h4 style="color: #666; margin-bottom: 10px;">原始数据 (Hex) - 仅供查看</h4>';
+            result += '<pre style="background: #f5f5f5; padding: 15px; border-radius: 5px; overflow-x: auto; font-family: monospace; font-size: 0.9em;">';
+            
+            // 格式化十六进制输出，每16个字节一行
+            for (let i = 0; i < uint8Array.length; i += 16) {
+                const offset = i.toString(16).padStart(8, '0');
+                const bytes = Array.from(uint8Array.slice(i, i + 16))
+                    .map(b => b.toString(16).padStart(2, '0'))
+                    .join(' ');
+                const ascii = Array.from(uint8Array.slice(i, i + 16))
+                    .map(b => (b >= 32 && b <= 126) ? String.fromCharCode(b) : '.')
+                    .join('');
+                result += `<span style="color: #999;">${offset}</span>  ${bytes.padEnd(48, ' ')}  <span style="color: #666;">${escapeHtml(ascii)}</span>\n`;
+            }
+            
+            result += '</pre></div>';
+            result += '</div>';
+            
+            return result;
         }
 
         // JSON语法高亮
@@ -2824,21 +4375,60 @@
         }
 
         // 复制响应内容
-        function copyResponse(elementId) {
-            const content = document.getElementById(elementId).textContent;
-            navigator.clipboard.writeText(content).then(() => {
-                const button = event.target;
-                const originalText = button.textContent;
-                button.textContent = '✅ 已复制';
-                button.style.background = '#28a745';
+        function copyResponse(elementId, event) {
+            try {
+                const element = document.getElementById(elementId);
+                if (!element) {
+                    alert('❌ 没有可复制的内容');
+                    return;
+                }
                 
-                setTimeout(() => {
-                    button.textContent = originalText;
-                    button.style.background = '#667eea';
-                }, 2000);
-            }).catch(err => {
-                alert('复制失败：' + err);
-            });
+                let content = '';
+                
+                // 检查是否是Protobuf响应（只复制解码后的内容）
+                const protobufDecodedContent = element.querySelector('.protobuf-decoded-content[data-copyable="true"]');
+                if (protobufDecodedContent) {
+                    // 只复制解码后的JSON内容
+                    content = protobufDecodedContent.textContent || protobufDecodedContent.innerText || '';
+                    console.log('📋 复制Protobuf解码后的内容');
+                } else {
+                    // 正常复制所有内容
+                    content = element.textContent || element.innerText || '';
+                }
+                
+                // 如果内容为空或只是提示信息
+                if (!content || content.includes('等待') || content.includes('无响应')) {
+                    alert('❌ 没有可复制的内容');
+                    return;
+                }
+                
+                navigator.clipboard.writeText(content).then(() => {
+                    const button = event ? event.target : document.activeElement;
+                    if (button) {
+                        const originalText = button.textContent;
+                        const originalBg = button.style.background;
+                        
+                        // 如果是protobuf响应，显示特殊提示
+                        if (protobufDecodedContent) {
+                            button.textContent = '✅ 已复制解码内容';
+                        } else {
+                            button.textContent = '✅ 已复制';
+                        }
+                        button.style.background = '#28a745';
+                        
+                        setTimeout(() => {
+                            button.textContent = originalText;
+                            button.style.background = originalBg || '#667eea';
+                        }, 2000);
+                    }
+                }).catch(err => {
+                    console.error('复制失败:', err);
+                    alert('❌ 复制失败：' + err.message);
+                });
+            } catch (error) {
+                console.error('复制响应内容出错:', error);
+                alert('❌ 复制失败：' + error.message);
+            }
         }
 
         // 格式化字节大小
@@ -2875,6 +4465,9 @@
             document.getElementById('oauth2TokenType').value = 'Bearer';
             switchAuthType();
             
+            // 清除Authorization缓存
+            clearAuthorizationCache();
+            
             paramsCount = 0;
             pathVarsCount = 0;
             headersCount = 0;
@@ -2887,9 +4480,18 @@
         // ==================== 历史记录管理 ====================
         const MAX_HISTORY = 20;
 
-        function saveToHistory(method, url, status, duration, params, pathVars, headers, authData, bodyData) {
+        function saveToHistory(method, url, status, duration, params, pathVars, headers, authData, bodyData, responseBody, responseHeaders, contentType, requestHeaders) {
             const storageKey = 'api_test_history';
             let history = JSON.parse(localStorage.getItem(storageKey) || '[]');
+            
+            // 处理响应体，如果是Protobuf二进制数据，转换为可存储的格式
+            let serializableResponseBody = responseBody;
+            if (responseBody && responseBody.__isProtobuf) {
+                serializableResponseBody = {
+                    __isProtobuf: true,
+                    data: Array.from(responseBody.data) // 将Uint8Array转换为普通数组
+                };
+            }
             
             const record = {
                 id: Date.now(),
@@ -2902,11 +4504,20 @@
                 headers: headers,  // 数组格式
                 authData: authData,  // 认证信息对象
                 bodyData: bodyData,  // Body数据对象
+                responseBody: serializableResponseBody,  // 响应体
+                responseHeaders: responseHeaders,  // 响应头
+                contentType: contentType,  // 响应内容类型
+                requestHeaders: requestHeaders,  // 实际请求头
                 timestamp: new Date().toLocaleString('zh-CN')
             };
             
+            // 移除相同method和url的旧记录，确保每个API只保留最新的一条记录
+            history = history.filter(item => !(item.method === method && item.url === url));
+            
+            // 添加新记录到最前面
             history.unshift(record);
             
+            // 限制历史记录总数
             if (history.length > MAX_HISTORY) {
                 history = history.slice(0, MAX_HISTORY);
             }
@@ -3058,7 +4669,8 @@
                     'none': 0,
                     'json': 1,
                     'form': 2,
-                    'text': 3
+                    'text': 3,
+                    'protobuf': 4
                 };
                 const bodyTypeOptions = document.querySelectorAll('.body-type-option');
                 if (bodyTypeOptions[bodyTypeMap[currentBodyType]]) {
@@ -3073,7 +4685,8 @@
                     'none': 'bodyNone',
                     'json': 'bodyJson',
                     'form': 'bodyForm',
-                    'text': 'bodyText'
+                    'text': 'bodyText',
+                    'protobuf': 'bodyProtobuf'
                 };
                 const bodyContent = document.getElementById(bodyContentMap[currentBodyType]);
                 if (bodyContent) {
@@ -3095,6 +4708,43 @@
                         if (valueInput) valueInput.value = formItem.value;
                     });
                 }
+                
+                // 加载 Protobuf Data
+                if (currentBodyType === 'protobuf' && record.bodyData.protobufData) {
+                    const protobufData = record.bodyData.protobufData;
+                    if (protobufData.protoDefinition) {
+                        document.getElementById('requestProtoDefinition').value = protobufData.protoDefinition;
+                        // 解析 Proto
+                        setTimeout(() => {
+                            parseRequestProto(true);
+                            // 设置选中的消息类型
+                            if (protobufData.messageType) {
+                                document.getElementById('requestProtoMessageType').value = protobufData.messageType;
+                                requestProtoCurrentMessageType = protobufData.messageType;
+                            }
+                            // 设置 JSON 输入
+                            if (protobufData.jsonInput) {
+                                document.getElementById('protobufJsonInput').value = protobufData.jsonInput;
+                                generateProtobufPreview();
+                            }
+                        }, 200);
+                    }
+                }
+            }
+
+            // 加载并显示响应数据（如果有）
+            if (record.responseBody !== undefined && record.responseHeaders !== undefined) {
+                // 处理Protobuf数据，将数组转换回Uint8Array
+                let responseBody = record.responseBody;
+                if (responseBody && responseBody.__isProtobuf && Array.isArray(responseBody.data)) {
+                    responseBody = {
+                        __isProtobuf: true,
+                        data: new Uint8Array(responseBody.data)
+                    };
+                }
+                
+                // 显示响应结果
+                displayResponse(record.status, record.duration, responseBody, record.responseHeaders, record.contentType, record.requestHeaders || {});
             }
 
             // 滚动到顶部
@@ -3128,12 +4778,618 @@
             }
         }
 
+        // ==================== 配置导出导入功能 ====================
+        
+        // 导出配置
+        function exportConfiguration() {
+            try {
+                // 收集所有配置数据
+                const configuration = {
+                    version: '1.0.0',
+                    exportTime: new Date().toISOString(),
+                    exportTimeReadable: new Date().toLocaleString('zh-CN'),
+                    data: {
+                        // 环境配置
+                        environments: JSON.parse(localStorage.getItem('api_environments') || '{}'),
+                        currentEnvironment: localStorage.getItem('api_current_environment') || 'default',
+                        
+                        // 历史记录
+                        history: JSON.parse(localStorage.getItem('api_test_history') || '[]'),
+                        
+                        // Authorization配置
+                        authorization: JSON.parse(localStorage.getItem('api_test_authorization') || '{}')
+                    }
+                };
+                
+                // 生成文件名
+                const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, -5);
+                const filename = `api-test-config-${timestamp}.json`;
+                
+                // 创建Blob并下载
+                const blob = new Blob([JSON.stringify(configuration, null, 2)], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = filename;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                
+                // 显示成功提示
+                const historyCount = configuration.data.history.length;
+                const envCount = Object.keys(configuration.data.environments).length;
+                alert(`✅ 配置导出成功！\n\n包含：\n- ${envCount} 个环境配置\n- ${historyCount} 条历史记录\n- Authorization配置\n\n文件名：${filename}`);
+                
+            } catch (error) {
+                console.error('导出配置失败:', error);
+                alert('❌ 导出配置失败：' + error.message);
+            }
+        }
+        
+        // 触发文件选择
+        function importConfiguration() {
+            document.getElementById('configFileInput').click();
+        }
+        
+        // 处理文件选择
+        function handleConfigFileSelect(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            // 验证文件类型
+            if (!file.name.endsWith('.json')) {
+                alert('❌ 请选择有效的 JSON 配置文件');
+                event.target.value = ''; // 清空选择
+                return;
+            }
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const configuration = JSON.parse(e.target.result);
+                    
+                    // 验证配置格式
+                    if (!configuration.version || !configuration.data) {
+                        throw new Error('配置文件格式无效');
+                    }
+                    
+                    // 显示导入确认
+                    const historyCount = configuration.data.history?.length || 0;
+                    const envCount = Object.keys(configuration.data.environments || {}).length;
+                    const exportTime = configuration.exportTimeReadable || configuration.exportTime;
+                    
+                    const confirmMessage = `确定要导入此配置吗？\n\n配置信息：\n- 导出时间：${exportTime}\n- 环境数量：${envCount} 个\n- 历史记录：${historyCount} 条\n\n⚠️ 注意：导入将会：\n1. 合并环境配置（同名环境将被覆盖）\n2. 合并历史记录（相同URL的请求将保留最新的）\n3. 覆盖Authorization配置`;
+                    
+                    if (!confirm(confirmMessage)) {
+                        event.target.value = ''; // 清空选择
+                        return;
+                    }
+                    
+                    // 执行导入
+                    performImport(configuration);
+                    
+                } catch (error) {
+                    console.error('导入配置失败:', error);
+                    alert('❌ 导入配置失败：' + error.message);
+                }
+                
+                // 清空文件选择，允许重复导入同一文件
+                event.target.value = '';
+            };
+            
+            reader.onerror = function() {
+                alert('❌ 读取文件失败');
+                event.target.value = '';
+            };
+            
+            reader.readAsText(file);
+        }
+        
+        // 执行导入操作
+        function performImport(configuration) {
+            try {
+                let importedCount = 0;
+                
+                // 1. 导入环境配置（合并）
+                if (configuration.data.environments) {
+                    const existingEnvs = JSON.parse(localStorage.getItem('api_environments') || '{}');
+                    const mergedEnvs = { ...existingEnvs, ...configuration.data.environments };
+                    localStorage.setItem('api_environments', JSON.stringify(mergedEnvs));
+                    importedCount++;
+                }
+                
+                // 2. 导入历史记录（合并，去重）
+                if (configuration.data.history) {
+                    const existingHistory = JSON.parse(localStorage.getItem('api_test_history') || '[]');
+                    const importedHistory = configuration.data.history;
+                    
+                    // 创建URL+Method的映射，用于去重
+                    const historyMap = new Map();
+                    
+                    // 先添加现有记录
+                    existingHistory.forEach(record => {
+                        const key = `${record.method}|${record.url}`;
+                        historyMap.set(key, record);
+                    });
+                    
+                    // 再添加导入的记录（会覆盖同URL的旧记录）
+                    importedHistory.forEach(record => {
+                        const key = `${record.method}|${record.url}`;
+                        // 如果导入的记录更新，则使用导入的；否则保留现有的
+                        if (!historyMap.has(key) || new Date(record.timestamp) > new Date(historyMap.get(key).timestamp)) {
+                            historyMap.set(key, record);
+                        }
+                    });
+                    
+                    // 转换回数组，按时间戳排序
+                    const mergedHistory = Array.from(historyMap.values())
+                        .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
+                        .slice(0, MAX_HISTORY); // 限制最大数量
+                    
+                    localStorage.setItem('api_test_history', JSON.stringify(mergedHistory));
+                    importedCount++;
+                }
+                
+                // 3. 导入Authorization配置（覆盖）
+                if (configuration.data.authorization && Object.keys(configuration.data.authorization).length > 0) {
+                    localStorage.setItem('api_test_authorization', JSON.stringify(configuration.data.authorization));
+                    importedCount++;
+                }
+                
+                // 4. 如果导入了环境配置，更新当前环境
+                if (configuration.data.currentEnvironment && configuration.data.environments[configuration.data.currentEnvironment]) {
+                    localStorage.setItem('api_current_environment', configuration.data.currentEnvironment);
+                }
+                
+                // 重新加载所有配置
+                loadGlobalVariables();
+                loadAuthorizationConfig();
+                loadHistory();
+                
+                // 显示成功提示
+                const historyCount = configuration.data.history?.length || 0;
+                const envCount = Object.keys(configuration.data.environments || {}).length;
+                alert(`✅ 配置导入成功！\n\n已导入：\n- ${envCount} 个环境配置\n- ${historyCount} 条历史记录\n- Authorization配置\n\n页面配置已自动刷新。`);
+                
+            } catch (error) {
+                console.error('执行导入失败:', error);
+                alert('❌ 导入过程中出现错误：' + error.message);
+            }
+        }
+
         function escapeHtml(text) {
             const div = document.createElement('div');
             div.textContent = text;
             return div.innerHTML;
         }
+
+        // ==================== Protobuf 相关函数 ====================
+        
+        // 切换Protobuf配置区域
+        function toggleProtobufConfig() {
+            const content = document.getElementById('protobufConfigContent');
+            const icon = document.getElementById('protobufToggleIcon');
+            
+            if (content.style.display === 'none') {
+                content.style.display = 'block';
+                icon.style.transform = 'rotate(180deg)';
+            } else {
+                content.style.display = 'none';
+                icon.style.transform = 'rotate(0deg)';
+            }
+        }
+
+        // 解析Proto定义
+        function parseProtoDefinition() {
+            const protoContent = document.getElementById('protoDefinition').value.trim();
+            
+            if (!protoContent) {
+                showProtobufStatus('请输入 Proto 定义', 'error');
+                return;
+            }
+
+            try {
+                // 检查protobuf库是否加载
+                if (typeof protobuf === 'undefined') {
+                    showProtobufStatus('Protobuf库未加载，请刷新页面重试', 'error');
+                    return;
+                }
+
+                // 使用 protobuf.js 解析 proto 内容
+                protobufRoot = protobuf.parse(protoContent).root;
+                
+                // 获取所有消息类型
+                const messageTypes = [];
+                function findMessageTypes(namespace, prefix = '') {
+                    if (namespace.nested) {
+                        for (const [name, nested] of Object.entries(namespace.nested)) {
+                            const fullName = prefix ? `${prefix}.${name}` : name;
+                            if (nested instanceof protobuf.Type) {
+                                messageTypes.push(fullName);
+                            }
+                            if (nested.nested) {
+                                findMessageTypes(nested, fullName);
+                            }
+                        }
+                    }
+                }
+                findMessageTypes(protobufRoot);
+
+                if (messageTypes.length === 0) {
+                    showProtobufStatus('未找到任何消息类型定义', 'error');
+                    return;
+                }
+
+                // 填充消息类型下拉框
+                const selectElement = document.getElementById('protobufMessageTypeSelect');
+                selectElement.innerHTML = messageTypes.map(type => 
+                    `<option value="${type}">${type}</option>`
+                ).join('');
+                
+                document.getElementById('protobufMessageTypeGroup').style.display = 'block';
+                protobufMessageType = messageTypes[0];
+                
+                // 保存到localStorage
+                try {
+                    localStorage.setItem('protobuf_definition', protoContent);
+                    localStorage.setItem('protobuf_message_types', JSON.stringify(messageTypes));
+                    localStorage.setItem('protobuf_current_type', protobufMessageType);
+                } catch (e) {
+                    console.warn('保存Proto定义到localStorage失败:', e);
+                }
+                
+                showProtobufStatus(`✅ 解析成功！找到 ${messageTypes.length} 个消息类型`, 'success');
+                
+            } catch (error) {
+                showProtobufStatus('解析失败: ' + error.message, 'error');
+                console.error('Proto解析错误:', error);
+            }
+        }
+
+        // 清空Proto定义
+        function clearProtoDefinition() {
+            document.getElementById('protoDefinition').value = '';
+            document.getElementById('protobufMessageTypeGroup').style.display = 'none';
+            protobufRoot = null;
+            protobufMessageType = null;
+            
+            // 清除localStorage
+            try {
+                localStorage.removeItem('protobuf_definition');
+                localStorage.removeItem('protobuf_message_types');
+                localStorage.removeItem('protobuf_current_type');
+            } catch (e) {
+                console.warn('清除localStorage失败:', e);
+            }
+            
+            showProtobufStatus('已清空 Proto 定义', 'success');
+        }
+
+        // 显示Protobuf状态消息
+        function showProtobufStatus(message, type) {
+            const statusElement = document.getElementById('protobufStatus');
+            statusElement.textContent = message;
+            statusElement.style.display = 'inline-block';
+            
+            if (type === 'success') {
+                statusElement.style.background = '#d4edda';
+                statusElement.style.color = '#155724';
+                statusElement.style.border = '1px solid #c3e6cb';
+            } else if (type === 'error') {
+                statusElement.style.background = '#f8d7da';
+                statusElement.style.color = '#721c24';
+                statusElement.style.border = '1px solid #f5c6cb';
+            }
+            
+            // 3秒后自动隐藏
+            setTimeout(() => {
+                statusElement.style.display = 'none';
+            }, 3000);
+        }
+
+        // 监听消息类型选择变化
+        document.addEventListener('DOMContentLoaded', function() {
+            const messageTypeSelect = document.getElementById('protobufMessageTypeSelect');
+            if (messageTypeSelect) {
+                messageTypeSelect.addEventListener('change', function() {
+                    protobufMessageType = this.value;
+                    // 保存到localStorage
+                    try {
+                        localStorage.setItem('protobuf_current_type', protobufMessageType);
+                    } catch (e) {
+                        console.warn('保存当前消息类型失败:', e);
+                    }
+                });
+            }
+            
+            // 尝试从localStorage恢复Proto定义
+            try {
+                const savedProto = localStorage.getItem('protobuf_definition');
+                const savedTypes = localStorage.getItem('protobuf_message_types');
+                const savedCurrentType = localStorage.getItem('protobuf_current_type');
+                
+                if (savedProto) {
+                    document.getElementById('protoDefinition').value = savedProto;
+                    
+                    if (savedTypes) {
+                        const messageTypes = JSON.parse(savedTypes);
+                        
+                        // 尝试重新解析
+                        try {
+                            protobufRoot = protobuf.parse(savedProto).root;
+                            
+                            const selectElement = document.getElementById('protobufMessageTypeSelect');
+                            selectElement.innerHTML = messageTypes.map(type => 
+                                `<option value="${type}" ${type === savedCurrentType ? 'selected' : ''}>${type}</option>`
+                            ).join('');
+                            
+                            document.getElementById('protobufMessageTypeGroup').style.display = 'block';
+                            protobufMessageType = savedCurrentType || messageTypes[0];
+                            
+                            console.log('已从缓存恢复 Proto 定义');
+                        } catch (e) {
+                            console.warn('恢复Proto定义失败:', e);
+                        }
+                    }
+                }
+            } catch (e) {
+                console.warn('从localStorage加载Proto定义失败:', e);
+            }
+        });
+
+        // ==================== Protobuf 请求 Body 相关功能 ====================
+        let requestProtoRoot = null;
+        let requestProtoCurrentMessageType = null;
+        const REQUEST_PROTO_CACHE_KEY = 'api_tool_request_protobuf_cache';
+
+        // 保存请求 Proto 到缓存
+        function saveRequestProtoToCache(protoContent, messageTypes) {
+            try {
+                const cacheData = {
+                    protoContent: protoContent,
+                    messageTypes: messageTypes,
+                    timestamp: new Date().toISOString(),
+                    currentMessageType: messageTypes[0] || null
+                };
+                localStorage.setItem(REQUEST_PROTO_CACHE_KEY, JSON.stringify(cacheData));
+            } catch (error) {
+                console.warn('请求Proto缓存保存失败:', error);
+            }
+        }
+
+        // 从缓存加载请求 Proto
+        function loadRequestProtoFromCache() {
+            try {
+                const cacheStr = localStorage.getItem(REQUEST_PROTO_CACHE_KEY);
+                if (!cacheStr) return null;
+                return JSON.parse(cacheStr);
+            } catch (error) {
+                console.warn('请求Proto缓存加载失败:', error);
+                return null;
+            }
+        }
+
+        // 显示请求 Proto 缓存状态
+        function showRequestProtoCacheStatus() {
+            const cache = loadRequestProtoFromCache();
+            const statusElement = document.getElementById('requestProtoCacheStatus');
+            const statusText = document.getElementById('requestProtoCacheStatusText');
+            
+            if (cache && cache.protoContent) {
+                const cacheDate = new Date(cache.timestamp);
+                const now = new Date();
+                const diffMinutes = Math.floor((now - cacheDate) / (1000 * 60));
+                
+                let timeText = '';
+                if (diffMinutes < 1) {
+                    timeText = '刚刚';
+                } else if (diffMinutes < 60) {
+                    timeText = diffMinutes + '分钟前';
+                } else if (diffMinutes < 1440) {
+                    timeText = Math.floor(diffMinutes / 60) + '小时前';
+                } else {
+                    timeText = Math.floor(diffMinutes / 1440) + '天前';
+                }
+                
+                statusText.textContent = `已检测到缓存的 Proto 定义（${timeText}），包含 ${cache.messageTypes.length} 个消息类型`;
+                statusElement.style.display = 'block';
+            } else {
+                statusElement.style.display = 'none';
+            }
+        }
+
+        // 解析请求 Proto
+        function parseRequestProto(fromCache = false) {
+            const protoContent = document.getElementById('requestProtoDefinition').value.trim();
+            
+            if (!protoContent) {
+                alert('❌ 请输入 Proto 文件内容');
+                return;
+            }
+
+            try {
+                // 使用 protobuf.js 解析 proto 内容
+                requestProtoRoot = protobuf.parse(protoContent).root;
+                
+                // 获取所有消息类型
+                const messageTypes = [];
+                function findMessageTypes(namespace, prefix = '') {
+                    if (namespace.nested) {
+                        for (const [name, nested] of Object.entries(namespace.nested)) {
+                            const fullName = prefix ? `${prefix}.${name}` : name;
+                            if (nested instanceof protobuf.Type) {
+                                messageTypes.push(fullName);
+                            }
+                            if (nested.nested) {
+                                findMessageTypes(nested, fullName);
+                            }
+                        }
+                    }
+                }
+                findMessageTypes(requestProtoRoot);
+
+                if (messageTypes.length === 0) {
+                    alert('❌ 未找到任何消息类型定义');
+                    return;
+                }
+
+                // 填充消息类型下拉框
+                const selectElement = document.getElementById('requestProtoMessageType');
+                selectElement.innerHTML = messageTypes.map(type => 
+                    `<option value="${type}">${type}</option>`
+                ).join('');
+                
+                document.getElementById('requestProtoMessageTypeGroup').style.display = 'block';
+                requestProtoCurrentMessageType = messageTypes[0];
+                
+                // 保存到缓存
+                saveRequestProtoToCache(protoContent, messageTypes);
+                
+                // 解析成功后隐藏缓存状态提示
+                if (!fromCache) {
+                    document.getElementById('requestProtoCacheStatus').style.display = 'none';
+                    alert(`✅ Proto 文件解析成功！找到 ${messageTypes.length} 个消息类型`);
+                }
+                
+                // 监听 JSON 输入变化，自动生成预览
+                document.getElementById('protobufJsonInput').addEventListener('input', generateProtobufPreview);
+                
+                // 立即生成一次预览
+                generateProtobufPreview();
+                
+            } catch (error) {
+                alert('❌ Proto 解析失败: ' + error.message);
+                console.error(error);
+            }
+        }
+
+        // 清空请求 Proto
+        function clearRequestProto() {
+            document.getElementById('requestProtoDefinition').value = '';
+            document.getElementById('requestProtoMessageTypeGroup').style.display = 'none';
+            document.getElementById('protobufEncodedPreview').style.display = 'none';
+            
+            requestProtoRoot = null;
+            requestProtoCurrentMessageType = null;
+            
+            // 清除缓存
+            localStorage.removeItem(REQUEST_PROTO_CACHE_KEY);
+            
+            // 隐藏缓存状态
+            document.getElementById('requestProtoCacheStatus').style.display = 'none';
+            
+            alert('✅ 已清空（包括缓存）');
+        }
+
+        // 监听请求消息类型选择变化
+        document.getElementById('requestProtoMessageType')?.addEventListener('change', function() {
+            requestProtoCurrentMessageType = this.value;
+            generateProtobufPreview();
+        });
+
+        // 生成 Protobuf 编码预览
+        function generateProtobufPreview() {
+            if (!requestProtoRoot || !requestProtoCurrentMessageType) {
+                return;
+            }
+
+            const jsonInput = document.getElementById('protobufJsonInput')?.value.trim();
+            if (!jsonInput) {
+                document.getElementById('protobufEncodedPreview').style.display = 'none';
+                return;
+            }
+
+            try {
+                const selectedType = document.getElementById('requestProtoMessageType').value;
+                const MessageType = requestProtoRoot.lookupType(selectedType);
+                const jsonData = JSON.parse(jsonInput);
+                
+                // 验证消息
+                const errMsg = MessageType.verify(jsonData);
+                if (errMsg) {
+                    throw new Error(errMsg);
+                }
+                
+                // 创建消息
+                const message = MessageType.create(jsonData);
+                
+                // 编码为二进制
+                const buffer = MessageType.encode(message).finish();
+                
+                // 转为 Hex 显示
+                const hex = Array.from(buffer)
+                    .map(b => b.toString(16).padStart(2, '0'))
+                    .join(' ');
+                
+                document.getElementById('protobufEncodedHex').textContent = hex + `\n\n字节数: ${buffer.length}`;
+                document.getElementById('protobufEncodedPreview').style.display = 'block';
+                
+            } catch (error) {
+                document.getElementById('protobufEncodedHex').textContent = '❌ 编码失败: ' + error.message;
+                document.getElementById('protobufEncodedPreview').style.display = 'block';
+            }
+        }
+
+        // 编码 Protobuf 请求
+        async function encodeProtobufRequest() {
+            if (!requestProtoRoot || !requestProtoCurrentMessageType) {
+                alert('❌ 请先解析 Proto 文件');
+                return null;
+            }
+
+            const jsonInput = document.getElementById('protobufJsonInput')?.value.trim();
+            if (!jsonInput) {
+                alert('❌ 请输入 JSON 数据');
+                return null;
+            }
+
+            try {
+                const selectedType = document.getElementById('requestProtoMessageType').value;
+                const MessageType = requestProtoRoot.lookupType(selectedType);
+                const jsonData = JSON.parse(jsonInput);
+                
+                // 验证消息
+                const errMsg = MessageType.verify(jsonData);
+                if (errMsg) {
+                    throw new Error(errMsg);
+                }
+                
+                // 创建消息
+                const message = MessageType.create(jsonData);
+                
+                // 编码为二进制
+                const buffer = MessageType.encode(message).finish();
+                
+                // 返回 ArrayBuffer
+                return buffer.buffer;
+                
+            } catch (error) {
+                console.error('Protobuf 编码失败:', error);
+                alert('❌ Protobuf 编码失败: ' + error.message);
+                return null;
+            }
+        }
+
+        // 页面加载时尝试从缓存恢复请求 Proto
+        window.addEventListener('DOMContentLoaded', function() {
+            const cache = loadRequestProtoFromCache();
+            if (cache && cache.protoContent) {
+                document.getElementById('requestProtoDefinition').value = cache.protoContent;
+                
+                // 显示缓存状态
+                showRequestProtoCacheStatus();
+                
+                // 自动解析缓存的proto
+                setTimeout(() => {
+                    parseRequestProto(true);
+                }, 100);
+            }
+        });
     </script>
+    
+    <!-- Protobuf.js 库 -->
+    <script src="libs/protobuf.min.js"></script>
 </body>
 </html>
 

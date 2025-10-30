@@ -3,7 +3,42 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>时间转换工具</title>
+    <title>时间转换工具 - 在线时区转换、时间戳转换工具 | 支持夏令时自动识别</title>
+    
+    <!-- SEO Meta Tags -->
+    <meta name="description" content="免费在线时间转换工具，支持全球时区转换、时间戳转换、夏令时自动识别。覆盖美洲、欧洲、亚洲、大洋洲等主要城市时区，操作简单，转换精确，支持移动端。">
+    <meta name="keywords" content="时间转换,时区转换,时间戳转换,夏令时,UTC时间,北京时间,纽约时间,时间计算器,在线时间工具">
+    <meta name="author" content="多功能工具箱">
+    <meta name="robots" content="index, follow">
+    <meta name="language" content="zh-CN">
+    <!-- Canonical URL -->
+    <link rel="canonical" href="https://www.seekpie.com/tools/time-converter.html">
+    
+    <!-- Structured Data (JSON-LD) -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "时间转换工具",
+      "description": "免费在线时间转换工具，支持全球时区转换、时间戳转换、夏令时自动识别",
+      "url": "https://www.seekpie.com/tools/time-converter.html",
+      "applicationCategory": "UtilitiesApplication",
+      "operatingSystem": "All",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "CNY"
+      },
+      "featureList": [
+        "全球时区转换",
+        "时间戳转换",
+        "夏令时自动识别",
+        "本地时间显示",
+        "UTC时间显示",
+        "转换历史记录"
+      ]
+    }
+    </script>
     <style>
         * {
             margin: 0;
@@ -229,13 +264,13 @@
         }
 
         .clear-history-btn, .toggle-history-btn {
-            background: #e74c3c;
+            padding: 8px 16px;
+            background: #dc3545;
             color: white;
             border: none;
-            padding: 8px 15px;
-            border-radius: 20px;
-            font-size: 0.9em;
+            border-radius: 8px;
             cursor: pointer;
+            font-size: 0.95em;
             transition: all 0.3s ease;
         }
 
@@ -244,13 +279,13 @@
         }
 
         .clear-history-btn:hover {
-            background: #c0392b;
-            transform: translateY(-1px);
+            background: #c82333;
+            transform: scale(1.05);
         }
 
         .toggle-history-btn:hover {
             background: #2980b9;
-            transform: translateY(-1px);
+            transform: scale(1.05);
         }
 
         .history-list {
@@ -260,10 +295,10 @@
 
         .history-item {
             background: white;
+            border: 2px solid #e1e5e9;
             border-radius: 10px;
             padding: 15px;
             margin-bottom: 10px;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -271,8 +306,8 @@
         }
 
         .history-item:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+            border-color: #4facfe;
+            box-shadow: 0 4px 12px rgba(79, 172, 254, 0.2);
         }
 
         .history-content {
@@ -325,27 +360,26 @@
         }
 
         .history-action-btn {
-            background: #95a5a6;
+            padding: 4px 10px;
+            background: #dc3545;
             color: white;
             border: none;
-            padding: 6px 10px;
-            border-radius: 15px;
-            font-size: 0.8em;
+            border-radius: 5px;
             cursor: pointer;
+            font-size: 0.8em;
             transition: all 0.3s ease;
         }
 
         .history-action-btn:hover {
-            background: #7f8c8d;
-            transform: scale(1.05);
+            background: #c82333;
         }
 
         .history-action-btn.delete {
-            background: #e74c3c;
+            background: #dc3545;
         }
 
         .history-action-btn.delete:hover {
-            background: #c0392b;
+            background: #c82333;
         }
 
         .history-empty {
@@ -633,7 +667,7 @@
 
             .history-section {
                 margin-top: 20px;
-                padding: 15px;
+                padding: 0;
             }
 
             .history-header {
@@ -655,7 +689,7 @@
             .clear-history-btn, .toggle-history-btn {
                 flex: 1;
                 min-width: 120px;
-                padding: 10px 15px;
+                padding: 8px 16px;
                 font-size: 0.95em;
             }
 
@@ -683,8 +717,8 @@
             }
 
             .history-action-btn {
-                padding: 8px 15px;
-                font-size: 0.85em;
+                padding: 4px 10px;
+                font-size: 0.8em;
             }
 
             .timestamp-info {
@@ -2043,7 +2077,7 @@
                     </div>
                     <div class="history-actions">
                         <button class="history-action-btn delete" onclick="deleteHistoryItem(${item.id})" title="删除此记录">
-                            🗑️ 删除
+                            删除
                         </button>
                     </div>
                 `;

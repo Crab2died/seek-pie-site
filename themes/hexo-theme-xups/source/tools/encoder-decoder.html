@@ -3,7 +3,45 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>编解码工具</title>
+    <title>编解码工具 - 在线Base64、URL、Unicode、Protobuf编解码 | 多格式支持</title>
+    
+    <!-- SEO Meta Tags -->
+    <meta name="description" content="免费在线编解码工具，支持Base64、URL、HTML、Unicode、UTF-8、Protocol Buffer等多种编码格式的编码和解码。操作简单，结果准确，适合开发者使用。">
+    <meta name="keywords" content="Base64编码,URL编码,Unicode编码,HTML编码,Protobuf编码,Protocol Buffer,编解码工具,在线编码,在线解码,UTF-8编码">
+    <meta name="author" content="多功能工具箱">
+    <meta name="robots" content="index, follow">
+    <meta name="language" content="zh-CN">
+    <!-- Canonical URL -->
+    <link rel="canonical" href="https://www.seekpie.com/tools/encoder-decoder.html">
+    
+    <!-- Structured Data (JSON-LD) -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "编解码工具",
+      "description": "免费在线编解码工具，支持Base64、URL、Unicode等多种格式",
+      "url": "https://www.seekpie.com/tools/encoder-decoder.html",
+      "applicationCategory": "DeveloperApplication",
+      "operatingSystem": "All",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "CNY"
+      },
+      "featureList": [
+        "Base64编解码",
+        "URL编解码",
+        "HTML编解码",
+        "Unicode编解码",
+        "UTF-8编解码",
+        "Protocol Buffer编解码",
+        "哈希计算",
+        "Hex转换",
+        "二进制转换"
+      ]
+    }
+    </script>
     <style>
         * {
             margin: 0;
@@ -432,6 +470,15 @@
             font-style: italic;
         }
 
+        .proto-tab-active {
+            color: #4facfe !important;
+            border-bottom-color: #4facfe !important;
+        }
+
+        .proto-tab:hover {
+            color: #4facfe !important;
+        }
+
         /* 移动端优化 */
         @media (max-width: 768px) {
             body {
@@ -728,6 +775,158 @@
                 font-size: 1em;
             }
         }
+
+        /* Protobuf 特定样式 */
+        .proto-cache-status {
+            background: #fff9e6;
+            border-left: 4px solid #ffc107;
+            padding: 10px 15px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            color: #856404;
+            font-size: 0.9em;
+        }
+
+        .proto-file-upload-wrapper {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .proto-file-upload-label {
+            padding: 10px 20px;
+            background: #4facfe;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 0;
+        }
+
+        .proto-file-upload-label:hover {
+            background: #3d9ce8;
+        }
+
+        .proto-file-upload-input {
+            display: none;
+        }
+
+        .proto-file-name {
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        .proto-message-type-group {
+            margin-bottom: 20px;
+        }
+
+        .proto-message-type-label {
+            display: block;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+        }
+
+        .proto-message-type-select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e1e5e9;
+            border-radius: 10px;
+            font-size: 1em;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        .proto-message-type-select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .proto-encode-decode-section {
+            border-top: 2px solid #e1e5e9;
+            padding-top: 20px;
+            margin-top: 20px;
+        }
+
+        .proto-tab-buttons {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #e1e5e9;
+            padding-bottom: 10px;
+        }
+
+        .proto-tab-button {
+            padding: 12px 24px;
+            background: transparent;
+            border: none;
+            border-bottom: 3px solid transparent;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: 600;
+            color: #666;
+            transition: all 0.3s ease;
+        }
+
+        .proto-tab-content {
+            display: none;
+        }
+
+        .proto-tab-content.active {
+            display: block;
+        }
+
+        .proto-format-options {
+            margin-bottom: 15px;
+        }
+
+        .proto-format-options-label {
+            display: block;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+        }
+
+        .proto-format-options-group {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .proto-format-option {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            color: #555;
+        }
+
+        .proto-format-option input[type="radio"] {
+            cursor: pointer;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .ellipsis-text {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .clickable {
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
@@ -746,6 +945,7 @@
             <div class="encoder-tab" onclick="switchTab('hash')">哈希计算</div>
             <div class="encoder-tab" onclick="switchTab('hex')">Hex转换</div>
             <div class="encoder-tab" onclick="switchTab('binary')">二进制</div>
+            <div class="encoder-tab" onclick="switchTab('protobuf')">Protobuf</div>
         </div>
 
         <!-- Base64 编码 -->
@@ -979,10 +1179,136 @@
                 <div id="binaryHistory" class="history-list"></div>
             </div>
         </div>
+
+        <!-- Protobuf 编解码 -->
+        <div id="protobuf" class="encoder-content">
+            <div class="info-box">
+                <h4>📘 Protocol Buffer 编解码说明</h4>
+                <p>Protocol Buffer是Google开发的一种数据序列化格式，支持上传.proto文件，进行JSON与Protobuf之间的编解码转换。常用于高效的数据传输和存储。</p>
+                <p><strong>✨ 特性：</strong>支持嵌套对象、数组、枚举、oneof 字段等复杂数据结构的完整解析。</p>
+                <p><strong>🎯 类型保持：</strong>解析后的数据类型与 proto 定义保持一致（int32/int64→数字，string→字符串，enum→名称，bytes→Base64，bool→布尔值，嵌套对象保持结构）。</p>
+            </div>
+
+            <!-- Proto 文件定义 -->
+            <div class="input-group">
+                <label>Proto 文件定义</label>
+                <div id="protoCacheStatus" class="proto-cache-status hidden">
+                    <span id="protoCacheStatusText"></span>
+                </div>
+                <div class="proto-file-upload-wrapper">
+                    <label for="protoFile" class="proto-file-upload-label">
+                        <span>📁 选择 .proto 文件</span>
+                    </label>
+                    <input type="file" id="protoFile" accept=".proto" class="proto-file-upload-input">
+                    <span id="protoFileName" class="proto-file-name">未选择文件</span>
+                </div>
+                <div class="textarea-wrapper">
+                    <textarea id="protobufProtoInput" rows="8" placeholder="或直接输入 Proto 定义：&#10;syntax = &quot;proto3&quot;;&#10;&#10;enum Status {&#10;  ACTIVE = 0;&#10;  INACTIVE = 1;&#10;}&#10;&#10;message Address {&#10;  string city = 1;&#10;  string street = 2;&#10;}&#10;&#10;message Person {&#10;  string name = 1;&#10;  int32 age = 2;&#10;  int64 id = 3;&#10;  bool active = 4;&#10;  Status status = 5;&#10;  Address address = 6;&#10;  repeated string hobbies = 7;&#10;}"></textarea>
+                    <span class="char-count" id="protobufProtoCount">0 字符</span>
+                </div>
+            </div>
+
+            <div class="button-group">
+                <button class="btn btn-primary" onclick="parseProto()">🔍 解析 Proto</button>
+                <button class="btn btn-warning" onclick="clearProto()">🗑️ 清空</button>
+            </div>
+
+            <div id="protoMessageTypeGroup" class="proto-message-type-group hidden">
+                <label class="proto-message-type-label">选择消息类型：</label>
+                <select id="protoMessageType" class="proto-message-type-select">
+                    <option value="">-- 请先解析 Proto 文件 --</option>
+                </select>
+            </div>
+
+            <!-- 编码/解码操作 -->
+            <div class="proto-encode-decode-section">
+                <div class="proto-tab-buttons">
+                    <button class="proto-tab-button proto-tab proto-tab-active" onclick="switchProtoTab('encode', event)">编码 (JSON → Protobuf)</button>
+                    <button class="proto-tab-button proto-tab" onclick="switchProtoTab('decode', event)">解码 (Protobuf → JSON)</button>
+                </div>
+
+                <!-- 编码标签 -->
+                <div id="protoEncodeTab" class="proto-tab-content active">
+                    <div class="input-group">
+                        <label>输入 JSON 数据</label>
+                        <div class="textarea-wrapper">
+                            <textarea id="protobufJsonInput" rows="6" placeholder='{&#10;  "name": "张三",&#10;  "age": 25,&#10;  "id": 1234567890,&#10;  "active": true,&#10;  "status": "ACTIVE",&#10;  "address": {&#10;    "city": "北京",&#10;    "street": "长安街"&#10;  },&#10;  "hobbies": ["阅读", "旅游"]&#10;}'></textarea>
+                            <span class="char-count" id="protobufJsonCount">0 字符</span>
+                        </div>
+                    </div>
+
+                    <div class="proto-format-options">
+                        <label class="proto-format-options-label">输出格式：</label>
+                        <div class="proto-format-options-group">
+                            <label class="proto-format-option">
+                                <input type="radio" name="protoEncodeFormat" value="hex" checked>
+                                <span>Hex (十六进制)</span>
+                            </label>
+                            <label class="proto-format-option">
+                                <input type="radio" name="protoEncodeFormat" value="base64">
+                                <span>Base64</span>
+                            </label>
+                            <label class="proto-format-option">
+                                <input type="radio" name="protoEncodeFormat" value="binary">
+                                <span>Binary (二进制)</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="button-group">
+                        <button class="btn btn-primary" onclick="protobufEncode()">🔒 编码</button>
+                        <button class="btn btn-success" onclick="copyProtoResult('protoEncodeResult')">📋 复制结果</button>
+                    </div>
+
+                    <div id="protoEncodeResult"></div>
+                </div>
+
+                <!-- 解码标签 -->
+                <div id="protoDecodeTab" class="proto-tab-content">
+                    <div class="proto-format-options">
+                        <label class="proto-format-options-label">输入格式：</label>
+                        <div class="proto-format-options-group">
+                            <label class="proto-format-option">
+                                <input type="radio" name="protoDecodeFormat" value="hex" checked>
+                                <span>Hex (十六进制)</span>
+                            </label>
+                            <label class="proto-format-option">
+                                <input type="radio" name="protoDecodeFormat" value="base64">
+                                <span>Base64</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="input-group">
+                        <label>输入 Protobuf 数据</label>
+                        <div class="textarea-wrapper">
+                            <textarea id="protobufDataInput" rows="6" placeholder="输入十六进制或 Base64 编码的 Protobuf 数据"></textarea>
+                            <span class="char-count" id="protobufDataCount">0 字符</span>
+                        </div>
+                    </div>
+
+                    <div class="button-group">
+                        <button class="btn btn-primary" onclick="protobufDecode()">🔓 解码</button>
+                        <button class="btn btn-success" onclick="copyProtoResult('protoDecodeResult')">📋 复制结果</button>
+                    </div>
+
+                    <div id="protoDecodeResult"></div>
+                </div>
+            </div>
+
+            <div class="history-section">
+                <div class="history-header">
+                    <h3>📜 历史记录</h3>
+                    <button class="clear-history-btn" onclick="clearHistory('protobuf')">清空历史</button>
+                </div>
+                <div id="protobufHistory" class="history-list"></div>
+            </div>
+        </div>
         </div>
     </div>
 
     <script src="libs/crypto-js.min.js"></script>
+    <script src="libs/protobuf.min.js"></script>
     <script>
         // 初始化字符计数
         document.querySelectorAll('textarea').forEach(textarea => {
@@ -1067,16 +1393,16 @@
                 return `
                     <div class="history-item">
                         <div class="history-item-header">
-                            <div class="history-item-title" onclick="loadHistoryItem('${type}', ${record.id})" style="cursor: pointer;">${record.operation}</div>
+                            <div class="history-item-title clickable" onclick="loadHistoryItem('${type}', ${record.id})">${record.operation}</div>
                             <div class="history-item-actions">
                                 <div class="history-item-date">${record.timestamp}</div>
                                 <button class="delete-history-btn" onclick="deleteHistoryItem('${type}', ${record.id}, event)" title="删除此记录">删除</button>
                             </div>
                         </div>
-                        <div class="history-item-details" onclick="loadHistoryItem('${type}', ${record.id})" style="cursor: pointer;">
+                        <div class="history-item-details clickable" onclick="loadHistoryItem('${type}', ${record.id})">
                             <div class="history-item-detail">
                                 <div class="history-item-detail-label">输入内容</div>
-                                <div class="history-item-detail-value" title="${escapeHtml(fullInput)}" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${escapeHtml(preview)}${fullInput.length > 100 ? '...' : ''}</div>
+                                <div class="history-item-detail-value ellipsis-text" title="${escapeHtml(fullInput)}">${escapeHtml(preview)}${fullInput.length > 100 ? '...' : ''}</div>
                             </div>
                         </div>
                     </div>
@@ -1091,6 +1417,12 @@
             const record = history.find(r => r.id === recordId);
             
             if (record) {
+                // Protobuf 特殊处理
+                if (type === 'protobuf') {
+                    loadProtobufHistoryItem(record);
+                    return;
+                }
+                
                 const inputElement = document.getElementById(`${type}Input`);
                 if (inputElement) {
                     // 获取完整的输入内容（从完整记录中获取）
@@ -1100,6 +1432,56 @@
                     if (countElement) {
                         countElement.textContent = record.input.length + ' 字符';
                     }
+                    
+                    // 显示输出结果
+                    if (record.output) {
+                        showResult(`${type}Result`, record.output);
+                    }
+                }
+            }
+        }
+        
+        // 加载 Protobuf 历史记录项
+        function loadProtobufHistoryItem(record) {
+            // 判断是编码还是解码操作
+            const isEncode = record.operation.includes('编码');
+            const isDecode = record.operation.includes('解码');
+            
+            if (isEncode) {
+                // 切换到编码标签页
+                switchProtoTab('encode');
+                
+                // 加载 JSON 输入
+                const jsonInput = document.getElementById('protobufJsonInput');
+                if (jsonInput) {
+                    jsonInput.value = record.input;
+                    const countElement = document.getElementById('protobufJsonCount');
+                    if (countElement) {
+                        countElement.textContent = record.input.length + ' 字符';
+                    }
+                }
+                
+                // 显示输出结果
+                if (record.output) {
+                    showResult('protoEncodeResult', record.output);
+                }
+            } else if (isDecode) {
+                // 切换到解码标签页
+                switchProtoTab('decode');
+                
+                // 加载 Protobuf 数据输入
+                const dataInput = document.getElementById('protobufDataInput');
+                if (dataInput) {
+                    dataInput.value = record.input;
+                    const countElement = document.getElementById('protobufDataCount');
+                    if (countElement) {
+                        countElement.textContent = record.input.length + ' 字符';
+                    }
+                }
+                
+                // 显示输出结果
+                if (record.output) {
+                    showResult('protoDecodeResult', record.output);
                 }
             }
         }
@@ -1168,12 +1550,13 @@
             
             navigator.clipboard.writeText(text).then(() => {
                 const originalText = button.textContent;
+                const originalBg = button.style.backgroundColor;
                 button.textContent = '✅ 已复制';
-                button.style.background = '#28a745';
+                button.style.backgroundColor = '#28a745';
                 
                 setTimeout(() => {
                     button.textContent = originalText;
-                    button.style.background = '#667eea';
+                    button.style.backgroundColor = originalBg || '#667eea';
                 }, 2000);
             }).catch(err => {
                 alert('复制失败：' + err);
@@ -1478,6 +1861,366 @@
                 showResult('binaryResult', '转换失败：' + error.message, true);
             }
         }
+
+        // ==================== Protobuf 相关功能 ====================
+        let protoRoot = null;
+        let protoCurrentMessageType = null;
+        const PROTO_CACHE_KEY = 'protobuf_tool_cache';
+
+        // 保存Proto到缓存
+        function saveProtoToCache(protoContent, messageTypes) {
+            try {
+                const cacheData = {
+                    protoContent: protoContent,
+                    messageTypes: messageTypes,
+                    timestamp: new Date().toISOString(),
+                    currentMessageType: messageTypes[0] || null
+                };
+                localStorage.setItem(PROTO_CACHE_KEY, JSON.stringify(cacheData));
+            } catch (error) {
+                console.warn('Proto缓存保存失败:', error);
+            }
+        }
+
+        // 从缓存加载Proto
+        function loadProtoFromCache() {
+            try {
+                const cacheStr = localStorage.getItem(PROTO_CACHE_KEY);
+                if (!cacheStr) return null;
+                return JSON.parse(cacheStr);
+            } catch (error) {
+                console.warn('Proto缓存加载失败:', error);
+                return null;
+            }
+        }
+
+        // 显示Proto缓存状态
+        function showProtoCacheStatus() {
+            const cache = loadProtoFromCache();
+            const statusElement = document.getElementById('protoCacheStatus');
+            const statusText = document.getElementById('protoCacheStatusText');
+            
+            if (cache && cache.protoContent) {
+                const cacheDate = new Date(cache.timestamp);
+                const now = new Date();
+                const diffMinutes = Math.floor((now - cacheDate) / (1000 * 60));
+                
+                let timeText = '';
+                if (diffMinutes < 1) {
+                    timeText = '刚刚';
+                } else if (diffMinutes < 60) {
+                    timeText = diffMinutes + '分钟前';
+                } else if (diffMinutes < 1440) {
+                    timeText = Math.floor(diffMinutes / 60) + '小时前';
+                } else {
+                    timeText = Math.floor(diffMinutes / 1440) + '天前';
+                }
+                
+                statusText.textContent = `已检测到缓存的 Proto 定义（${timeText}），包含 ${cache.messageTypes.length} 个消息类型`;
+                statusElement.classList.remove('hidden');
+            } else {
+                statusElement.classList.add('hidden');
+            }
+        }
+
+        // Proto文件上传处理
+        document.getElementById('protoFile').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                document.getElementById('protoFileName').textContent = file.name;
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    document.getElementById('protobufProtoInput').value = event.target.result;
+                    // 更新字符计数
+                    const countElement = document.getElementById('protobufProtoCount');
+                    if (countElement) {
+                        countElement.textContent = event.target.result.length + ' 字符';
+                    }
+                };
+                reader.readAsText(file);
+            }
+        });
+
+        // 解析Proto文件
+        function parseProto(fromCache = false) {
+            const protoContent = document.getElementById('protobufProtoInput').value.trim();
+            
+            if (!protoContent) {
+                alert('❌ 请输入或上传 Proto 文件内容');
+                return;
+            }
+
+            try {
+                // 使用 protobuf.js 解析 proto 内容
+                protoRoot = protobuf.parse(protoContent).root;
+                
+                // 获取所有消息类型
+                const messageTypes = [];
+                function findMessageTypes(namespace, prefix = '') {
+                    if (namespace.nested) {
+                        for (const [name, nested] of Object.entries(namespace.nested)) {
+                            const fullName = prefix ? `${prefix}.${name}` : name;
+                            if (nested instanceof protobuf.Type) {
+                                messageTypes.push(fullName);
+                            }
+                            if (nested.nested) {
+                                findMessageTypes(nested, fullName);
+                            }
+                        }
+                    }
+                }
+                findMessageTypes(protoRoot);
+
+                if (messageTypes.length === 0) {
+                    alert('❌ 未找到任何消息类型定义');
+                    return;
+                }
+
+                // 填充消息类型下拉框
+                const selectElement = document.getElementById('protoMessageType');
+                selectElement.innerHTML = messageTypes.map(type => 
+                    `<option value="${type}">${type}</option>`
+                ).join('');
+                
+                document.getElementById('protoMessageTypeGroup').classList.remove('hidden');
+                protoCurrentMessageType = messageTypes[0];
+                
+                // 保存到缓存
+                saveProtoToCache(protoContent, messageTypes);
+                
+                // 解析成功后隐藏缓存状态提示
+                if (!fromCache) {
+                    document.getElementById('protoCacheStatus').classList.add('hidden');
+                    // 只在非缓存恢复时显示成功提示
+                    alert(`✅ Proto 文件解析成功！找到 ${messageTypes.length} 个消息类型`);
+                }
+            } catch (error) {
+                alert('❌ Proto 解析失败: ' + error.message);
+                console.error(error);
+            }
+        }
+
+        // 清空Proto
+        function clearProto() {
+            document.getElementById('protobufProtoInput').value = '';
+            document.getElementById('protoFile').value = '';
+            document.getElementById('protoFileName').textContent = '未选择文件';
+            document.getElementById('protoMessageTypeGroup').classList.add('hidden');
+            
+            // 更新字符计数
+            const countElement = document.getElementById('protobufProtoCount');
+            if (countElement) {
+                countElement.textContent = '0 字符';
+            }
+            
+            protoRoot = null;
+            protoCurrentMessageType = null;
+            
+            // 清除缓存
+            localStorage.removeItem(PROTO_CACHE_KEY);
+            
+            // 隐藏缓存状态
+            document.getElementById('protoCacheStatus').classList.add('hidden');
+            
+            alert('✅ 已清空（包括缓存）');
+        }
+
+        // 监听消息类型选择变化
+        document.getElementById('protoMessageType').addEventListener('change', function() {
+            protoCurrentMessageType = this.value;
+        });
+
+        // 切换Proto标签页
+        function switchProtoTab(tab, event) {
+            // 更新标签按钮状态
+            document.querySelectorAll('.proto-tab').forEach(t => t.classList.remove('proto-tab-active'));
+            
+            // 如果有事件对象，高亮点击的按钮
+            if (event && event.target) {
+                event.target.classList.add('proto-tab-active');
+            } else {
+                // 从代码调用时，根据tab名称找到对应的按钮并高亮
+                const buttons = document.querySelectorAll('.proto-tab');
+                if (tab === 'encode' && buttons[0]) {
+                    buttons[0].classList.add('proto-tab-active');
+                } else if (tab === 'decode' && buttons[1]) {
+                    buttons[1].classList.add('proto-tab-active');
+                }
+            }
+            
+            // 更新内容显示
+            document.querySelectorAll('.proto-tab-content').forEach(c => c.classList.remove('active'));
+            document.getElementById('proto' + tab.charAt(0).toUpperCase() + tab.slice(1) + 'Tab').classList.add('active');
+        }
+
+        // Protobuf编码
+        function protobufEncode() {
+            if (!protoRoot || !protoCurrentMessageType) {
+                showResult('protoEncodeResult', '请先解析 Proto 文件', true);
+                return;
+            }
+
+            const jsonInput = document.getElementById('protobufJsonInput').value.trim();
+            if (!jsonInput) {
+                showResult('protoEncodeResult', '请输入 JSON 数据', true);
+                return;
+            }
+
+            try {
+                // 获取当前选择的消息类型
+                const selectedType = document.getElementById('protoMessageType').value;
+                const MessageType = protoRoot.lookupType(selectedType);
+                
+                // 解析 JSON
+                const jsonData = JSON.parse(jsonInput);
+                
+                // 验证消息
+                const errMsg = MessageType.verify(jsonData);
+                if (errMsg) {
+                    throw new Error(errMsg);
+                }
+                
+                // 创建消息
+                const message = MessageType.create(jsonData);
+                
+                // 编码为二进制
+                const buffer = MessageType.encode(message).finish();
+                
+                // 根据选择的格式输出
+                const format = document.querySelector('input[name="protoEncodeFormat"]:checked').value;
+                let result = '';
+                
+                if (format === 'hex') {
+                    result = Array.from(buffer)
+                        .map(b => b.toString(16).padStart(2, '0'))
+                        .join(' ');
+                } else if (format === 'base64') {
+                    result = btoa(String.fromCharCode.apply(null, buffer));
+                } else if (format === 'binary') {
+                    result = Array.from(buffer)
+                        .map(b => b.toString(2).padStart(8, '0'))
+                        .join(' ');
+                }
+                
+                // 添加统计信息
+                result += `\n\n--- 统计信息 ---\n字节数: ${buffer.length}\n格式: ${format.toUpperCase()}\n消息类型: ${selectedType}`;
+                
+                showResult('protoEncodeResult', result);
+                saveHistory('protobuf', `Protobuf 编码 (${selectedType})`, jsonInput, result);
+                
+            } catch (error) {
+                showResult('protoEncodeResult', '编码失败: ' + error.message, true);
+                console.error(error);
+            }
+        }
+
+        // Protobuf解码
+        function protobufDecode() {
+            if (!protoRoot || !protoCurrentMessageType) {
+                showResult('protoDecodeResult', '请先解析 Proto 文件', true);
+                return;
+            }
+
+            const protobufInput = document.getElementById('protobufDataInput').value.trim();
+            if (!protobufInput) {
+                showResult('protoDecodeResult', '请输入 Protobuf 数据', true);
+                return;
+            }
+
+            try {
+                // 获取当前选择的消息类型
+                const selectedType = document.getElementById('protoMessageType').value;
+                const MessageType = protoRoot.lookupType(selectedType);
+                
+                // 根据输入格式解析
+                const format = document.querySelector('input[name="protoDecodeFormat"]:checked').value;
+                let buffer;
+                
+                if (format === 'hex') {
+                    // 移除空格和换行
+                    const hexStr = protobufInput.replace(/\s+/g, '');
+                    buffer = new Uint8Array(hexStr.match(/.{1,2}/g).map(byte => parseInt(byte, 16)));
+                } else if (format === 'base64') {
+                    const binaryString = atob(protobufInput);
+                    buffer = new Uint8Array(binaryString.length);
+                    for (let i = 0; i < binaryString.length; i++) {
+                        buffer[i] = binaryString.charCodeAt(i);
+                    }
+                }
+                
+                // 解码消息
+                const message = MessageType.decode(buffer);
+                
+                // 转换为 JSON，保持类型与 proto 定义一致
+                const jsonResult = MessageType.toObject(message, {
+                    longs: Number,           // int64/uint64 保持为数字类型
+                    enums: String,           // 枚举显示为名称字符串
+                    bytes: String,           // bytes 转为 Base64 字符串（便于阅读）
+                    defaults: true,          // 包含默认值字段
+                    arrays: true,            // 正确处理 repeated 字段
+                    objects: true,           // 正确处理嵌套对象
+                    oneofs: true             // 包含 oneof 字段
+                });
+                
+                const result = JSON.stringify(jsonResult, null, 2);
+                showResult('protoDecodeResult', result);
+                saveHistory('protobuf', `Protobuf 解码 (${selectedType})`, protobufInput, result);
+                
+            } catch (error) {
+                showResult('protoDecodeResult', '解码失败: ' + error.message, true);
+                console.error(error);
+            }
+        }
+
+        // 复制Proto结果
+        function copyProtoResult(elementId) {
+            const container = document.getElementById(elementId);
+            const resultContent = container.querySelector('.result-content');
+            
+            if (!resultContent) {
+                alert('❌ 没有可复制的内容');
+                return;
+            }
+            
+            const text = resultContent.textContent;
+            
+            navigator.clipboard.writeText(text).then(() => {
+                alert('✅ 已复制到剪贴板');
+            }).catch(err => {
+                alert('❌ 复制失败: ' + err.message);
+            });
+        }
+
+        // 当切换到Protobuf标签时，加载缓存和历史记录
+        const originalSwitchTab = switchTab;
+        switchTab = function(tabName) {
+            originalSwitchTab(tabName);
+            
+            if (tabName === 'protobuf') {
+                // 显示缓存状态
+                showProtoCacheStatus();
+                
+                // 尝试从缓存恢复
+                const cache = loadProtoFromCache();
+                if (cache && cache.protoContent && !protoRoot) {
+                    document.getElementById('protobufProtoInput').value = cache.protoContent;
+                    
+                    // 更新字符计数
+                    const countElement = document.getElementById('protobufProtoCount');
+                    if (countElement) {
+                        countElement.textContent = cache.protoContent.length + ' 字符';
+                    }
+                    
+                    // 自动解析缓存的proto
+                    setTimeout(() => {
+                        parseProto(true);
+                    }, 100);
+                }
+                
+                // 加载历史记录
+                loadHistory('protobuf');
+            }
+        };
     </script>
 </body>
 </html>

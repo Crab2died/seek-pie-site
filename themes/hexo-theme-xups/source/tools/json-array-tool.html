@@ -3,7 +3,42 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>JSON数组展示工具</title>
+    <title>JSON数组展示工具 - 在线JSON数据表格展示、列管理、导出</title>
+    
+    <!-- SEO Meta Tags -->
+    <meta name="description" content="免费在线JSON数组展示工具，支持JSON数据解析、表格展示、列管理、数据搜索、排序和导出功能。可视化展示JSON数组数据，操作简单高效。">
+    <meta name="keywords" content="JSON工具,JSON数组,JSON表格,JSON展示,JSON解析,JSON导出,数据可视化">
+    <meta name="author" content="多功能工具箱">
+    <meta name="robots" content="index, follow">
+    <meta name="language" content="zh-CN">
+    <!-- Canonical URL -->
+    <link rel="canonical" href="https://www.seekpie.com/tools/json-array-tool.html">
+    
+    <!-- Structured Data (JSON-LD) -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "JSON数组展示工具",
+      "description": "免费在线JSON数组展示工具，支持数据解析、表格展示、列管理和导出",
+      "url": "https://www.seekpie.com/tools/json-array-tool.html",
+      "applicationCategory": "DeveloperApplication",
+      "operatingSystem": "All",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "CNY"
+      },
+      "featureList": [
+        "JSON数组解析",
+        "表格展示",
+        "列管理",
+        "数据搜索",
+        "排序功能",
+        "数据导出"
+      ]
+    }
+    </script>
     <style>
         * {
             margin: 0;
@@ -515,6 +550,403 @@
             color: white;
             border-color: #4facfe;
         }
+        
+        /* 列过滤设置样式 */
+        .column-filter-options {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+            margin-bottom: 10px;
+        }
+        
+        .column-filter-option {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            margin: 0;
+            cursor: pointer;
+            padding: 6px 12px;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+        }
+        
+        .column-filter-option:hover {
+            background: #f0f8ff;
+        }
+        
+        .column-filter-option input[type="radio"] {
+            cursor: pointer;
+            width: 18px;
+            height: 18px;
+            accent-color: #4facfe;
+        }
+        
+        .column-filter-option span {
+            font-weight: 500;
+            color: #495057;
+            user-select: none;
+        }
+        
+        #columnFilterInput:focus {
+            outline: none;
+            border-color: #4facfe;
+            box-shadow: 0 0 0 3px rgba(79, 172, 254, 0.1);
+        }
+        
+        #columnFilterInput:disabled {
+            background-color: #e9ecef;
+            cursor: not-allowed;
+        }
+        
+        /* 标签输入容器 */
+        .tags-input-container {
+            width: 100%;
+            min-height: 44px;
+            padding: 6px;
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            background: white;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            align-items: center;
+            cursor: text;
+            transition: border-color 0.3s ease;
+        }
+        
+        .tags-input-container:focus-within {
+            border-color: #4facfe;
+            box-shadow: 0 0 0 3px rgba(79, 172, 254, 0.1);
+        }
+        
+        .tags-input-container.disabled {
+            background-color: #e9ecef;
+            cursor: not-allowed;
+        }
+        
+        /* 标签样式 */
+        .column-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 10px;
+            background: linear-gradient(135deg, #17a2b8 0%, #5ce1e6 100%);
+            color: white;
+            border-radius: 16px;
+            font-size: 0.9em;
+            font-weight: 500;
+            animation: tagFadeIn 0.2s ease;
+        }
+        
+        @keyframes tagFadeIn {
+            from {
+                opacity: 0;
+                transform: scale(0.8);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+        
+        .column-tag-text {
+            user-select: none;
+            max-width: 150px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        
+        .column-tag-remove {
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            transition: all 0.2s ease;
+            font-size: 14px;
+            line-height: 1;
+        }
+        
+        .column-tag-remove:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.1);
+        }
+        
+        /* 标签输入框 */
+        .tags-input-field {
+            flex: 1;
+            min-width: 120px;
+            border: none;
+            outline: none;
+            padding: 4px;
+            font-size: 14px;
+        }
+        
+        .tags-input-field:disabled {
+            background: transparent;
+            cursor: not-allowed;
+        }
+        
+        /* 标签占位符 */
+        .tags-placeholder {
+            color: #6c757d;
+            font-size: 14px;
+            pointer-events: none;
+            user-select: none;
+        }
+        
+        /* 内容过滤器标签 */
+        .filter-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 12px;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            border-radius: 20px;
+            font-size: 0.9em;
+            font-weight: 500;
+            animation: tagFadeIn 0.2s ease;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        .filter-tag-content {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+        
+        .filter-tag-column {
+            font-weight: 600;
+            font-size: 0.95em;
+        }
+        
+        .filter-tag-condition {
+            font-size: 0.85em;
+            opacity: 0.9;
+        }
+        
+        .filter-tag-remove {
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            transition: all 0.2s ease;
+            font-size: 16px;
+            line-height: 1;
+            flex-shrink: 0;
+        }
+        
+        .filter-tag-remove:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.1);
+        }
+        
+        /* 列内容过滤区域样式 */
+        .content-filter-section {
+            background: #fff9e6;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #ffe4a3;
+            margin-bottom: 15px;
+        }
+        
+        .content-filter-header {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            width: 100%;
+        }
+        
+        .content-filter-title {
+            color: #495057;
+        }
+        
+        .content-filter-subtitle {
+            font-size: 0.85em;
+            color: #6c757d;
+            margin-left: 10px;
+        }
+        
+        .filter-logic-selector {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: white;
+            padding: 5px 12px;
+            border-radius: 20px;
+            border: 2px solid #ffe4a3;
+        }
+        
+        .filter-logic-label {
+            font-size: 0.85em;
+            color: #495057;
+            font-weight: 500;
+        }
+        
+        .filter-logic-option {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            cursor: pointer;
+            margin: 0;
+        }
+        
+        .filter-logic-radio {
+            cursor: pointer;
+            accent-color: #f5576c;
+        }
+        
+        .filter-logic-text {
+            font-size: 0.9em;
+            color: #495057;
+            font-weight: 500;
+        }
+        
+        .clear-all-filters-btn {
+            padding: 6px 14px;
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+            color: white;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.85em;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        .clear-all-filters-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+        
+        .filter-input-row {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            align-items: center;
+            padding: 10px;
+            background: white;
+            border-radius: 6px;
+            border: 2px dashed #dee2e6;
+            transition: all 0.3s ease;
+        }
+        
+        .filter-input-row:hover {
+            border-color: #4facfe;
+        }
+        
+        .filter-input-field {
+            flex: 1;
+            min-width: 150px;
+        }
+        
+        .filter-condition-field {
+            min-width: 130px;
+        }
+        
+        .filter-input {
+            width: 100%;
+            padding: 8px;
+            border: 2px solid #dee2e6;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+        
+        .filter-input:focus {
+            outline: none;
+            border-color: #4facfe;
+            box-shadow: 0 0 0 3px rgba(79, 172, 254, 0.1);
+        }
+        
+        .filter-select {
+            width: 100%;
+            padding: 8px;
+            border: 2px solid #dee2e6;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+        
+        .filter-add-btn {
+            padding: 8px 16px;
+            white-space: nowrap;
+        }
+        
+        /* 动态过滤器行样式 */
+        .filter-row {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            align-items: center;
+            /* margin-bottom: 8px; */
+            padding: 10px;
+            background: white;
+            border-radius: 6px;
+            border: 2px solid #dee2e6;
+            transition: all 0.3s ease;
+        }
+        
+        .filter-row:hover {
+            border-color: #4facfe;
+        }
+        
+        .filter-row-field {
+            flex: 1;
+            min-width: 150px;
+        }
+        
+        .filter-row-condition {
+            min-width: 130px;
+        }
+        
+        .filter-row-input {
+            width: 100%;
+            padding: 8px;
+            border: 2px solid #dee2e6;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+        
+        .filter-row-input:disabled {
+            background: #e9ecef;
+        }
+        
+        .filter-row-select {
+            width: 100%;
+            padding: 8px;
+            border: 2px solid #dee2e6;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+        
+        .filter-row-delete-btn {
+            padding: 8px 16px;
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+        }
+        
+        .filter-row-delete-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
 
         .column-toggle > span:not(.drag-handle) {
             overflow: hidden;
@@ -973,6 +1405,123 @@
                 padding: 6px 10px;
                 font-size: 0.85em;
             }
+            
+            .column-filter-options {
+                gap: 10px;
+            }
+            
+            .column-filter-option {
+                padding: 5px 10px;
+                font-size: 0.9em;
+            }
+            
+            .column-filter-option input[type="radio"] {
+                width: 16px;
+                height: 16px;
+            }
+            
+            /* 移动端优化列过滤设置栏 */
+            .input-group > div:first-child {
+                flex-direction: column;
+                align-items: flex-start !important;
+                gap: 8px;
+            }
+            
+            /* 列内容过滤区域 */
+            .content-filter-header {
+                flex-direction: column;
+                align-items: flex-start !important;
+                gap: 12px;
+            }
+            
+            .filter-logic-selector {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+            
+            .filter-logic-option {
+                width: 100%;
+                justify-content: flex-start;
+            }
+            
+            .clear-all-filters-btn {
+                width: 100%;
+                justify-content: center;
+                padding: 10px;
+            }
+            
+            .filter-input-row {
+                flex-direction: column !important;
+                gap: 10px;
+                padding: 12px;
+            }
+            
+            .filter-input-field,
+            .filter-condition-field {
+                width: 100% !important;
+                min-width: auto !important;
+            }
+            
+            .filter-input,
+            .filter-select {
+                width: 100%;
+                font-size: 14px;
+            }
+            
+            .filter-add-btn {
+                width: 100%;
+                padding: 12px;
+                font-size: 14px;
+            }
+            
+            .filter-row {
+                flex-direction: column !important;
+                gap: 10px;
+                padding: 12px;
+            }
+            
+            .filter-row-field,
+            .filter-row-condition {
+                width: 100% !important;
+            }
+            
+            .filter-row-input,
+            .filter-row-select {
+                width: 100%;
+                font-size: 14px;
+            }
+            
+            .filter-row-delete-btn {
+                width: 100%;
+                padding: 10px;
+                font-size: 14px;
+            }
+            
+            /* 表格优化 */
+            .table-wrapper {
+                max-height: 500px;
+            }
+            
+            th {
+                position: sticky;
+                white-space: normal;
+                word-wrap: break-word;
+                min-width: 80px;
+            }
+            
+            td {
+                white-space: normal;
+                word-wrap: break-word;
+            }
+            
+            /* 消息提示优化 */
+            .error-message,
+            .success-message {
+                padding: 12px;
+                font-size: 14px;
+                margin: 15px 0;
+            }
         }
 
         /* 小屏手机优化 */
@@ -1127,6 +1676,136 @@
                 padding: 3px 6px;
                 font-size: 0.75em;
             }
+            
+            .column-filter-options {
+                gap: 8px;
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .column-filter-option {
+                padding: 4px 8px;
+                font-size: 0.85em;
+                width: 100%;
+            }
+            
+            .column-filter-option input[type="radio"] {
+                width: 14px;
+                height: 14px;
+            }
+            
+            /* 标签样式调整 */
+            .column-tag {
+                font-size: 0.85em;
+                padding: 3px 8px;
+            }
+            
+            .column-tag-text {
+                max-width: 100px;
+            }
+            
+            .column-tag-remove {
+                width: 16px;
+                height: 16px;
+                font-size: 12px;
+            }
+            
+            .tags-input-container {
+                min-height: 38px;
+                padding: 5px;
+                gap: 5px;
+            }
+            
+            .tags-input-field {
+                min-width: 100px;
+                font-size: 13px;
+            }
+            
+            /* 内容过滤器样式调整 */
+            .filter-tag {
+                font-size: 0.85em;
+                padding: 5px 10px;
+            }
+            
+            .filter-tag-column {
+                font-size: 0.9em;
+            }
+            
+            .filter-tag-condition {
+                font-size: 0.8em;
+            }
+            
+            .filter-tag-remove {
+                width: 18px;
+                height: 18px;
+                font-size: 14px;
+            }
+            
+            /* 列内容过滤区域 - 小屏优化 */
+            .content-filter-title {
+                font-size: 1em;
+            }
+            
+            .filter-logic-selector {
+                width: 100%;
+            }
+            
+            .filter-logic-label {
+                font-size: 0.85em;
+            }
+            
+            .filter-logic-text {
+                font-size: 0.85em;
+            }
+            
+            .clear-all-filters-btn {
+                font-size: 13px;
+                padding: 8px;
+            }
+            
+            .filter-input,
+            .filter-select {
+                font-size: 13px;
+                padding: 8px;
+            }
+            
+            .filter-add-btn {
+                font-size: 13px;
+                padding: 10px;
+            }
+            
+            .filter-row,
+            .filter-input-row {
+                padding: 10px;
+            }
+            
+            .filter-row-input,
+            .filter-row-select {
+                font-size: 13px;
+                padding: 8px;
+            }
+            
+            .filter-row-delete-btn {
+                font-size: 13px;
+                padding: 8px;
+            }
+            
+            /* 表格优化 */
+            .table-wrapper {
+                max-height: 400px;
+            }
+            
+            th, td {
+                min-width: 70px;
+            }
+            
+            /* 消息提示优化 */
+            .error-message,
+            .success-message {
+                padding: 10px;
+                font-size: 13px;
+                margin: 12px 0;
+            }
         }
 
         /* 超小屏手机 */
@@ -1168,6 +1847,104 @@
                 padding: 5px 8px;
                 font-size: 0.75em;
             }
+            
+            /* 列内容过滤区域 - 超小屏优化 */
+            .content-filter-title {
+                font-size: 0.95em;
+            }
+            
+            .filter-logic-label {
+                font-size: 0.8em;
+            }
+            
+            .filter-logic-text {
+                font-size: 0.8em;
+            }
+            
+            .clear-all-filters-btn {
+                font-size: 12px;
+                padding: 6px;
+            }
+            
+            .filter-input,
+            .filter-select,
+            .filter-row-input,
+            .filter-row-select {
+                font-size: 12px;
+                padding: 6px;
+            }
+            
+            .filter-add-btn {
+                font-size: 12px;
+                padding: 8px;
+            }
+            
+            .filter-row,
+            .filter-input-row {
+                padding: 8px;
+                gap: 8px;
+            }
+            
+            .filter-row-delete-btn {
+                font-size: 12px;
+                padding: 6px;
+            }
+            
+            /* 表格优化 */
+            .table-wrapper {
+                max-height: 350px;
+            }
+            
+            th, td {
+                min-width: 60px;
+            }
+            
+            /* 消息提示优化 */
+            .error-message,
+            .success-message {
+                padding: 8px;
+                font-size: 12px;
+                margin: 10px 0;
+            }
+        }
+        
+        /* 表格横向滚动优化 */
+        .data-table-container {
+            -webkit-overflow-scrolling: touch;
+        }
+        
+        /* 触摸优化 */
+        @media (hover: none) and (pointer: coarse) {
+            .btn,
+            .pagination button,
+            .column-toggle,
+            .filter-add-btn,
+            .filter-row-delete-btn,
+            .clear-all-filters-btn {
+                min-height: 44px;
+                touch-action: manipulation;
+            }
+            
+            .filter-input,
+            .filter-select,
+            .filter-row-input,
+            .filter-row-select {
+                min-height: 44px;
+                font-size: 16px; /* 防止 iOS Safari 自动缩放 */
+            }
+            
+            input[type="text"],
+            input[type="search"],
+            textarea,
+            select {
+                font-size: 16px; /* 防止 iOS Safari 自动缩放 */
+            }
+            
+            .column-tag-remove,
+            .filter-tag-remove {
+                min-width: 32px;
+                min-height: 32px;
+            }
         }
     </style>
 </head>
@@ -1187,6 +1964,53 @@
                     <label for="jsonInput">请输入JSON数组数据：</label>
                     <textarea id="jsonInput" placeholder='例如：[{"id": 1, "name": "张三", "age": 25, "city": "北京"}, {"id": 2, "name": "李四", "age": 30, "city": "上海"}]'></textarea>
                 </div>
+                
+                <!-- 列过滤设置 -->
+                <div class="input-group" style="margin-top: 15px; background: #f0f7ff; padding: 15px; border-radius: 8px; border: 1px solid #d0e7ff; position: relative;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                        <label style="margin: 0; font-weight: 600; color: #495057;">🎯 列过滤设置</label>
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <span style="font-size: 0.8em; color: #6c757d; background: white; padding: 4px 8px; border-radius: 4px; border: 1px solid #d0e7ff;">
+                                💾 设置自动保存
+                            </span>
+                            <button onclick="resetColumnFilterSettings()" 
+                                    style="font-size: 0.8em; padding: 4px 10px; border: 1px solid #dee2e6; background: white; border-radius: 4px; cursor: pointer; color: #6c757d; transition: all 0.3s ease;"
+                                    onmouseover="this.style.background='#f8f9fa'; this.style.borderColor='#4facfe'"
+                                    onmouseout="this.style.background='white'; this.style.borderColor='#dee2e6'"
+                                    title="重置为默认设置">
+                                🔄 重置
+                            </button>
+                        </div>
+                    </div>
+                    <div class="column-filter-options">
+                        <label class="column-filter-option">
+                            <input type="radio" name="columnFilterMode" value="all" checked onchange="updateColumnFilterUI()">
+                            <span>显示所有列</span>
+                        </label>
+                        <label class="column-filter-option">
+                            <input type="radio" name="columnFilterMode" value="include" onchange="updateColumnFilterUI()">
+                            <span>仅显示指定列</span>
+                        </label>
+                        <label class="column-filter-option">
+                            <input type="radio" name="columnFilterMode" value="exclude" onchange="updateColumnFilterUI()">
+                            <span>忽略指定列</span>
+                        </label>
+                    </div>
+                    <!-- 标签输入容器 -->
+                    <div id="tagsInputContainer" class="tags-input-container disabled" style="display: none;" onclick="focusTagsInput()">
+                        <!-- 标签将动态添加到这里 -->
+                        <input type="text" 
+                               id="columnFilterInput" 
+                               class="tags-input-field"
+                               placeholder="输入列名后按回车添加，例如：id"
+                               disabled
+                               autocomplete="off">
+                    </div>
+                    <div style="font-size: 0.85em; color: #6c757d; margin-top: 5px; display: none;" id="columnFilterHint">
+                        💡 提示：输入列名后按 <kbd style="padding: 2px 6px; background: #f0f0f0; border: 1px solid #ccc; border-radius: 3px; font-size: 0.9em;">Enter</kbd> 添加标签，点击 ✕ 删除
+                    </div>
+                </div>
+                
                 <div class="button-group">
                     <button class="btn btn-parse" onclick="parseAndDisplay()">
                         <span>📊</span> 解析并展示
@@ -1223,6 +2047,64 @@
             </div>
 
             <div id="controlsSection" class="controls-section" style="display: none;">
+                <!-- 列内容过滤区域 -->
+                <div class="controls-row content-filter-section" id="contentFilterSection">
+                    <!-- 标题和操作栏 -->
+                    <div class="content-filter-header">
+                        <div>
+                            <strong class="content-filter-title">🔍 列内容过滤</strong>
+                        </div>
+                        <div class="filter-logic-selector">
+                            <span class="filter-logic-label">多条件逻辑：</span>
+                            <label class="filter-logic-option">
+                                <input type="radio" name="filterLogic" value="AND" checked onchange="applyContentFiltersAndDisplay()" class="filter-logic-radio">
+                                <span class="filter-logic-text">AND (且)</span>
+                            </label>
+                            <label class="filter-logic-option">
+                                <input type="radio" name="filterLogic" value="OR" onchange="applyContentFiltersAndDisplay()" class="filter-logic-radio">
+                                <span class="filter-logic-text">OR (或)</span>
+                            </label>
+                        </div>
+                        <button onclick="clearAllContentFilters()" id="clearAllFiltersBtn" class="clear-all-filters-btn" style="display: none;">
+                            🗑️ 清除所有
+                        </button>
+                    </div>
+                    
+                    <!-- 过滤器行将在这里动态生成 -->
+                    
+                    <!-- 添加新过滤器的输入行 -->
+                    <div class="filter-input-row">
+                        <div class="filter-input-field">
+                            <input type="text" id="filterColumnName" 
+                                   placeholder="输入列名" 
+                                   list="availableColumns"
+                                   class="filter-input">
+                            <datalist id="availableColumns"></datalist>
+                        </div>
+                        <div class="filter-condition-field">
+                            <select id="filterCondition" class="filter-select">
+                                <option value="contains">包含</option>
+                                <option value="equals">等于</option>
+                                <option value="notEquals">不等于</option>
+                                <option value="startsWith">开头是</option>
+                                <option value="endsWith">结尾是</option>
+                                <option value="greaterThan">大于</option>
+                                <option value="lessThan">小于</option>
+                                <option value="isEmpty">为空</option>
+                                <option value="notEmpty">不为空</option>
+                            </select>
+                        </div>
+                        <div class="filter-input-field">
+                            <input type="text" id="filterValue" 
+                                   placeholder="输入过滤值" 
+                                   list="availableValues"
+                                   class="filter-input">
+                            <datalist id="availableValues"></datalist>
+                        </div>
+                        <button class="btn btn-parse filter-add-btn" onclick="addContentFilter()">添加</button>
+                    </div>
+                </div>
+                
                 <div class="controls-row" id="columnControlsRow" style="display: none;">
                     <div class="column-controls" id="columnControls">
                         <!-- 列控制按钮将在这里动态生成 -->
@@ -1292,6 +2174,531 @@
         let visibleColumns = [];
         let columnOrder = [];
         let prettyPrintJSON = false; // 是否美化JSON对象显示
+        let columnTags = []; // 存储当前的列标签
+        let contentFilters = []; // 存储列内容过滤器: [{column, condition, value}, ...]
+        
+        // 列过滤设置
+        function updateColumnFilterUI() {
+            const filterMode = document.querySelector('input[name="columnFilterMode"]:checked').value;
+            const filterInput = document.getElementById('columnFilterInput');
+            const filterHint = document.getElementById('columnFilterHint');
+            const tagsContainer = document.getElementById('tagsInputContainer');
+            
+            if (filterMode === 'all') {
+                tagsContainer.style.display = 'none';
+                tagsContainer.classList.add('disabled');
+                filterInput.disabled = true;
+                filterHint.style.display = 'none';
+            } else {
+                tagsContainer.style.display = 'flex';
+                tagsContainer.classList.remove('disabled');
+                filterInput.disabled = false;
+                filterHint.style.display = 'block';
+                
+                if (filterMode === 'include') {
+                    filterInput.placeholder = columnTags.length > 0 ? '继续添加...' : '输入要显示的列名后按回车';
+                    filterHint.innerHTML = '💡 提示：输入列名后按 <kbd style="padding: 2px 6px; background: #f0f0f0; border: 1px solid #ccc; border-radius: 3px; font-size: 0.9em;">Enter</kbd> 添加标签，支持带空格的列名。多个列名用逗号或分号分隔';
+                } else if (filterMode === 'exclude') {
+                    filterInput.placeholder = columnTags.length > 0 ? '继续添加...' : '输入要隐藏的列名后按回车';
+                    filterHint.innerHTML = '💡 提示：输入列名后按 <kbd style="padding: 2px 6px; background: #f0f0f0; border: 1px solid #ccc; border-radius: 3px; font-size: 0.9em;">Enter</kbd> 添加标签，支持带空格的列名。多个列名用逗号或分号分隔';
+                }
+            }
+            
+            // 保存设置到缓存
+            saveColumnFilterSettings();
+        }
+        
+        // 聚焦到标签输入框
+        function focusTagsInput() {
+            const filterInput = document.getElementById('columnFilterInput');
+            if (filterInput && !filterInput.disabled) {
+                filterInput.focus();
+            }
+        }
+        
+        // 添加列标签
+        function addColumnTag(columnName) {
+            // 清理输入
+            columnName = columnName.trim();
+            if (!columnName) return;
+            
+            // 检查是否已存在
+            if (columnTags.includes(columnName)) {
+                showMessage(`列 "${columnName}" 已存在`, 'error');
+                return;
+            }
+            
+            // 添加到数组
+            columnTags.push(columnName);
+            
+            // 渲染标签
+            renderColumnTags();
+            
+            // 清空输入框
+            const filterInput = document.getElementById('columnFilterInput');
+            filterInput.value = '';
+            
+            // 更新占位符
+            updateColumnFilterUI();
+            
+            // 保存设置
+            saveColumnFilterSettings();
+        }
+        
+        // 删除列标签
+        function removeColumnTag(columnName) {
+            const index = columnTags.indexOf(columnName);
+            if (index > -1) {
+                columnTags.splice(index, 1);
+                renderColumnTags();
+                updateColumnFilterUI();
+                saveColumnFilterSettings();
+            }
+        }
+        
+        // 渲染所有标签
+        function renderColumnTags() {
+            const tagsContainer = document.getElementById('tagsInputContainer');
+            const filterInput = document.getElementById('columnFilterInput');
+            
+            // 清除现有标签
+            const existingTags = tagsContainer.querySelectorAll('.column-tag');
+            existingTags.forEach(tag => tag.remove());
+            
+            // 创建新标签
+            columnTags.forEach(columnName => {
+                const tag = document.createElement('div');
+                tag.className = 'column-tag';
+                tag.innerHTML = `
+                    <span class="column-tag-text" title="${columnName}">${columnName}</span>
+                    <span class="column-tag-remove" onclick="removeColumnTag('${columnName}')" title="删除">✕</span>
+                `;
+                
+                // 在输入框前插入
+                tagsContainer.insertBefore(tag, filterInput);
+            });
+        }
+        
+        // 初始化标签输入事件
+        function initializeTagsInput() {
+            const filterInput = document.getElementById('columnFilterInput');
+            
+            filterInput.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    const value = this.value.trim();
+                    if (value) {
+                        // 支持逗号和分号分隔的多个列名（保留空格以支持带空格的列名）
+                        const columns = value.split(/[,，;；]+/).filter(col => col.trim());
+                        columns.forEach(col => addColumnTag(col.trim()));
+                    }
+                } else if (e.key === 'Backspace' && this.value === '' && columnTags.length > 0) {
+                    // 删除最后一个标签
+                    e.preventDefault();
+                    removeColumnTag(columnTags[columnTags.length - 1]);
+                }
+            });
+            
+            // 失焦时处理输入
+            filterInput.addEventListener('blur', function() {
+                const value = this.value.trim();
+                if (value) {
+                    // 支持逗号和分号分隔的多个列名（保留空格以支持带空格的列名）
+                    const columns = value.split(/[,，;；]+/).filter(col => col.trim());
+                    columns.forEach(col => addColumnTag(col.trim()));
+                }
+            });
+        }
+        
+        // 列内容过滤相关函数
+        
+        // 添加内容过滤器
+        function addContentFilter() {
+            const columnName = document.getElementById('filterColumnName').value.trim();
+            const condition = document.getElementById('filterCondition').value;
+            const value = document.getElementById('filterValue').value.trim();
+            
+            if (!columnName) {
+                showMessage('请输入列名', 'error');
+                return;
+            }
+            
+            // 检查列是否存在
+            if (!columnOrder.includes(columnName)) {
+                showMessage(`列 "${columnName}" 不存在`, 'error');
+                return;
+            }
+            
+            // 某些条件不需要值
+            if (!['isEmpty', 'notEmpty'].includes(condition) && !value) {
+                showMessage('请输入过滤值', 'error');
+                return;
+            }
+            
+            // 添加到过滤器数组
+            const filter = {
+                id: Date.now(),
+                column: columnName,
+                condition: condition,
+                value: value
+            };
+            
+            contentFilters.push(filter);
+            
+            // 清空输入
+            document.getElementById('filterColumnName').value = '';
+            document.getElementById('filterValue').value = '';
+            
+            // 渲染过滤器标签
+            renderContentFilters();
+            
+            // 重新应用过滤并显示数据
+            applyContentFiltersAndDisplay();
+            
+            showMessage(`已添加过滤器：${columnName}`, 'success');
+        }
+        
+        // 删除内容过滤器
+        function removeContentFilter(filterId) {
+            contentFilters = contentFilters.filter(f => f.id !== filterId);
+            renderContentFilters();
+            applyContentFiltersAndDisplay();
+            showMessage('过滤器已删除', 'success');
+        }
+        
+        // 清除所有内容过滤器
+        function clearAllContentFilters() {
+            if (contentFilters.length === 0) {
+                showMessage('当前没有活动的过滤器', 'error');
+                return;
+            }
+            
+            const count = contentFilters.length;
+            contentFilters = [];
+            renderContentFilters();
+            applyContentFiltersAndDisplay();
+            showMessage(`已清除所有 ${count} 个过滤器`, 'success');
+        }
+        
+        // 更新过滤器列名
+        function updateFilterColumn(filterId, newColumn) {
+            const filter = contentFilters.find(f => f.id === filterId);
+            if (filter) {
+                filter.column = newColumn.trim();
+                applyContentFiltersAndDisplay();
+            }
+        }
+        
+        // 更新过滤器列名并更新可用值列表
+        function updateFilterColumnAndValues(filterId, newColumn) {
+            const filter = contentFilters.find(f => f.id === filterId);
+            if (filter) {
+                filter.column = newColumn.trim();
+                // 更新该过滤器的可用值列表
+                updateAvailableValuesForFilter(filterId, filter.column);
+                applyContentFiltersAndDisplay();
+            }
+        }
+        
+        // 为特定过滤器更新可用值推荐列表
+        function updateAvailableValuesForFilter(filterId, columnName) {
+            const datalist = document.getElementById(`availableValues_${filterId}`);
+            
+            // 如果 datalist 不存在，直接返回
+            if (!datalist) {
+                return;
+            }
+            
+            // 清空现有选项
+            datalist.innerHTML = '';
+            
+            // 如果列名为空或数据为空，不提供推荐
+            if (!columnName || !currentData || currentData.length === 0) {
+                return;
+            }
+            
+            // 收集该列的所有唯一值
+            const uniqueValues = new Set();
+            currentData.forEach(row => {
+                const value = row[columnName];
+                // 排除 null、undefined 和空字符串
+                if (value !== null && value !== undefined && value !== '') {
+                    uniqueValues.add(String(value));
+                }
+            });
+            
+            // 如果唯一值太多（超过100个），只显示前100个
+            const valuesToShow = Array.from(uniqueValues).sort().slice(0, 100);
+            
+            // 添加到 datalist
+            valuesToShow.forEach(value => {
+                const option = document.createElement('option');
+                option.value = value;
+                datalist.appendChild(option);
+            });
+        }
+        
+        // 更新过滤器条件
+        function updateFilterCondition(filterId, newCondition) {
+            const filter = contentFilters.find(f => f.id === filterId);
+            if (filter) {
+                filter.condition = newCondition;
+                // 如果是isEmpty或notEmpty，清空值
+                if (['isEmpty', 'notEmpty'].includes(newCondition)) {
+                    filter.value = '';
+                }
+                renderContentFilters();
+                applyContentFiltersAndDisplay();
+            }
+        }
+        
+        // 更新过滤器值
+        function updateFilterValue(filterId, newValue) {
+            const filter = contentFilters.find(f => f.id === filterId);
+            if (filter) {
+                filter.value = newValue.trim();
+                applyContentFiltersAndDisplay();
+            }
+        }
+        
+        // 渲染内容过滤器行
+        function renderContentFilters() {
+            const section = document.getElementById('contentFilterSection');
+            const clearBtn = document.getElementById('clearAllFiltersBtn');
+            
+            // 显示或隐藏清除按钮
+            if (clearBtn) {
+                clearBtn.style.display = contentFilters.length > 0 ? 'inline-block' : 'none';
+            }
+            
+            // 移除所有现有的过滤器行（保留标题和添加输入行）
+            const existingFilters = section.querySelectorAll('.filter-row');
+            existingFilters.forEach(el => el.remove());
+            
+            if (contentFilters.length === 0) {
+                return;
+            }
+            
+            // 找到添加输入行
+            const addInputRow = section.lastElementChild;
+            
+            contentFilters.forEach((filter, index) => {
+                // 创建过滤器行
+                const filterRow = document.createElement('div');
+                filterRow.className = 'filter-row';
+                
+                filterRow.innerHTML = `
+                    <div class="filter-row-field">
+                        <input type="text" 
+                               value="${filter.column}" 
+                               oninput="updateFilterColumnAndValues(${filter.id}, this.value)"
+                               list="availableColumns"
+                               class="filter-row-input">
+                    </div>
+                    <div class="filter-row-condition">
+                        <select onchange="updateFilterCondition(${filter.id}, this.value)" class="filter-row-select">
+                            <option value="contains" ${filter.condition === 'contains' ? 'selected' : ''}>包含</option>
+                            <option value="equals" ${filter.condition === 'equals' ? 'selected' : ''}>等于</option>
+                            <option value="notEquals" ${filter.condition === 'notEquals' ? 'selected' : ''}>不等于</option>
+                            <option value="startsWith" ${filter.condition === 'startsWith' ? 'selected' : ''}>开头是</option>
+                            <option value="endsWith" ${filter.condition === 'endsWith' ? 'selected' : ''}>结尾是</option>
+                            <option value="greaterThan" ${filter.condition === 'greaterThan' ? 'selected' : ''}>大于</option>
+                            <option value="lessThan" ${filter.condition === 'lessThan' ? 'selected' : ''}>小于</option>
+                            <option value="isEmpty" ${filter.condition === 'isEmpty' ? 'selected' : ''}>为空</option>
+                            <option value="notEmpty" ${filter.condition === 'notEmpty' ? 'selected' : ''}>不为空</option>
+                        </select>
+                    </div>
+                    <div class="filter-row-field">
+                        <input type="text" 
+                               value="${filter.value || ''}" 
+                               onchange="updateFilterValue(${filter.id}, this.value)"
+                               placeholder="输入过滤值"
+                               list="availableValues_${filter.id}"
+                               class="filter-row-input"
+                               ${['isEmpty', 'notEmpty'].includes(filter.condition) ? 'disabled' : ''}>
+                        <datalist id="availableValues_${filter.id}"></datalist>
+                    </div>
+                    <button onclick="removeContentFilter(${filter.id})" 
+                            class="filter-row-delete-btn"
+                            title="删除此过滤条件">删除</button>`;
+                
+                section.insertBefore(filterRow, addInputRow);
+                
+                // 初始化该过滤器行的可用值列表
+                updateAvailableValuesForFilter(filter.id, filter.column);
+            });
+        }
+        
+        // 获取条件文本
+        function getConditionText(condition) {
+            const conditionMap = {
+                'contains': '包含',
+                'equals': '等于',
+                'notEquals': '不等于',
+                'startsWith': '开头是',
+                'endsWith': '结尾是',
+                'greaterThan': '大于',
+                'lessThan': '小于',
+                'isEmpty': '为空',
+                'notEmpty': '不为空'
+            };
+            return conditionMap[condition] || condition;
+        }
+        
+        // 应用内容过滤并显示数据
+        function applyContentFiltersAndDisplay() {
+            if (contentFilters.length === 0) {
+                filteredData = [];
+            } else {
+                const filterLogic = document.querySelector('input[name="filterLogic"]:checked')?.value || 'AND';
+                
+                filteredData = currentData.filter(row => {
+                    if (filterLogic === 'AND') {
+                        // AND关系：所有过滤器都必须满足
+                        return contentFilters.every(filter => {
+                            return matchFilter(row, filter);
+                        });
+                    } else {
+                        // OR关系：至少一个过滤器满足
+                        return contentFilters.some(filter => {
+                            return matchFilter(row, filter);
+                        });
+                    }
+                });
+            }
+            
+            currentPage = 1; // 重置到第一页
+            displayData();
+        }
+        
+        // 检查行是否匹配过滤器
+        function matchFilter(row, filter) {
+            const cellValue = row[filter.column];
+            const filterValue = filter.value;
+            
+            // 处理null/undefined
+            if (cellValue === null || cellValue === undefined) {
+                if (filter.condition === 'isEmpty') return true;
+                if (filter.condition === 'notEmpty') return false;
+                return false;
+            }
+            
+            // 转换为字符串进行比较（除了数字比较）
+            const cellStr = String(cellValue).toLowerCase();
+            const filterStr = String(filterValue).toLowerCase();
+            
+            switch (filter.condition) {
+                case 'contains':
+                    return cellStr.includes(filterStr);
+                    
+                case 'equals':
+                    // 尝试数字比较
+                    if (!isNaN(cellValue) && !isNaN(filterValue)) {
+                        return Number(cellValue) === Number(filterValue);
+                    }
+                    return cellStr === filterStr;
+                    
+                case 'notEquals':
+                    if (!isNaN(cellValue) && !isNaN(filterValue)) {
+                        return Number(cellValue) !== Number(filterValue);
+                    }
+                    return cellStr !== filterStr;
+                    
+                case 'startsWith':
+                    return cellStr.startsWith(filterStr);
+                    
+                case 'endsWith':
+                    return cellStr.endsWith(filterStr);
+                    
+                case 'greaterThan':
+                    if (!isNaN(cellValue) && !isNaN(filterValue)) {
+                        return Number(cellValue) > Number(filterValue);
+                    }
+                    return cellStr > filterStr;
+                    
+                case 'lessThan':
+                    if (!isNaN(cellValue) && !isNaN(filterValue)) {
+                        return Number(cellValue) < Number(filterValue);
+                    }
+                    return cellStr < filterStr;
+                    
+                case 'isEmpty':
+                    return cellStr === '' || cellStr === 'null' || cellStr === 'undefined';
+                    
+                case 'notEmpty':
+                    return cellStr !== '' && cellStr !== 'null' && cellStr !== 'undefined';
+                    
+                default:
+                    return true;
+            }
+        }
+        
+        // 更新可用列名列表
+        function updateAvailableColumns() {
+            const datalist = document.getElementById('availableColumns');
+            datalist.innerHTML = '';
+            
+            columnOrder.forEach(column => {
+                const option = document.createElement('option');
+                option.value = column;
+                datalist.appendChild(option);
+            });
+        }
+        
+        // 应用列过滤设置
+        function applyColumnFilter(allColumns) {
+            const filterMode = document.querySelector('input[name="columnFilterMode"]:checked').value;
+            
+            if (filterMode === 'all') {
+                return Array.from(allColumns);
+            }
+            
+            // 使用columnTags数组而不是input的value
+            const specifiedColumns = columnTags;
+            
+            if (specifiedColumns.length === 0) {
+                if (filterMode === 'include') {
+                    showMessage('请添加要显示的列名标签');
+                    return Array.from(allColumns); // 如果没有指定，显示所有列
+                } else {
+                    return Array.from(allColumns);
+                }
+            }
+            
+            let resultColumns;
+            if (filterMode === 'include') {
+                // 白名单模式：仅显示指定的列
+                resultColumns = specifiedColumns.filter(col => allColumns.has(col));
+                const notFoundColumns = specifiedColumns.filter(col => !allColumns.has(col));
+                
+                if (notFoundColumns.length > 0) {
+                    showMessage(`以下列名不存在：${notFoundColumns.join(', ')}`, 'error');
+                }
+                
+                if (resultColumns.length === 0) {
+                    showMessage('指定的列名都不存在，将显示所有列');
+                    return Array.from(allColumns);
+                } else {
+                    showMessage(`已应用列过滤：仅显示 ${resultColumns.length} 列`, 'success');
+                }
+            } else {
+                // 黑名单模式：忽略指定的列
+                resultColumns = Array.from(allColumns).filter(col => !specifiedColumns.includes(col));
+                const foundColumns = specifiedColumns.filter(col => allColumns.has(col));
+                
+                if (foundColumns.length === 0) {
+                    showMessage('指定的列名都不存在，将显示所有列', 'error');
+                    return Array.from(allColumns);
+                } else if (resultColumns.length === 0) {
+                    showMessage('不能忽略所有列，将显示所有列', 'error');
+                    return Array.from(allColumns);
+                } else {
+                    showMessage(`已应用列过滤：忽略 ${foundColumns.length} 列，显示 ${resultColumns.length} 列`, 'success');
+                }
+            }
+            
+            return resultColumns;
+        }
 
         function showMessage(message, type = 'error') {
             const container = document.getElementById('messageContainer');
@@ -1370,9 +2777,17 @@
                 Object.keys(item).forEach(key => allColumns.add(key));
             });
 
+            // 应用列过滤设置
+            let filteredColumns = applyColumnFilter(allColumns);
+            
+            if (filteredColumns.length === 0) {
+                // 如果没有列可显示，则显示所有列
+                filteredColumns = Array.from(allColumns);
+            }
+
             // 初始化列配置
-            visibleColumns = Array.from(allColumns);
-            columnOrder = Array.from(allColumns);
+            visibleColumns = filteredColumns;
+            columnOrder = Array.from(allColumns); // columnOrder 包含所有列，以便后续管理
             
             // 清除所有排序
             sortColumns = [];
@@ -1384,6 +2799,9 @@
 
             // 生成列控制按钮
             generateColumnControls();
+            
+            // 更新可用列名列表
+            updateAvailableColumns();
             
             // 初始化搜索和分页
             setupEventListeners();
@@ -1506,7 +2924,14 @@
 
         function displayData() {
             // 创建数据副本以避免修改原数组
-            const dataToShow = [...(filteredData.length > 0 ? filteredData : currentData)];
+            // 如果有内容过滤器，使用 filteredData（即使为空）；否则使用全部数据
+            const dataToShow = contentFilters.length > 0 ? [...filteredData] : [...currentData];
+            
+            // 检查是否有内容过滤器但没有结果
+            if (contentFilters.length > 0 && dataToShow.length === 0) {
+                showEmptyFilterResult();
+                return;
+            }
             
             // 多列排序
             if (sortColumns.length > 0) {
@@ -1565,6 +2990,45 @@
             
             // 更新统计信息
             updateStats(dataToShow.length, startIndex + 1, endIndex);
+        }
+        
+        // 显示空过滤结果
+        function showEmptyFilterResult() {
+            const tbody = document.getElementById('tableBody');
+            const filterLogic = document.querySelector('input[name="filterLogic"]:checked')?.value || 'AND';
+            const logicText = filterLogic === 'AND' ? '且' : '或';
+            
+            // 生成表头
+            generateTableHeader();
+            
+            // 显示空状态
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="${visibleColumns.length}" style="text-align: center; padding: 60px 20px;">
+                        <div style="color: #6c757d;">
+                            <div style="font-size: 3em; margin-bottom: 15px;">🔍</div>
+                            <div style="font-size: 1.2em; font-weight: 600; margin-bottom: 10px;">未找到匹配的数据</div>
+                            <div style="font-size: 0.95em; margin-bottom: 15px;">
+                                当前 ${contentFilters.length} 个过滤条件（${logicText}）未匹配到任何结果
+                            </div>
+                            <div style="font-size: 0.85em; color: #adb5bd;">
+                                💡 尝试：
+                                <br>• 调整过滤条件的值
+                                <br>• 切换 AND/OR 逻辑
+                                <br>• 删除部分过滤条件
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+            `;
+            
+            // 隐藏分页
+            document.getElementById('paginationContainer').style.display = 'none';
+            
+            // 更新统计信息
+            const statsContainer = document.getElementById('statsInfo');
+            const filterInfo = `<div style="color: #dc3545;">过滤: ${contentFilters.length} 个条件 (${logicText}) | 原始数据: ${currentData.length} 条 | 匹配结果: 0 条</div>`;
+            statsContainer.innerHTML = filterInfo;
         }
 
         function generateTableHeader() {
@@ -1812,9 +3276,17 @@
                 sortInfo = `<div>排序: ${sortTexts.join(' → ')}</div>`;
             }
             
+            let filterInfo = '';
+            if (contentFilters.length > 0) {
+                const filterLogic = document.querySelector('input[name="filterLogic"]:checked')?.value || 'AND';
+                const logicText = filterLogic === 'AND' ? '且' : '或';
+                filterInfo = `<div>过滤: ${contentFilters.length} 个条件 (${logicText}) | 原始数据: ${currentData.length} 条</div>`;
+            }
+            
             statsContainer.innerHTML = `
                 <div>显示 ${start}-${end} 条，共 ${total} 条数据</div>
                 <div>当前页: ${currentPage} / ${Math.ceil(total / pageSize)}</div>
+                ${filterInfo}
                 ${sortInfo}
             `;
         }
@@ -1917,6 +3389,105 @@
         // 历史记录相关功能
         const HISTORY_KEY = 'json_table_history';
         const MAX_HISTORY_COUNT = 20;
+        
+        // 列过滤设置缓存
+        const COLUMN_FILTER_KEY = 'json_table_column_filter_settings';
+        
+        // 保存列过滤设置到本地存储
+        function saveColumnFilterSettings() {
+            try {
+                const filterMode = document.querySelector('input[name="columnFilterMode"]:checked').value;
+                
+                const settings = {
+                    mode: filterMode,
+                    tags: columnTags, // 保存标签数组而不是字符串
+                    timestamp: new Date().toISOString()
+                };
+                
+                localStorage.setItem(COLUMN_FILTER_KEY, JSON.stringify(settings));
+                console.log('列过滤设置已保存到缓存:', settings);
+            } catch (error) {
+                console.error('保存列过滤设置失败:', error);
+            }
+        }
+        
+        // 从本地存储加载列过滤设置
+        function loadColumnFilterSettings() {
+            try {
+                const settingsStr = localStorage.getItem(COLUMN_FILTER_KEY);
+                if (!settingsStr) {
+                    console.log('未找到缓存的列过滤设置');
+                    return;
+                }
+                
+                const settings = JSON.parse(settingsStr);
+                
+                // 设置过滤模式
+                const modeRadio = document.querySelector(`input[name="columnFilterMode"][value="${settings.mode}"]`);
+                if (modeRadio) {
+                    modeRadio.checked = true;
+                }
+                
+                // 加载标签（兼容旧格式的columns字符串）
+                if (settings.tags && Array.isArray(settings.tags)) {
+                    columnTags = settings.tags;
+                } else if (settings.columns && typeof settings.columns === 'string') {
+                    // 兼容旧版本的逗号分隔字符串
+                    columnTags = settings.columns
+                        .split(/[,;，；\s]+/)
+                        .map(col => col.trim())
+                        .filter(col => col.length > 0);
+                }
+                
+                // 渲染标签
+                renderColumnTags();
+                
+                // 更新UI显示
+                updateColumnFilterUI();
+                
+                console.log('已从缓存加载列过滤设置:', settings);
+            } catch (error) {
+                console.error('加载列过滤设置失败:', error);
+            }
+        }
+        
+        // 清除列过滤设置缓存
+        function clearColumnFilterSettings() {
+            try {
+                localStorage.removeItem(COLUMN_FILTER_KEY);
+                console.log('列过滤设置缓存已清除');
+            } catch (error) {
+                console.error('清除列过滤设置失败:', error);
+            }
+        }
+        
+        // 重置列过滤设置为默认值
+        function resetColumnFilterSettings() {
+            // 清除缓存
+            clearColumnFilterSettings();
+            
+            // 清空标签数组
+            columnTags = [];
+            
+            // 重置UI为默认值
+            const allRadio = document.querySelector('input[name="columnFilterMode"][value="all"]');
+            if (allRadio) {
+                allRadio.checked = true;
+            }
+            
+            const filterInput = document.getElementById('columnFilterInput');
+            if (filterInput) {
+                filterInput.value = '';
+            }
+            
+            // 重新渲染标签
+            renderColumnTags();
+            
+            // 更新UI
+            updateColumnFilterUI();
+            
+            showMessage('列过滤设置已重置为默认值', 'success');
+        }
 
         function saveToHistory(jsonData) {
             try {
@@ -2183,9 +3754,84 @@ ${detailedInfo.sampleData ? '<strong>示例数据:</strong>\n' + detailedInfo.sa
         }
 
 
+        // 初始化内容过滤输入
+        function initializeContentFilterInput() {
+            const filterColumnInput = document.getElementById('filterColumnName');
+            const filterValueInput = document.getElementById('filterValue');
+            const filterConditionSelect = document.getElementById('filterCondition');
+            
+            // 监听回车键
+            [filterColumnInput, filterValueInput].forEach(input => {
+                input.addEventListener('keydown', function(e) {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        addContentFilter();
+                    }
+                });
+            });
+            
+            // 当选择"为空"或"不为空"时，禁用值输入框
+            filterConditionSelect.addEventListener('change', function() {
+                const condition = this.value;
+                if (['isEmpty', 'notEmpty'].includes(condition)) {
+                    filterValueInput.disabled = true;
+                    filterValueInput.value = '';
+                    filterValueInput.style.backgroundColor = '#e9ecef';
+                } else {
+                    filterValueInput.disabled = false;
+                    filterValueInput.style.backgroundColor = '';
+                }
+            });
+            
+            // 当列名改变时，更新可用值的推荐列表
+            filterColumnInput.addEventListener('input', function() {
+                updateAvailableValuesForColumn(this.value);
+            });
+        }
+        
+        // 更新指定列的可用值推荐列表
+        function updateAvailableValuesForColumn(columnName) {
+            const datalist = document.getElementById('availableValues');
+            
+            // 清空现有选项
+            datalist.innerHTML = '';
+            
+            // 如果列名为空或数据为空，不提供推荐
+            if (!columnName || !currentData || currentData.length === 0) {
+                return;
+            }
+            
+            // 收集该列的所有唯一值
+            const uniqueValues = new Set();
+            currentData.forEach(row => {
+                const value = row[columnName];
+                // 排除 null、undefined 和空字符串
+                if (value !== null && value !== undefined && value !== '') {
+                    uniqueValues.add(String(value));
+                }
+            });
+            
+            // 如果唯一值太多（超过100个），只显示前100个
+            const valuesToShow = Array.from(uniqueValues).sort().slice(0, 100);
+            
+            // 添加到 datalist
+            valuesToShow.forEach(value => {
+                const option = document.createElement('option');
+                option.value = value;
+                datalist.appendChild(option);
+            });
+        }
+        
         // 页面加载完成后的初始化
         document.addEventListener('DOMContentLoaded', function() {
-            // 可以在这里添加一些初始化代码
+            // 初始化标签输入功能
+            initializeTagsInput();
+            
+            // 初始化内容过滤输入
+            initializeContentFilterInput();
+            
+            // 加载列过滤设置
+            loadColumnFilterSettings();
         });
     </script>
 </body>

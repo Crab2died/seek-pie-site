@@ -3,7 +3,43 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CSV展示工具</title>
+    <title>CSV展示工具 - 在线CSV文件查看、搜索和排序工具</title>
+    
+    <!-- SEO Meta Tags -->
+    <meta name="description" content="免费在线CSV文件展示工具，支持CSV文件上传、文本输入、表格查看、数据搜索、排序和分页功能。操作简单，无需安装软件，支持大文件处理，数据安全不上传服务器。">
+    <meta name="keywords" content="CSV工具,CSV查看器,CSV文件,在线CSV,表格查看,数据展示,CSV转表格,Excel查看,CSV文本输入">
+    <meta name="author" content="多功能工具箱">
+    <meta name="robots" content="index, follow">
+    <meta name="language" content="zh-CN">
+    <!-- Canonical URL -->
+    <link rel="canonical" href="https://www.seekpie.com/tools/csv-tool.html">
+    
+    <!-- Structured Data (JSON-LD) -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "CSV展示工具",
+      "description": "免费在线CSV文件展示工具，支持上传、查看、搜索和排序功能",
+      "url": "https://www.seekpie.com/tools/csv-tool.html",
+      "applicationCategory": "UtilitiesApplication",
+      "operatingSystem": "All",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "CNY"
+      },
+      "featureList": [
+        "CSV文件上传",
+        "文本直接输入",
+        "表格展示",
+        "数据搜索",
+        "排序功能",
+        "分页显示",
+        "本地处理，数据安全"
+      ]
+    }
+    </script>
     <style>
         * {
             margin: 0;
@@ -51,6 +87,35 @@
             border-bottom: 1px solid #eee;
         }
 
+        .input-mode-tabs {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .mode-tab {
+            padding: 10px 30px;
+            background: #f0f0f0;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1em;
+            color: #666;
+        }
+
+        .mode-tab:hover {
+            background: #e6f3ff;
+            border-color: #4facfe;
+        }
+
+        .mode-tab.active {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            border-color: #4facfe;
+        }
+
         .upload-area {
             border: 3px dashed #4facfe;
             border-radius: 15px;
@@ -59,6 +124,67 @@
             transition: all 0.3s ease;
             cursor: pointer;
             position: relative;
+        }
+
+        .text-input-area {
+            display: none;
+            text-align: left;
+        }
+
+        .text-input-area.show {
+            display: block;
+        }
+
+        .text-input-label {
+            font-size: 1.1em;
+            color: #333;
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        .text-input-hint {
+            color: #999;
+            font-size: 0.9em;
+            margin-bottom: 15px;
+        }
+
+        .csv-textarea {
+            width: 100%;
+            min-height: 300px;
+            padding: 15px;
+            border: 2px solid #4facfe;
+            border-radius: 10px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            resize: vertical;
+            background: white;
+        }
+
+        .csv-textarea:focus {
+            outline: none;
+            border-color: #00f2fe;
+            box-shadow: 0 0 10px rgba(79, 172, 254, 0.3);
+        }
+
+        .parse-btn {
+            margin-top: 15px;
+            padding: 12px 30px;
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .parse-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(79, 172, 254, 0.4);
+        }
+
+        .parse-btn:active {
+            transform: translateY(0);
         }
 
         .upload-area:hover {
@@ -184,7 +310,7 @@
             padding: 8px 35px 8px 12px;
             border: 1px solid #ddd;
             border-radius: 6px;
-            width: 200px;
+            width: 300px;
             font-size: 0.9em;
         }
 
@@ -500,6 +626,321 @@
             user-select: none;
         }
 
+        /* 列过滤设置样式 */
+        .column-filter-options {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+            margin-bottom: 10px;
+        }
+        
+        .column-filter-option {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            margin: 0;
+            cursor: pointer;
+            padding: 6px 12px;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+        }
+        
+        .column-filter-option:hover {
+            background: #f0f8ff;
+        }
+        
+        .column-filter-option input[type="radio"] {
+            cursor: pointer;
+            width: 18px;
+            height: 18px;
+            accent-color: #4facfe;
+        }
+        
+        .column-filter-option span {
+            font-weight: 500;
+            color: #495057;
+            user-select: none;
+        }
+
+        /* 标签输入容器 */
+        .tags-input-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            align-items: center;
+            padding: 10px 12px;
+            border: 2px solid #4facfe;
+            border-radius: 6px;
+            background: white;
+            min-height: 48px;
+            cursor: text;
+            transition: all 0.3s ease;
+        }
+        
+        .tags-input-container:focus-within {
+            border-color: #00f2fe;
+            box-shadow: 0 0 0 3px rgba(79, 172, 254, 0.1);
+        }
+        
+        .tags-input-container.disabled {
+            background-color: #e9ecef;
+            cursor: not-allowed;
+            border-color: #dee2e6;
+        }
+        
+        .column-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 10px;
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            border-radius: 4px;
+            font-size: 0.9em;
+            user-select: none;
+            transition: all 0.2s ease;
+        }
+        
+        .column-tag:hover {
+            background: linear-gradient(135deg, #3d9aed 0%, #00e0ed 100%);
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(79, 172, 254, 0.3);
+        }
+        
+        .column-tag-text {
+            max-width: 150px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        
+        .column-tag-remove {
+            cursor: pointer;
+            font-weight: bold;
+            padding: 0 2px;
+            border-radius: 3px;
+            transition: background 0.2s ease;
+        }
+        
+        .column-tag-remove:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+        
+        .tags-input-field {
+            flex: 1;
+            min-width: 150px;
+            border: none;
+            outline: none;
+            padding: 6px 0;
+            font-size: 0.9em;
+            background: transparent;
+        }
+        
+        .tags-input-field:disabled {
+            cursor: not-allowed;
+        }
+
+        /* 列内容过滤区域样式 */
+        .content-filter-section {
+            background: #fff9e6;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #ffe4a3;
+            margin-bottom: 15px;
+        }
+        
+        .content-filter-header {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            width: 100%;
+            margin-bottom: 15px;
+        }
+        
+        .content-filter-title {
+            color: #495057;
+        }
+        
+        .filter-logic-selector {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: white;
+            padding: 5px 12px;
+            border-radius: 20px;
+            border: 2px solid #ffe4a3;
+        }
+        
+        .filter-logic-label {
+            font-size: 0.85em;
+            color: #495057;
+            font-weight: 500;
+        }
+        
+        .filter-logic-option {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            cursor: pointer;
+            margin: 0;
+        }
+        
+        .filter-logic-radio {
+            cursor: pointer;
+            accent-color: #f5576c;
+        }
+        
+        .filter-logic-text {
+            font-size: 0.9em;
+            color: #495057;
+            font-weight: 500;
+        }
+        
+        .clear-all-filters-btn {
+            padding: 6px 14px;
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+            color: white;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.85em;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        .clear-all-filters-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+        
+        .filter-input-row {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            align-items: center;
+            padding: 10px;
+            background: white;
+            border-radius: 6px;
+            border: 2px dashed #dee2e6;
+            transition: all 0.3s ease;
+        }
+        
+        .filter-input-row:hover {
+            border-color: #4facfe;
+        }
+        
+        .filter-input-field {
+            flex: 1;
+            min-width: 150px;
+        }
+        
+        .filter-condition-field {
+            min-width: 130px;
+        }
+        
+        .filter-input {
+            width: 100%;
+            padding: 8px;
+            border: 2px solid #dee2e6;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+        
+        .filter-input:focus {
+            outline: none;
+            border-color: #4facfe;
+            box-shadow: 0 0 0 3px rgba(79, 172, 254, 0.1);
+        }
+        
+        .filter-select {
+            width: 100%;
+            padding: 8px;
+            border: 2px solid #dee2e6;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+        
+        .filter-add-btn {
+            padding: 8px 16px;
+            white-space: nowrap;
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .filter-add-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(79, 172, 254, 0.3);
+        }
+        
+        /* 动态过滤器行样式 */
+        .filter-row {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            align-items: center;
+            padding: 10px;
+            background: white;
+            border-radius: 6px;
+            border: 2px solid #dee2e6;
+            transition: all 0.3s ease;
+            margin-bottom: 8px;
+        }
+        
+        .filter-row:hover {
+            border-color: #4facfe;
+            box-shadow: 0 2px 8px rgba(79, 172, 254, 0.1);
+        }
+        
+        .filter-row-field {
+            flex: 1;
+            min-width: 150px;
+        }
+        
+        .filter-row-condition {
+            min-width: 130px;
+        }
+        
+        .filter-row-input {
+            width: 100%;
+            padding: 6px;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            font-size: 13px;
+        }
+        
+        .filter-row-select {
+            width: 100%;
+            padding: 6px;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            font-size: 13px;
+        }
+        
+        .filter-row-delete-btn {
+            padding: 6px 12px;
+            background: #dc3545;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 13px;
+            white-space: nowrap;
+            transition: all 0.2s ease;
+        }
+        
+        .filter-row-delete-btn:hover {
+            background: #c82333;
+            transform: translateY(-1px);
+        }
+
         .btn-sort-column {
             padding: 8px 16px;
             background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
@@ -620,6 +1061,26 @@
                 border-radius: 12px;
             }
 
+            .input-mode-tabs {
+                flex-direction: column;
+                gap: 8px;
+            }
+
+            .mode-tab {
+                padding: 12px 20px;
+                width: 100%;
+            }
+
+            .csv-textarea {
+                min-height: 250px;
+                font-size: 0.85em;
+            }
+
+            .parse-btn {
+                width: 100%;
+                padding: 12px 20px;
+            }
+
             .column-management {
                 padding: 15px;
                 margin-bottom: 15px;
@@ -650,6 +1111,93 @@
 
             .column-toggle > span:not(.drag-handle) {
                 max-width: 80px;
+            }
+
+            .column-filter-options {
+                gap: 10px;
+            }
+            
+            .column-filter-option {
+                padding: 5px 10px;
+                font-size: 0.9em;
+            }
+            
+            .column-filter-option input[type="radio"] {
+                width: 16px;
+                height: 16px;
+            }
+
+            /* 列内容过滤区域 */
+            .content-filter-header {
+                flex-direction: column;
+                align-items: flex-start !important;
+                gap: 12px;
+            }
+
+            .filter-logic-selector {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+                width: 100%;
+            }
+
+            .filter-logic-option {
+                width: 100%;
+                justify-content: flex-start;
+            }
+
+            .clear-all-filters-btn {
+                width: 100%;
+                justify-content: center;
+                padding: 10px;
+            }
+
+            .filter-input-row {
+                flex-direction: column !important;
+                gap: 10px;
+                padding: 12px;
+            }
+
+            .filter-input-field,
+            .filter-condition-field {
+                width: 100% !important;
+                min-width: auto !important;
+            }
+
+            .filter-input,
+            .filter-select {
+                width: 100%;
+                font-size: 14px;
+            }
+
+            .filter-add-btn {
+                width: 100%;
+                padding: 12px;
+                font-size: 14px;
+            }
+
+            .filter-row {
+                flex-direction: column !important;
+                gap: 10px;
+                padding: 12px;
+            }
+
+            .filter-row-field,
+            .filter-row-condition {
+                width: 100% !important;
+                min-width: auto !important;
+            }
+
+            .filter-row-input,
+            .filter-row-select {
+                width: 100%;
+                font-size: 14px;
+            }
+
+            .filter-row-delete-btn {
+                width: 100%;
+                padding: 10px;
+                font-size: 14px;
             }
 
             .header {
@@ -812,6 +1360,30 @@
                 border-radius: 10px;
             }
 
+            .mode-tab {
+                padding: 10px 15px;
+                font-size: 0.9em;
+            }
+
+            .csv-textarea {
+                min-height: 200px;
+                font-size: 0.8em;
+                padding: 12px;
+            }
+
+            .parse-btn {
+                padding: 10px 20px;
+                font-size: 0.9em;
+            }
+
+            .text-input-label {
+                font-size: 1em;
+            }
+
+            .text-input-hint {
+                font-size: 0.85em;
+            }
+
             .column-management {
                 padding: 12px;
             }
@@ -830,6 +1402,88 @@
             .btn-toggle-columns {
                 font-size: 0.85em;
                 padding: 8px 12px;
+            }
+
+            .column-filter-options {
+                gap: 8px;
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .column-filter-option {
+                padding: 4px 8px;
+                font-size: 0.85em;
+                width: 100%;
+            }
+            
+            .column-filter-option input[type="radio"] {
+                width: 14px;
+                height: 14px;
+            }
+
+            /* 列内容过滤区域 - 小屏优化 */
+            .content-filter-title {
+                font-size: 1em;
+            }
+
+            .filter-logic-selector {
+                width: 100%;
+            }
+
+            .filter-logic-label {
+                font-size: 0.85em;
+            }
+
+            .filter-logic-text {
+                font-size: 0.85em;
+            }
+
+            .clear-all-filters-btn {
+                font-size: 13px;
+                padding: 8px;
+            }
+
+            .filter-input,
+            .filter-select {
+                font-size: 13px;
+                padding: 8px;
+            }
+
+            .filter-add-btn {
+                font-size: 13px;
+                padding: 10px;
+            }
+
+            .filter-row-input,
+            .filter-row-select {
+                font-size: 13px;
+                padding: 6px;
+            }
+
+            .filter-row-delete-btn {
+                font-size: 13px;
+                padding: 8px;
+            }
+
+            /* 标签样式调整 */
+            .column-tag {
+                font-size: 0.85em;
+                padding: 3px 8px;
+            }
+
+            .column-tag-text {
+                max-width: 100px;
+            }
+
+            .tags-input-container {
+                min-height: 38px;
+                padding: 5px;
+                gap: 5px;
+            }
+
+            .tags-input-field {
+                min-width: 100px;
+                font-size: 13px;
             }
 
             .header {
@@ -937,6 +1591,66 @@
 
         /* 超小屏手机 */
         @media (max-width: 360px) {
+            /* 列内容过滤区域 - 超小屏优化 */
+            .content-filter-title {
+                font-size: 0.95em;
+            }
+
+            .filter-logic-label {
+                font-size: 0.8em;
+            }
+
+            .filter-logic-text {
+                font-size: 0.8em;
+            }
+
+            .clear-all-filters-btn {
+                font-size: 12px;
+                padding: 6px;
+            }
+
+            .filter-input,
+            .filter-select {
+                font-size: 12px;
+                padding: 6px;
+            }
+
+            .filter-add-btn {
+                font-size: 12px;
+                padding: 8px;
+            }
+
+            .filter-row-input,
+            .filter-row-select {
+                font-size: 12px;
+                padding: 5px;
+            }
+
+            .filter-row-delete-btn {
+                font-size: 12px;
+                padding: 6px;
+            }
+
+            .column-tag {
+                font-size: 0.8em;
+                padding: 2px 6px;
+            }
+
+            .column-tag-text {
+                max-width: 80px;
+            }
+
+            .tags-input-container {
+                min-height: 35px;
+                padding: 4px;
+                gap: 4px;
+            }
+
+            .tags-input-field {
+                min-width: 80px;
+                font-size: 12px;
+            }
+
             .header h1 {
                 font-size: 1.3em;
             }
@@ -986,19 +1700,30 @@
     <div class="container">
             <div class="header">
                 <h1>📊 CSV展示工具</h1>
-                <p>上传CSV文件，以表格形式展示数据，支持分页、搜索和排序功能</p>
+                <p>上传CSV文件或直接输入文本，以表格形式展示数据，支持分页、搜索和排序功能</p>
                 <p style="font-size: 0.9em; margin-top: 10px; opacity: 0.8;">
                     💡 提示：点击表头排序 | 按住Shift点击多列排序 | 悬停查看完整内容 | 双击单元格展开/收缩
                 </p>
             </div>
 
         <div class="upload-section">
+            <div class="input-mode-tabs">
+                <button class="mode-tab active" id="fileTab">📁 文件上传</button>
+                <button class="mode-tab" id="textTab">📝 文本输入</button>
+            </div>
+            
             <div class="upload-area" id="uploadArea">
                 <div class="upload-icon">📁</div>
                 <div class="upload-text">点击选择CSV文件或拖拽文件到此处</div>
                 <div class="upload-hint">支持 .csv 格式文件</div>
             </div>
             <input type="file" id="fileInput" accept=".csv" />
+            
+            <div class="text-input-area" id="textInputArea">
+                <label class="text-input-label">输入或粘贴CSV数据：</label>
+                <textarea class="csv-textarea" id="csvTextarea" placeholder="请在此输入CSV文本数据...&#10;例如：&#10;姓名,年龄,城市&#10;张三,25,北京&#10;李四,30,上海"></textarea>
+                <button class="parse-btn" id="parseBtn">解析数据</button>
+            </div>
             
             <div class="file-info" id="fileInfo">
                 <div class="file-name" id="fileName"></div>
@@ -1010,6 +1735,110 @@
 
         <div class="data-section" id="dataSection">
             <div class="column-management">
+                <!-- 列内容过滤区域 -->
+                <div class="content-filter-section" id="contentFilterSection">
+                    <!-- 标题和操作栏 -->
+                    <div class="content-filter-header">
+                        <div>
+                            <strong class="content-filter-title">🔍 列内容过滤</strong>
+                        </div>
+                        <div class="filter-logic-selector">
+                            <span class="filter-logic-label">多条件逻辑：</span>
+                            <label class="filter-logic-option">
+                                <input type="radio" name="filterLogic" value="AND" checked onchange="csvViewer.applyContentFiltersAndDisplay()" class="filter-logic-radio">
+                                <span class="filter-logic-text">AND (且)</span>
+                            </label>
+                            <label class="filter-logic-option">
+                                <input type="radio" name="filterLogic" value="OR" onchange="csvViewer.applyContentFiltersAndDisplay()" class="filter-logic-radio">
+                                <span class="filter-logic-text">OR (或)</span>
+                            </label>
+                        </div>
+                        <button onclick="csvViewer.clearAllContentFilters()" id="clearAllFiltersBtn" class="clear-all-filters-btn" style="display: none;">
+                            🗑️ 清除所有
+                        </button>
+                    </div>
+                    
+                    <!-- 过滤器行将在这里动态生成 -->
+                    
+                    <!-- 添加新过滤器的输入行 -->
+                    <div class="filter-input-row">
+                        <div class="filter-input-field">
+                            <input type="text" id="filterColumnName" 
+                                   placeholder="输入列名" 
+                                   list="availableColumns"
+                                   class="filter-input">
+                            <datalist id="availableColumns"></datalist>
+                        </div>
+                        <div class="filter-condition-field">
+                            <select id="filterCondition" class="filter-select">
+                                <option value="contains">包含</option>
+                                <option value="equals">等于</option>
+                                <option value="notEquals">不等于</option>
+                                <option value="startsWith">开头是</option>
+                                <option value="endsWith">结尾是</option>
+                                <option value="greaterThan">大于</option>
+                                <option value="lessThan">小于</option>
+                                <option value="isEmpty">为空</option>
+                                <option value="notEmpty">不为空</option>
+                            </select>
+                        </div>
+                        <div class="filter-input-field">
+                            <input type="text" id="filterValue" 
+                                   placeholder="输入过滤值" 
+                                   list="availableValues"
+                                   class="filter-input">
+                            <datalist id="availableValues"></datalist>
+                        </div>
+                        <button class="filter-add-btn" onclick="csvViewer.addContentFilter()">添加</button>
+                    </div>
+                </div>
+
+                <!-- 列过滤设置 -->
+                <div style="margin-bottom: 15px; background: #f0f7ff; padding: 15px; border-radius: 8px; border: 1px solid #d0e7ff; position: relative;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                        <label style="margin: 0; font-weight: 600; color: #495057;">🎯 列过滤设置</label>
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <span style="font-size: 0.8em; color: #6c757d; background: white; padding: 4px 8px; border-radius: 4px; border: 1px solid #d0e7ff;">
+                                💾 设置自动保存
+                            </span>
+                            <button onclick="csvViewer.resetColumnFilterSettings()" 
+                                    style="font-size: 0.8em; padding: 4px 10px; border: 1px solid #dee2e6; background: white; border-radius: 4px; cursor: pointer; color: #6c757d; transition: all 0.3s ease;"
+                                    onmouseover="this.style.background='#f8f9fa'; this.style.borderColor='#4facfe'"
+                                    onmouseout="this.style.background='white'; this.style.borderColor='#dee2e6'"
+                                    title="重置为默认设置">
+                                🔄 重置
+                            </button>
+                        </div>
+                    </div>
+                    <div class="column-filter-options">
+                        <label class="column-filter-option">
+                            <input type="radio" name="columnFilterMode" value="all" checked onchange="csvViewer.updateColumnFilterUI()">
+                            <span>显示所有列</span>
+                        </label>
+                        <label class="column-filter-option">
+                            <input type="radio" name="columnFilterMode" value="include" onchange="csvViewer.updateColumnFilterUI()">
+                            <span>仅显示指定列</span>
+                        </label>
+                        <label class="column-filter-option">
+                            <input type="radio" name="columnFilterMode" value="exclude" onchange="csvViewer.updateColumnFilterUI()">
+                            <span>忽略指定列</span>
+                        </label>
+                    </div>
+                    <!-- 标签输入容器 -->
+                    <div id="tagsInputContainer" class="tags-input-container disabled" style="display: none;" onclick="csvViewer.focusTagsInput()">
+                        <!-- 标签将动态添加到这里 -->
+                        <input type="text" 
+                               id="columnFilterInput" 
+                               class="tags-input-field"
+                               placeholder="输入列名后按回车添加"
+                               disabled
+                               autocomplete="off">
+                    </div>
+                    <div style="font-size: 0.85em; color: #6c757d; margin-top: 5px; display: none;" id="columnFilterHint">
+                        💡 提示：输入列名后按 <kbd style="padding: 2px 6px; background: #f0f0f0; border: 1px solid #ccc; border-radius: 3px; font-size: 0.9em;">Enter</kbd> 添加标签，点击 ✕ 删除
+                    </div>
+                </div>
+
                 <div class="column-controls-header">
                     <div class="column-select-all">
                         <label>
@@ -1085,9 +1914,15 @@
                 this.columnOrder = []; // 列的显示顺序
                 this.columnControlsVisible = false; // 列管理面板是否显示
                 this.columnSortOrder = 'none'; // 列名排序状态：'none' | 'asc' | 'desc'
+                this.columnTags = []; // 存储列过滤标签
+                this.COLUMN_FILTER_KEY = 'csv_table_column_filter_settings'; // localStorage key
+                this.contentFilters = []; // 存储列内容过滤器: [{id, column, condition, value}, ...]
                 
                 this.initializeElements();
                 this.bindEvents();
+                this.initializeTagsInput();
+                this.initializeContentFilterInput();
+                this.loadColumnFilterSettings();
             }
 
             initializeElements() {
@@ -1112,6 +1947,11 @@
                 this.toggleColumnsBtn = document.getElementById('toggleColumnsBtn');
                 this.columnControlsRow = document.getElementById('columnControlsRow');
                 this.columnControls = document.getElementById('columnControls');
+                this.fileTab = document.getElementById('fileTab');
+                this.textTab = document.getElementById('textTab');
+                this.textInputArea = document.getElementById('textInputArea');
+                this.csvTextarea = document.getElementById('csvTextarea');
+                this.parseBtn = document.getElementById('parseBtn');
             }
 
             bindEvents() {
@@ -1165,6 +2005,53 @@
                 this.selectAllCheckbox.addEventListener('change', () => this.toggleAllColumns());
                 this.sortColumnsBtn.addEventListener('click', () => this.sortColumnsByName());
                 this.toggleColumnsBtn.addEventListener('click', () => this.toggleColumnControls());
+                
+                // 输入模式切换事件
+                this.fileTab.addEventListener('click', () => this.switchInputMode('file'));
+                this.textTab.addEventListener('click', () => this.switchInputMode('text'));
+                
+                // 文本解析事件
+                this.parseBtn.addEventListener('click', () => this.handleTextInput());
+            }
+
+            switchInputMode(mode) {
+                if (mode === 'file') {
+                    this.fileTab.classList.add('active');
+                    this.textTab.classList.remove('active');
+                    this.uploadArea.style.display = 'block';
+                    this.textInputArea.classList.remove('show');
+                } else {
+                    this.textTab.classList.add('active');
+                    this.fileTab.classList.remove('active');
+                    this.uploadArea.style.display = 'none';
+                    this.textInputArea.classList.add('show');
+                }
+                this.hideError();
+                this.fileInfo.classList.remove('show');
+            }
+
+            handleTextInput() {
+                const csvText = this.csvTextarea.value.trim();
+                
+                if (!csvText) {
+                    this.showError('请输入CSV数据');
+                    return;
+                }
+                
+                this.hideError();
+                
+                try {
+                    this.parseCSV(csvText);
+                    this.showDataSection();
+                    
+                    // 显示文件信息（文本输入模式）
+                    this.fileName.textContent = '文本输入数据';
+                    const lines = csvText.split('\n').filter(line => line.trim());
+                    this.fileSize.textContent = `${lines.length} 行, ${csvText.length} 字符`;
+                    this.fileInfo.classList.add('show');
+                } catch (error) {
+                    this.showError('CSV数据解析失败: ' + error.message);
+                }
             }
 
             handleFileSelect(file) {
@@ -1231,11 +2118,16 @@
                 this.currentPage = 1;
                 
                 // 初始化列配置
-                this.visibleColumns = [...this.headers];
                 this.columnOrder = [...this.headers];
+                
+                // 应用列过滤设置来确定可见列
+                this.applyColumnFilter();
                 
                 // 生成列控制按钮
                 this.generateColumnControls();
+                
+                // 更新可用列名列表
+                this.updateAvailableColumns();
             }
 
             parseCSVLine(line) {
@@ -1261,10 +2153,32 @@
             }
 
             filterData() {
+                // 先应用内容过滤
+                let dataAfterContentFilter = [...this.csvData];
+                
+                if (this.contentFilters.length > 0) {
+                    const filterLogic = document.querySelector('input[name="filterLogic"]:checked')?.value || 'AND';
+                    
+                    dataAfterContentFilter = this.csvData.filter(row => {
+                        if (filterLogic === 'AND') {
+                            // AND关系：所有过滤器都必须满足
+                            return this.contentFilters.every(filter => {
+                                return this.matchFilter(row, filter);
+                            });
+                        } else {
+                            // OR关系：至少一个过滤器满足
+                            return this.contentFilters.some(filter => {
+                                return this.matchFilter(row, filter);
+                            });
+                        }
+                    });
+                }
+                
+                // 再应用搜索过滤
                 if (!this.searchTerm) {
-                    this.filteredData = [...this.csvData];
+                    this.filteredData = dataAfterContentFilter;
                 } else {
-                    this.filteredData = this.csvData.filter(row => {
+                    this.filteredData = dataAfterContentFilter.filter(row => {
                         return Object.values(row).some(value => 
                             value.toString().toLowerCase().includes(this.searchTerm)
                         );
@@ -1776,11 +2690,609 @@
             handleDragEnd(e) {
                 e.target.classList.remove('dragging');
             }
+
+            // 列过滤设置相关方法
+            updateColumnFilterUI() {
+                const filterMode = document.querySelector('input[name="columnFilterMode"]:checked').value;
+                const filterInput = document.getElementById('columnFilterInput');
+                const filterHint = document.getElementById('columnFilterHint');
+                const tagsContainer = document.getElementById('tagsInputContainer');
+                
+                if (filterMode === 'all') {
+                    tagsContainer.style.display = 'none';
+                    tagsContainer.classList.add('disabled');
+                    filterInput.disabled = true;
+                    filterHint.style.display = 'none';
+                } else {
+                    tagsContainer.style.display = 'flex';
+                    tagsContainer.classList.remove('disabled');
+                    filterInput.disabled = false;
+                    filterHint.style.display = 'block';
+                    
+                    if (filterMode === 'include') {
+                        filterInput.placeholder = this.columnTags.length > 0 ? '继续添加...' : '输入要显示的列名后按回车';
+                        filterHint.innerHTML = '💡 提示：输入列名后按 <kbd style="padding: 2px 6px; background: #f0f0f0; border: 1px solid #ccc; border-radius: 3px; font-size: 0.9em;">Enter</kbd> 添加标签，支持带空格的列名。多个列名用逗号或分号分隔';
+                    } else if (filterMode === 'exclude') {
+                        filterInput.placeholder = this.columnTags.length > 0 ? '继续添加...' : '输入要隐藏的列名后按回车';
+                        filterHint.innerHTML = '💡 提示：输入列名后按 <kbd style="padding: 2px 6px; background: #f0f0f0; border: 1px solid #ccc; border-radius: 3px; font-size: 0.9em;">Enter</kbd> 添加标签，支持带空格的列名。多个列名用逗号或分号分隔';
+                    }
+                }
+                
+                // 保存设置到缓存
+                this.saveColumnFilterSettings();
+                
+                // 如果有数据，重新应用过滤
+                if (this.headers.length > 0) {
+                    this.applyColumnFilter();
+                    this.renderTable();
+                    this.generateColumnControls();
+                }
+            }
+
+            focusTagsInput() {
+                const filterInput = document.getElementById('columnFilterInput');
+                if (filterInput && !filterInput.disabled) {
+                    filterInput.focus();
+                }
+            }
+
+            addColumnTag(columnName) {
+                // 清理输入
+                columnName = columnName.trim();
+                if (!columnName) return;
+                
+                // 检查是否已存在
+                if (this.columnTags.includes(columnName)) {
+                    alert(`列 "${columnName}" 已存在`);
+                    return;
+                }
+                
+                // 添加到数组
+                this.columnTags.push(columnName);
+                
+                // 渲染标签
+                this.renderColumnTags();
+                
+                // 清空输入框
+                const filterInput = document.getElementById('columnFilterInput');
+                filterInput.value = '';
+                
+                // 更新占位符
+                this.updateColumnFilterUI();
+                
+                // 保存设置
+                this.saveColumnFilterSettings();
+                
+                // 重新应用过滤
+                if (this.headers.length > 0) {
+                    this.applyColumnFilter();
+                    this.renderTable();
+                    this.generateColumnControls();
+                }
+            }
+
+            removeColumnTag(columnName) {
+                const index = this.columnTags.indexOf(columnName);
+                if (index > -1) {
+                    this.columnTags.splice(index, 1);
+                    this.renderColumnTags();
+                    this.updateColumnFilterUI();
+                    this.saveColumnFilterSettings();
+                    
+                    // 重新应用过滤
+                    if (this.headers.length > 0) {
+                        this.applyColumnFilter();
+                        this.renderTable();
+                        this.generateColumnControls();
+                    }
+                }
+            }
+
+            renderColumnTags() {
+                const tagsContainer = document.getElementById('tagsInputContainer');
+                const filterInput = document.getElementById('columnFilterInput');
+                
+                // 清除现有标签
+                const existingTags = tagsContainer.querySelectorAll('.column-tag');
+                existingTags.forEach(tag => tag.remove());
+                
+                // 创建新标签
+                this.columnTags.forEach(columnName => {
+                    const tag = document.createElement('div');
+                    tag.className = 'column-tag';
+                    tag.innerHTML = `
+                        <span class="column-tag-text" title="${columnName}">${columnName}</span>
+                        <span class="column-tag-remove" onclick="csvViewer.removeColumnTag('${columnName}')" title="删除">✕</span>
+                    `;
+                    
+                    // 在输入框前插入
+                    tagsContainer.insertBefore(tag, filterInput);
+                });
+            }
+
+            initializeTagsInput() {
+                const filterInput = document.getElementById('columnFilterInput');
+                
+                filterInput.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        const value = filterInput.value.trim();
+                        if (value) {
+                            // 支持逗号和分号分隔的多个列名（保留空格以支持带空格的列名）
+                            const columns = value.split(/[,，;；]+/).filter(col => col.trim());
+                            columns.forEach(col => this.addColumnTag(col.trim()));
+                        }
+                    } else if (e.key === 'Backspace' && filterInput.value === '' && this.columnTags.length > 0) {
+                        // 删除最后一个标签
+                        e.preventDefault();
+                        this.removeColumnTag(this.columnTags[this.columnTags.length - 1]);
+                    }
+                });
+                
+                // 失焦时处理输入
+                filterInput.addEventListener('blur', () => {
+                    const value = filterInput.value.trim();
+                    if (value) {
+                        // 支持逗号和分号分隔的多个列名（保留空格以支持带空格的列名）
+                        const columns = value.split(/[,，;；]+/).filter(col => col.trim());
+                        columns.forEach(col => this.addColumnTag(col.trim()));
+                    }
+                });
+            }
+
+            applyColumnFilter() {
+                const filterMode = document.querySelector('input[name="columnFilterMode"]:checked').value;
+                
+                if (filterMode === 'all') {
+                    // 显示所有列
+                    this.visibleColumns = [...this.headers];
+                } else if (filterMode === 'include') {
+                    // 仅显示指定列
+                    if (this.columnTags.length === 0) {
+                        // 如果没有指定列，显示所有列
+                        this.visibleColumns = [...this.headers];
+                    } else {
+                        // 只显示在标签中且存在于headers中的列
+                        this.visibleColumns = this.columnTags.filter(col => this.headers.includes(col));
+                    }
+                } else if (filterMode === 'exclude') {
+                    // 忽略指定列
+                    if (this.columnTags.length === 0) {
+                        // 如果没有指定要忽略的列，显示所有列
+                        this.visibleColumns = [...this.headers];
+                    } else {
+                        // 显示不在标签中的列
+                        this.visibleColumns = this.headers.filter(col => !this.columnTags.includes(col));
+                    }
+                }
+            }
+
+            saveColumnFilterSettings() {
+                try {
+                    const filterMode = document.querySelector('input[name="columnFilterMode"]:checked').value;
+                    
+                    const settings = {
+                        mode: filterMode,
+                        tags: this.columnTags,
+                        timestamp: new Date().toISOString()
+                    };
+                    
+                    localStorage.setItem(this.COLUMN_FILTER_KEY, JSON.stringify(settings));
+                    console.log('列过滤设置已保存到缓存:', settings);
+                } catch (error) {
+                    console.error('保存列过滤设置失败:', error);
+                }
+            }
+
+            loadColumnFilterSettings() {
+                try {
+                    const settingsStr = localStorage.getItem(this.COLUMN_FILTER_KEY);
+                    if (!settingsStr) {
+                        console.log('未找到缓存的列过滤设置');
+                        return;
+                    }
+                    
+                    const settings = JSON.parse(settingsStr);
+                    
+                    // 设置过滤模式
+                    const modeRadio = document.querySelector(`input[name="columnFilterMode"][value="${settings.mode}"]`);
+                    if (modeRadio) {
+                        modeRadio.checked = true;
+                    }
+                    
+                    // 恢复标签
+                    if (settings.tags && Array.isArray(settings.tags)) {
+                        this.columnTags = settings.tags;
+                        this.renderColumnTags();
+                    }
+                    
+                    // 更新UI
+                    this.updateColumnFilterUI();
+                    
+                    console.log('列过滤设置已从缓存加载:', settings);
+                } catch (error) {
+                    console.error('加载列过滤设置失败:', error);
+                }
+            }
+
+            resetColumnFilterSettings() {
+                // 清除缓存
+                try {
+                    localStorage.removeItem(this.COLUMN_FILTER_KEY);
+                } catch (error) {
+                    console.error('清除列过滤设置失败:', error);
+                }
+                
+                // 清空标签数组
+                this.columnTags = [];
+                
+                // 重置UI为默认值
+                const allRadio = document.querySelector('input[name="columnFilterMode"][value="all"]');
+                if (allRadio) {
+                    allRadio.checked = true;
+                }
+                
+                const filterInput = document.getElementById('columnFilterInput');
+                if (filterInput) {
+                    filterInput.value = '';
+                }
+                
+                // 清除所有标签
+                this.renderColumnTags();
+                
+                // 更新UI
+                this.updateColumnFilterUI();
+                
+                // 如果有数据，重新显示
+                if (this.headers.length > 0) {
+                    this.applyColumnFilter();
+                    this.renderTable();
+                    this.generateColumnControls();
+                }
+                
+                alert('列过滤设置已重置');
+            }
+
+            // 列内容过滤相关方法
+            addContentFilter() {
+                const columnName = document.getElementById('filterColumnName').value.trim();
+                const condition = document.getElementById('filterCondition').value;
+                const value = document.getElementById('filterValue').value.trim();
+                
+                if (!columnName) {
+                    alert('请输入列名');
+                    return;
+                }
+                
+                // 检查列是否存在
+                if (!this.headers.includes(columnName)) {
+                    alert(`列 "${columnName}" 不存在`);
+                    return;
+                }
+                
+                // 某些条件不需要值
+                if (!['isEmpty', 'notEmpty'].includes(condition) && !value) {
+                    alert('请输入过滤值');
+                    return;
+                }
+                
+                // 添加到过滤器数组
+                const filter = {
+                    id: Date.now(),
+                    column: columnName,
+                    condition: condition,
+                    value: value
+                };
+                
+                this.contentFilters.push(filter);
+                
+                // 清空输入
+                document.getElementById('filterColumnName').value = '';
+                document.getElementById('filterValue').value = '';
+                
+                // 渲染过滤器标签
+                this.renderContentFilters();
+                
+                // 重新应用过滤并显示数据
+                this.applyContentFiltersAndDisplay();
+            }
+
+            removeContentFilter(filterId) {
+                this.contentFilters = this.contentFilters.filter(f => f.id !== filterId);
+                this.renderContentFilters();
+                this.applyContentFiltersAndDisplay();
+            }
+
+            clearAllContentFilters() {
+                if (this.contentFilters.length === 0) {
+                    alert('当前没有活动的过滤器');
+                    return;
+                }
+                
+                const count = this.contentFilters.length;
+                this.contentFilters = [];
+                this.renderContentFilters();
+                this.applyContentFiltersAndDisplay();
+                alert(`已清除所有 ${count} 个过滤器`);
+            }
+
+            updateFilterColumnAndValues(filterId, newColumn) {
+                const filter = this.contentFilters.find(f => f.id === filterId);
+                if (filter) {
+                    filter.column = newColumn.trim();
+                    // 更新该过滤器的可用值列表
+                    this.updateAvailableValuesForFilter(filterId, filter.column);
+                    this.applyContentFiltersAndDisplay();
+                }
+            }
+
+            updateFilterCondition(filterId, newCondition) {
+                const filter = this.contentFilters.find(f => f.id === filterId);
+                if (filter) {
+                    filter.condition = newCondition;
+                    // 如果是isEmpty或notEmpty，清空值
+                    if (['isEmpty', 'notEmpty'].includes(newCondition)) {
+                        filter.value = '';
+                    }
+                    this.renderContentFilters();
+                    this.applyContentFiltersAndDisplay();
+                }
+            }
+
+            updateFilterValue(filterId, newValue) {
+                const filter = this.contentFilters.find(f => f.id === filterId);
+                if (filter) {
+                    filter.value = newValue.trim();
+                    this.applyContentFiltersAndDisplay();
+                }
+            }
+
+            renderContentFilters() {
+                const section = document.getElementById('contentFilterSection');
+                const clearBtn = document.getElementById('clearAllFiltersBtn');
+                
+                // 显示或隐藏清除按钮
+                if (clearBtn) {
+                    clearBtn.style.display = this.contentFilters.length > 0 ? 'inline-block' : 'none';
+                }
+                
+                // 移除所有现有的过滤器行（保留标题和添加输入行）
+                const existingFilters = section.querySelectorAll('.filter-row');
+                existingFilters.forEach(el => el.remove());
+                
+                if (this.contentFilters.length === 0) {
+                    return;
+                }
+                
+                // 找到添加输入行
+                const addInputRow = section.lastElementChild;
+                
+                this.contentFilters.forEach((filter, index) => {
+                    // 创建过滤器行
+                    const filterRow = document.createElement('div');
+                    filterRow.className = 'filter-row';
+                    
+                    filterRow.innerHTML = `
+                        <div class="filter-row-field">
+                            <input type="text" 
+                                   value="${filter.column}" 
+                                   oninput="csvViewer.updateFilterColumnAndValues(${filter.id}, this.value)"
+                                   list="availableColumns"
+                                   class="filter-row-input">
+                        </div>
+                        <div class="filter-row-condition">
+                            <select onchange="csvViewer.updateFilterCondition(${filter.id}, this.value)" class="filter-row-select">
+                                <option value="contains" ${filter.condition === 'contains' ? 'selected' : ''}>包含</option>
+                                <option value="equals" ${filter.condition === 'equals' ? 'selected' : ''}>等于</option>
+                                <option value="notEquals" ${filter.condition === 'notEquals' ? 'selected' : ''}>不等于</option>
+                                <option value="startsWith" ${filter.condition === 'startsWith' ? 'selected' : ''}>开头是</option>
+                                <option value="endsWith" ${filter.condition === 'endsWith' ? 'selected' : ''}>结尾是</option>
+                                <option value="greaterThan" ${filter.condition === 'greaterThan' ? 'selected' : ''}>大于</option>
+                                <option value="lessThan" ${filter.condition === 'lessThan' ? 'selected' : ''}>小于</option>
+                                <option value="isEmpty" ${filter.condition === 'isEmpty' ? 'selected' : ''}>为空</option>
+                                <option value="notEmpty" ${filter.condition === 'notEmpty' ? 'selected' : ''}>不为空</option>
+                            </select>
+                        </div>
+                        <div class="filter-row-field">
+                            <input type="text" 
+                                   value="${filter.value || ''}" 
+                                   onchange="csvViewer.updateFilterValue(${filter.id}, this.value)"
+                                   placeholder="输入过滤值"
+                                   list="availableValues_${filter.id}"
+                                   class="filter-row-input"
+                                   ${['isEmpty', 'notEmpty'].includes(filter.condition) ? 'disabled' : ''}>
+                            <datalist id="availableValues_${filter.id}"></datalist>
+                        </div>
+                        <button onclick="csvViewer.removeContentFilter(${filter.id})" 
+                                class="filter-row-delete-btn"
+                                title="删除此过滤条件">删除</button>`;
+                    
+                    section.insertBefore(filterRow, addInputRow);
+                    
+                    // 初始化该过滤器行的可用值列表
+                    this.updateAvailableValuesForFilter(filter.id, filter.column);
+                });
+            }
+
+            applyContentFiltersAndDisplay() {
+                this.currentPage = 1;
+                this.filterData();
+                this.renderTable();
+            }
+
+            matchFilter(row, filter) {
+                const cellValue = row[filter.column];
+                const filterValue = filter.value;
+                
+                // 处理null/undefined
+                if (cellValue === null || cellValue === undefined) {
+                    if (filter.condition === 'isEmpty') return true;
+                    if (filter.condition === 'notEmpty') return false;
+                    return false;
+                }
+                
+                // 转换为字符串进行比较（除了数字比较）
+                const cellStr = String(cellValue).toLowerCase();
+                const filterStr = String(filterValue).toLowerCase();
+                
+                switch (filter.condition) {
+                    case 'contains':
+                        return cellStr.includes(filterStr);
+                        
+                    case 'equals':
+                        // 尝试数字比较
+                        if (!isNaN(cellValue) && !isNaN(filterValue)) {
+                            return Number(cellValue) === Number(filterValue);
+                        }
+                        return cellStr === filterStr;
+                        
+                    case 'notEquals':
+                        if (!isNaN(cellValue) && !isNaN(filterValue)) {
+                            return Number(cellValue) !== Number(filterValue);
+                        }
+                        return cellStr !== filterStr;
+                        
+                    case 'startsWith':
+                        return cellStr.startsWith(filterStr);
+                        
+                    case 'endsWith':
+                        return cellStr.endsWith(filterStr);
+                        
+                    case 'greaterThan':
+                        if (!isNaN(cellValue) && !isNaN(filterValue)) {
+                            return Number(cellValue) > Number(filterValue);
+                        }
+                        return cellStr > filterStr;
+                        
+                    case 'lessThan':
+                        if (!isNaN(cellValue) && !isNaN(filterValue)) {
+                            return Number(cellValue) < Number(filterValue);
+                        }
+                        return cellStr < filterStr;
+                        
+                    case 'isEmpty':
+                        return cellStr === '' || cellStr === 'null' || cellStr === 'undefined';
+                        
+                    case 'notEmpty':
+                        return cellStr !== '' && cellStr !== 'null' && cellStr !== 'undefined';
+                        
+                    default:
+                        return true;
+                }
+            }
+
+            updateAvailableColumns() {
+                const datalist = document.getElementById('availableColumns');
+                datalist.innerHTML = '';
+                
+                this.headers.forEach(column => {
+                    const option = document.createElement('option');
+                    option.value = column;
+                    datalist.appendChild(option);
+                });
+            }
+
+            // 更新指定列的可用值推荐列表（用于主输入行）
+            updateAvailableValuesForColumn(columnName) {
+                const datalist = document.getElementById('availableValues');
+                
+                // 清空现有选项
+                datalist.innerHTML = '';
+                
+                // 如果列名为空或数据为空，不提供推荐
+                if (!columnName || !this.csvData || this.csvData.length === 0) {
+                    return;
+                }
+                
+                // 收集该列的所有唯一值
+                const uniqueValues = new Set();
+                this.csvData.forEach(row => {
+                    const value = row[columnName];
+                    // 排除 null、undefined 和空字符串
+                    if (value !== null && value !== undefined && value !== '') {
+                        uniqueValues.add(String(value));
+                    }
+                });
+                
+                // 如果唯一值太多（超过100个），只显示前100个
+                const valuesToShow = Array.from(uniqueValues).sort().slice(0, 100);
+                
+                // 添加到 datalist
+                valuesToShow.forEach(value => {
+                    const option = document.createElement('option');
+                    option.value = value;
+                    datalist.appendChild(option);
+                });
+            }
+
+            // 为特定过滤器更新可用值推荐列表
+            updateAvailableValuesForFilter(filterId, columnName) {
+                const datalist = document.getElementById(`availableValues_${filterId}`);
+                
+                // 如果 datalist 不存在，直接返回
+                if (!datalist) {
+                    return;
+                }
+                
+                // 清空现有选项
+                datalist.innerHTML = '';
+                
+                // 如果列名为空或数据为空，不提供推荐
+                if (!columnName || !this.csvData || this.csvData.length === 0) {
+                    return;
+                }
+                
+                // 收集该列的所有唯一值
+                const uniqueValues = new Set();
+                this.csvData.forEach(row => {
+                    const value = row[columnName];
+                    // 排除 null、undefined 和空字符串
+                    if (value !== null && value !== undefined && value !== '') {
+                        uniqueValues.add(String(value));
+                    }
+                });
+                
+                // 如果唯一值太多（超过100个），只显示前100个
+                const valuesToShow = Array.from(uniqueValues).sort().slice(0, 100);
+                
+                // 添加到 datalist
+                valuesToShow.forEach(value => {
+                    const option = document.createElement('option');
+                    option.value = value;
+                    datalist.appendChild(option);
+                });
+            }
+
+            // 初始化内容过滤输入事件
+            initializeContentFilterInput() {
+                const filterColumnInput = document.getElementById('filterColumnName');
+                const filterConditionSelect = document.getElementById('filterCondition');
+                const filterValueInput = document.getElementById('filterValue');
+                
+                // 当条件改变时，根据条件类型启用/禁用值输入框
+                filterConditionSelect.addEventListener('change', () => {
+                    const condition = filterConditionSelect.value;
+                    if (condition === 'isEmpty' || condition === 'notEmpty') {
+                        filterValueInput.disabled = true;
+                        filterValueInput.value = '';
+                        filterValueInput.style.backgroundColor = '#e9ecef';
+                    } else {
+                        filterValueInput.disabled = false;
+                        filterValueInput.style.backgroundColor = '';
+                    }
+                });
+                
+                // 当列名改变时，更新可用值的推荐列表
+                filterColumnInput.addEventListener('input', () => {
+                    this.updateAvailableValuesForColumn(filterColumnInput.value);
+                });
+            }
         }
 
         // 初始化应用
+        let csvViewer;
         document.addEventListener('DOMContentLoaded', () => {
-            new CSVViewer();
+            csvViewer = new CSVViewer();
         });
     </script>
 </body>
