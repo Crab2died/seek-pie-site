@@ -64,17 +64,18 @@
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
-            padding: 20px;
+            padding: clamp(10px, 2vw, 20px);
+            font-size: clamp(14px, 1.5vw, 16px);
             /* 移动端滚动优化 */
             -webkit-overflow-scrolling: touch;
             scroll-behavior: smooth;
         }
 
         .container {
-            max-width: 1400px;
+            max-width: min(1400px, 70vw);
             margin: 0 auto;
             background: white;
-            border-radius: 15px;
+            border-radius: clamp(12px, 2vw, 15px);
             box-shadow: 0 20px 40px rgba(0,0,0,0.1);
             overflow: hidden;
         }
@@ -82,65 +83,142 @@
         .header {
             background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
             color: white;
-            padding: 30px;
+            padding: clamp(20px, 4vw, 30px);
             text-align: center;
         }
 
         .header h1 {
-            font-size: 2.5em;
-            margin-bottom: 10px;
+            font-size: clamp(1.5em, 3.5vw, 2.5em);
+            margin-bottom: clamp(8px, 1.5vw, 10px);
             font-weight: 300;
         }
 
         .header p {
-            font-size: 1.1em;
+            font-size: clamp(0.9em, 2vw, 1.1em);
             opacity: 0.9;
         }
 
         .content {
-            padding: 40px;
+            padding: clamp(20px, 4vw, 40px);
         }
 
-        .info-box {
+        /* 通用提示框基础样式 */
+        .info-box,
+        .info-tip,
+        .warning-tip,
+        .auth-info-box,
+        .auth-warning-box,
+        .response-info-section,
+        .cors-warning-section,
+        .browser-headers-section {
+            padding: clamp(12px, 2vw, 15px);
+            border-radius: clamp(4px, 0.8vw, 8px);
+            margin-bottom: clamp(15px, 2.5vw, 20px);
+            border-left: 4px solid;
+        }
+
+        .info-box,
+        .info-tip,
+        .response-info-section {
             background: #e7f3ff;
-            border-left: 4px solid #2196F3;
-            padding: 15px;
-            border-radius: 5px;
-            margin-bottom: 25px;
+            border-left-color: #2196F3;
         }
 
-        .info-box h4 {
+        .warning-tip,
+        .cors-warning-section {
+            background: #fff9e6;
+            border-left-color: #ffc107;
+        }
+
+        .auth-info-box {
+            background: linear-gradient(135deg, #e7f3ff 0%, #f0f7ff 100%);
+            border-left-color: #667eea;
+        }
+
+        .auth-warning-box {
+            background: linear-gradient(135deg, #fff3cd 0%, #fff8e1 100%);
+            border-left-color: #ffc107;
+        }
+
+        .browser-headers-section {
+            background: #f8f9fa;
+            border-left-color: #6c757d;
+        }
+
+        .info-box h4,
+        .info-tip h4,
+        .auth-info-box h4,
+        .response-info-title,
+        .response-headers-title,
+        .browser-headers-title,
+        .cors-warning-title {
+            margin-bottom: clamp(6px, 1vw, 10px);
+            font-size: clamp(0.85em, 1.6vw, 0.95em);
+            font-weight: 600;
+        }
+
+        .info-box h4,
+        .response-info-title {
             color: #1976D2;
-            margin-bottom: 8px;
         }
 
-        .info-box p {
+        .auth-info-box h4 {
+            color: #667eea;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .cors-warning-title {
+            color: #856404;
+        }
+
+        .browser-headers-title {
             color: #666;
-            line-height: 1.6;
         }
 
-        .info-box code {
+        .info-box p,
+        .info-tip,
+        .auth-info-box p,
+        .auth-warning-box p,
+        .response-info-content,
+        .cors-warning-content,
+        .browser-headers-content {
+            color: #666;
+            line-height: 1.5;
+            font-size: clamp(0.8em, 1.3vw, 0.85em);
+        }
+
+        .warning-tip,
+        .cors-warning-title,
+        .cors-warning-content,
+        .auth-warning-box p {
+            color: #856404;
+        }
+
+        .info-box code,
+        code {
             background: rgba(102, 126, 234, 0.1);
             padding: 2px 6px;
             border-radius: 4px;
             font-family: 'Consolas', 'Monaco', monospace;
-            font-size: 0.9em;
+            font-size: clamp(0.75em, 1.2vw, 0.8em);
             color: #667eea;
         }
 
         .section {
-            margin-bottom: 30px;
+            margin-bottom: clamp(20px, 3vw, 30px);
         }
 
         .section-title {
-            font-size: 1.3em;
+            font-size: clamp(1.1em, 2.2vw, 1.3em);
             font-weight: 600;
             color: #333;
-            margin-bottom: 15px;
+            margin-bottom: clamp(12px, 2vw, 15px);
             display: flex;
             align-items: center;
             justify-content: space-between;
-            gap: 10px;
+            gap: clamp(8px, 1.5vw, 10px);
         }
 
         .config-actions {
@@ -156,80 +234,145 @@
         }
 
         /* 通用间距类 */
-        .mb-15 {
-            margin-bottom: 15px;
-        }
+        .mb-8 { margin-bottom: 8px; }
+        .mb-10 { margin-bottom: 10px; }
+        .mb-15 { margin-bottom: 15px; }
+        .mb-20 { margin-bottom: 20px; }
+        .mb-25 { margin-bottom: 25px; }
+        
+        .mt-8 { margin-top: 8px; }
+        .mt-10 { margin-top: 10px; }
+        .mt-15 { margin-top: 15px; }
+        .mt-20 { margin-top: 20px; }
+        .mt-30 { margin-top: 30px; }
 
-        .mb-10 {
-            margin-bottom: 10px;
-        }
+        .p-10 { padding: 10px; }
+        .p-12 { padding: 12px; }
+        .p-15 { padding: 15px; }
+        .p-20 { padding: 20px; }
 
-        .mb-8 {
-            margin-bottom: 8px;
-        }
+        /* 显示控制类 */
+        .hidden { display: none; }
+        .show { display: block; }
 
-        .mt-8 {
-            margin-top: 8px;
-        }
+        /* Flex 布局类 */
+        .flex { display: flex; }
+        .flex-center { display: flex; align-items: center; justify-content: center; }
+        .flex-between { display: flex; align-items: center; justify-content: space-between; }
+        .flex-col { display: flex; flex-direction: column; }
+        .flex-wrap { flex-wrap: wrap; }
+        .flex-gap-5 { gap: 5px; }
+        .flex-gap-8 { gap: 8px; }
+        .flex-gap-10 { gap: 10px; }
+        .flex-gap-15 { gap: 15px; }
+        .flex-gap-20 { gap: 20px; }
 
-        .mt-10 {
-            margin-top: 10px;
-        }
+        /* 宽度类 */
+        .w-full { width: 100%; }
+        .w-auto { width: auto; }
 
-        .mt-15 {
-            margin-top: 15px;
-        }
+        /* 文本对齐类 */
+        .text-center { text-align: center; }
+        .text-left { text-align: left; }
+        .text-right { text-align: right; }
 
-        .mt-20 {
-            margin-top: 20px;
-        }
+        /* 颜色类 */
+        .text-success { color: #28a745; }
+        .text-error { color: #dc3545; }
+        .text-warning { color: #ffc107; }
+        .text-info { color: #17a2b8; }
+        .text-muted { color: #666; }
 
-        /* 隐藏类 */
-        .hidden {
-            display: none;
-        }
+        /* 字体大小类 */
+        .text-sm { font-size: 0.85em; }
+        .text-md { font-size: 0.95em; }
+        .text-lg { font-size: 1.1em; }
+        .text-xl { font-size: 1.3em; }
 
-        /* 提示框样式 */
-        .info-tip {
-            background: #e7f3ff;
-            border-left: 4px solid #2196F3;
-            padding: 10px;
-            border-radius: 5px;
-            margin-bottom: 15px;
-            font-size: 0.9em;
-        }
+        /* 字体粗细类 */
+        .font-normal { font-weight: 400; }
+        .font-medium { font-weight: 500; }
+        .font-semibold { font-weight: 600; }
+        .font-bold { font-weight: 700; }
 
-        .warning-tip {
-            background: #fff9e6;
-            border-left: 4px solid #ffc107;
-            padding: 10px 15px;
-            border-radius: 5px;
-            margin-bottom: 10px;
-            color: #856404;
-            font-size: 0.9em;
-        }
+        /* 提示框样式已合并到上方通用样式 */
 
-        /* Proto相关样式 */
-        .proto-textarea {
+        /* 通用表单控件样式 */
+        input[type="text"],
+        input[type="password"],
+        input[type="number"],
+        input[type="url"],
+        textarea,
+        select,
+        .url-input,
+        .auth-input,
+        .auth-textarea,
+        .auth-select,
+        .proto-textarea,
+        .proto-select,
+        .key-value-row input[type="text"] {
             width: 100%;
-            padding: 12px;
-            border: 2px solid #e0e0e0;
-            border-radius: 8px;
+            padding: 12px 15px;
+            border: 2px solid #e1e5e9;
+            border-radius: 10px;
+            font-size: 0.95em;
+            background: white;
+            transition: all 0.3s ease;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        textarea,
+        .auth-textarea,
+        .proto-textarea,
+        .url-input,
+        .auth-input,
+        .key-value-row input[type="text"] {
             font-family: 'Consolas', 'Monaco', monospace;
-            font-size: 0.9em;
         }
 
+        input[type="text"]:focus,
+        input[type="password"]:focus,
+        input[type="number"]:focus,
+        input[type="url"]:focus,
+        textarea:focus,
+        select:focus,
+        .url-input:focus,
+        .auth-input:focus,
+        .auth-textarea:focus,
+        .auth-select:focus,
+        .proto-textarea:focus,
+        .proto-select:focus,
+        .key-value-row input[type="text"]:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .auth-input,
+        .auth-textarea {
+            background: #f8f9fa;
+        }
+
+        .auth-input:focus,
+        .auth-textarea:focus {
+            background: white;
+        }
+
+        textarea,
+        .auth-textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        select,
+        .auth-select,
         .proto-select {
-            width: 100%;
-            padding: 10px;
-            border: 2px solid #e0e0e0;
-            border-radius: 8px;
-            font-size: 1em;
+            cursor: pointer;
         }
 
-        .proto-label {
+        .proto-label,
+        label {
             display: block;
-            margin-bottom: 8px;
             font-weight: 600;
             color: #555;
         }
@@ -281,7 +424,7 @@
         }
 
         .protobuf-config-subtitle {
-            font-size: 0.8em;
+            font-size: 0.75em;
             color: #999;
             font-weight: normal;
         }
@@ -299,7 +442,7 @@
         .protobuf-status {
             padding: 8px 12px;
             border-radius: 5px;
-            font-size: 0.9em;
+            font-size: 0.8em;
             display: none;
         }
 
@@ -327,15 +470,14 @@
             margin-bottom: 15px;
         }
 
+        /* 响应相关特殊样式 */
         .response-headers-title {
             color: #4facfe;
-            margin-bottom: 10px;
-            font-size: 1em;
         }
 
         .response-headers-count {
             margin-bottom: 10px;
-            font-size: 0.9em;
+            font-size: 0.8em;
             color: #666;
         }
 
@@ -343,62 +485,29 @@
             color: #999;
             font-style: italic;
             padding: 10px 0;
-        }
-
-        .browser-headers-section {
-            margin-top: 20px;
-            padding: 12px;
-            background: #f8f9fa;
-            border-radius: 5px;
-        }
-
-        .browser-headers-title {
-            color: #666;
-            margin-bottom: 10px;
-            font-size: 0.95em;
-        }
-
-        .browser-headers-content {
             font-size: 0.85em;
-            color: #666;
-            line-height: 1.8;
+        }
+
+        .browser-headers-section,
+        .cors-warning-section,
+        .response-info-section {
+            margin-top: 20px;
         }
 
         .browser-note {
             margin-top: 8px;
             padding-top: 8px;
             border-top: 1px solid #e0e0e0;
-            font-size: 0.8em;
+            font-size: 0.75em;
             color: #999;
             font-style: italic;
-        }
-
-        /* CORS警告区域 */
-        .cors-warning-section {
-            margin-top: 20px;
-            padding: 12px;
-            background: #fff3cd;
-            border-left: 4px solid #ffc107;
-            border-radius: 5px;
-        }
-
-        .cors-warning-title {
-            color: #856404;
-            margin-bottom: 10px;
-            font-size: 0.95em;
-        }
-
-        .cors-warning-content {
-            font-size: 0.85em;
-            color: #856404;
-            line-height: 1.8;
         }
 
         .cors-example {
             margin-top: 12px;
             padding-top: 12px;
             border-top: 1px solid #ffc107;
-            font-size: 0.85em;
+            font-size: 0.8em;
             color: #856404;
         }
 
@@ -408,7 +517,7 @@
             background: rgba(255,255,255,0.5);
             border-radius: 4px;
             font-family: monospace;
-            font-size: 0.9em;
+            font-size: 0.8em;
         }
 
         .cors-code {
@@ -416,29 +525,12 @@
         }
 
         .cors-code-note {
-            font-size: 0.85em;
+            font-size: 0.75em;
             color: #666;
         }
 
-        /* 响应说明区域 */
-        .response-info-section {
-            margin-top: 15px;
-            padding: 12px;
-            background: #e7f3ff;
-            border-left: 4px solid #2196F3;
-            border-radius: 5px;
-        }
-
-        .response-info-title {
-            color: #1976D2;
-            margin-bottom: 10px;
-            font-size: 0.95em;
-        }
-
         .response-info-content {
-            font-size: 0.85em;
             color: #1976D2;
-            line-height: 1.8;
         }
 
         /* 预格式化文本 */
@@ -474,35 +566,26 @@
 
         .url-input {
             flex: 1;
-            padding: 12px;
-            border: 2px solid #e1e5e9;
-            border-radius: 10px;
-            font-size: 1em;
-            font-family: 'Consolas', 'Monaco', monospace;
-            transition: all 0.3s ease;
-        }
-
-        .url-input:focus {
-            outline: none;
-            border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            min-height: 44px;
         }
 
         .btn {
-            padding: 12px 30px;
+            padding: clamp(10px, 1.5vw, 12px) clamp(20px, 3vw, 30px);
             border: none;
-            border-radius: 10px;
-            font-size: 1em;
+            border-radius: clamp(8px, 1.2vw, 10px);
+            font-size: clamp(0.9em, 1.5vw, 1em);
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s ease;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            /* 确保触摸目标足够大 */
+            min-height: 44px;
         }
 
         .btn-primary {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
-            min-width: 120px;
+            min-width: clamp(100px, 15vw, 120px);
         }
 
         .btn-primary:hover {
@@ -598,21 +681,7 @@
             transition: all 0.3s ease;
         }
 
-        .key-value-row input[type="text"] {
-            padding: 10px;
-            border: 2px solid #e1e5e9;
-            border-radius: 8px;
-            font-size: 0.95em;
-            font-family: 'Consolas', 'Monaco', monospace;
-            background: white;
-            box-sizing: border-box;
-        }
-
-        .key-value-row input[type="text"]:focus {
-            outline: none;
-            border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-        }
+        /* key-value-row input 样式已合并到通用表单控件样式 */
 
         .key-value-row input[type="checkbox"] {
             flex-shrink: 0;
@@ -814,100 +883,18 @@
             font-size: 1em;
         }
 
-        .auth-input {
-            width: 100%;
-            padding: 12px 15px;
-            border: 2px solid #e1e5e9;
-            border-radius: 10px;
-            font-size: 0.95em;
-            font-family: 'Consolas', 'Monaco', monospace;
-            background: #f8f9fa;
-            transition: all 0.3s ease;
-        }
-
-        .auth-input:focus {
-            outline: none;
-            border-color: #667eea;
-            background: white;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-        }
-
+        /* Auth 相关样式已合并到通用表单控件和提示框样式 */
+        
         .auth-input[type="password"] {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
 
-        .auth-textarea {
-            width: 100%;
-            min-height: 120px;
-            padding: 15px;
-            border: 2px solid #e1e5e9;
-            border-radius: 10px;
-            font-size: 0.95em;
-            font-family: 'Consolas', 'Monaco', monospace;
-            resize: vertical;
-            background: #f8f9fa;
-            transition: all 0.3s ease;
-        }
-
-        .auth-textarea:focus {
-            outline: none;
-            border-color: #667eea;
-            background: white;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-        }
-
-        .auth-select {
-            width: 100%;
-            padding: 12px 15px;
-            border: 2px solid #e1e5e9;
-            border-radius: 10px;
-            font-size: 0.95em;
-            background: white;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .auth-select:focus {
-            outline: none;
-            border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-        }
-
-        .auth-info-box {
-            background: linear-gradient(135deg, #e7f3ff 0%, #f0f7ff 100%);
-            border-left: 4px solid #667eea;
-            padding: 15px 20px;
-            border-radius: 8px;
-            margin-top: 20px;
-        }
-
-        .auth-info-box h4 {
-            color: #667eea;
-            margin-bottom: 8px;
-            font-size: 1em;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .auth-info-box p {
-            color: #555;
-            line-height: 1.6;
-            font-size: 0.95em;
-        }
-
+        .auth-info-box,
         .auth-warning-box {
-            background: linear-gradient(135deg, #fff3cd 0%, #fff8e1 100%);
-            border-left: 4px solid #ffc107;
-            padding: 15px 20px;
-            border-radius: 8px;
             margin-top: 20px;
         }
 
         .auth-warning-box p {
-            color: #856404;
-            line-height: 1.6;
-            font-size: 0.95em;
             margin: 0;
         }
 
@@ -937,7 +924,7 @@
         }
 
         .status-label {
-            font-size: 0.9em;
+            font-size: 0.8em;
             color: #666;
             margin-bottom: 5px;
         }
@@ -1464,7 +1451,37 @@
         }
 
         /* 移动端优化 */
+        /* 超大屏幕优化 */
+        @media (min-width: 1920px) {
+            body {
+                font-size: 18px;
+            }
+            
+            .container {
+                max-width: 1200px;
+            }
+        }
+
+        /* 大屏幕优化 (桌面) */
+        @media (min-width: 1200px) and (max-width: 1919px) {
+            .container {
+                max-width: min(1000px, 80vw);
+            }
+        }
+
+        /* 平板横屏 */
+        @media (min-width: 769px) and (max-width: 1199px) {
+            .container {
+                max-width: min(900px, 85vw);
+            }
+        }
+
+        /* 平板竖屏和移动端横屏 */
         @media (max-width: 768px) {
+            .container {
+                max-width: 100%;
+            }
+
             body {
                 padding: 10px;
             }
@@ -1555,17 +1572,32 @@
             }
             
             /* 环境管理区域移动端优化 */
+            .env-management {
+                padding: 12px;
+            }
+            
             .env-management > div {
                 flex-direction: column !important;
                 gap: 10px !important;
+                align-items: stretch !important;
+            }
+            
+            .env-management .form-label-inline {
+                width: 100%;
+                margin-bottom: 5px;
+                font-size: 14px;
             }
             
             .env-management select {
                 max-width: 100% !important;
+                width: 100% !important;
+                min-height: 44px;
+                font-size: 14px;
             }
             
             .env-management .btn {
                 width: 100%;
+                justify-content: center;
             }
 
             .tabs {
@@ -1863,6 +1895,28 @@
                 padding: 5px 8px;
             }
             
+            /* 环境管理区域超小屏优化 */
+            .env-management {
+                padding: 10px;
+            }
+            
+            .env-management .form-label-inline {
+                font-size: 13px;
+            }
+            
+            .env-management select {
+                font-size: 13px;
+                padding: 8px 10px;
+                min-height: 44px;
+            }
+            
+            .env-management .btn-small {
+                font-size: 13px;
+                padding: 8px 12px;
+                white-space: normal;
+                line-height: 1.3;
+            }
+            
             /* 输入框字体大小 */
             .key-input, .value-input {
                 font-size: 14px;
@@ -1962,21 +2016,10 @@
             padding-top: 15px;
         }
         
+        /* Flex 工具类已合并到通用样式 */
         .flex-row {
             display: flex;
             align-items: center;
-        }
-        
-        .flex-gap-10 {
-            gap: 10px;
-        }
-        
-        .flex-gap-8 {
-            gap: 8px;
-        }
-        
-        .flex-wrap {
-            flex-wrap: wrap;
         }
         
         .border-top {
@@ -1992,6 +2035,8 @@
         .form-label-inline {
             color: #666;
             font-weight: 500;
+            white-space: nowrap;
+            flex-shrink: 0;
         }
         
         .full-width {
@@ -2006,6 +2051,7 @@
         .section-heading {
             color: #666;
             margin-bottom: 10px;
+            font-size: 0.85em;
         }
         
         .info-note {
@@ -2014,7 +2060,7 @@
             padding: 8px 12px;
             margin-bottom: 12px;
             border-radius: 4px;
-            font-size: 0.85em;
+            font-size: 0.8em;
         }
         
         .success-note {
@@ -2023,7 +2069,7 @@
             padding: 8px 12px;
             margin-bottom: 12px;
             border-radius: 4px;
-            font-size: 0.85em;
+            font-size: 0.8em;
         }
         
         .quick-env-buttons {
@@ -2035,6 +2081,8 @@
         .env-label {
             margin-right: 8px;
             color: #666;
+            white-space: nowrap;
+            flex-shrink: 0;
         }
         
         .btn-disabled-visual {
@@ -2068,6 +2116,141 @@
             
             .tab:active, .body-type-option:active {
                 opacity: 0.8;
+            }
+        }
+
+        /* 横屏模式优化（移动设备） */
+        @media (max-width: 768px) and (orientation: landscape) {
+            body {
+                padding: 8px;
+            }
+            
+            .header {
+                padding: 15px;
+            }
+            
+            .header h1 {
+                font-size: 1.5em;
+                margin-bottom: 5px;
+            }
+            
+            .header p {
+                font-size: 0.85em;
+            }
+            
+            .content {
+                padding: 15px;
+            }
+            
+            .section {
+                margin-bottom: 20px;
+            }
+            
+            .modal-content {
+                max-height: 85vh;
+            }
+            
+            /* 环境管理区域横屏优化 */
+            .env-management {
+                padding: 10px;
+            }
+            
+            .env-management > div {
+                flex-wrap: wrap;
+                gap: 8px !important;
+            }
+            
+            .env-management .form-label-inline {
+                width: 100%;
+                font-size: 13px;
+                margin-bottom: 3px;
+            }
+            
+            .env-management select {
+                flex: 1 1 100%;
+                min-width: 100%;
+                font-size: 13px;
+            }
+            
+            .env-management .btn {
+                flex: 1 1 calc(50% - 4px);
+                font-size: 12px;
+                padding: 8px 10px;
+            }
+        }
+
+        /* 超小屏幕优化 */
+        @media (max-width: 360px) {
+            body {
+                font-size: 13px;
+            }
+            
+            .content {
+                padding: 12px;
+            }
+            
+            .btn {
+                padding: 8px 15px;
+                font-size: 0.85em;
+            }
+            
+            .section-title {
+                font-size: 1em;
+            }
+            
+            /* 环境管理区域超超小屏优化 */
+            .env-management {
+                padding: 8px;
+            }
+            
+            .env-management .form-label-inline {
+                font-size: 12px;
+                margin-bottom: 5px;
+            }
+            
+            .env-management select {
+                font-size: 12px;
+                padding: 8px;
+            }
+            
+            .env-management .btn-small {
+                font-size: 12px;
+                padding: 8px 10px;
+            }
+        }
+
+        /* 打印样式优化 */
+        @media print {
+            body {
+                background: white;
+                padding: 0;
+            }
+            
+            .container {
+                box-shadow: none;
+                max-width: 100%;
+            }
+            
+            .header {
+                background: #4facfe !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+            
+            .btn, .delete-btn, .add-row-btn {
+                display: none;
+            }
+            
+            .response-section {
+                page-break-before: always;
+            }
+            
+            .section {
+                page-break-inside: avoid;
+            }
+            
+            .response-content {
+                max-height: none;
             }
         }
     </style>
@@ -2490,7 +2673,7 @@ message Response {
                     
                     <!-- 环境管理区域 -->
                     <div class="env-management mb-20">
-                        <div class="flex-row flex-gap-10 mb-15">
+                        <div class="flex-row flex-gap-10">
                             <label class="form-label-inline">🌍 当前环境：</label>
                             <select id="modalEnvironmentSelect" class="env-select env-select-wrapper" onchange="switchModalEnvironment()">
                             </select>
@@ -2522,7 +2705,7 @@ message Response {
                 <div class="modal-body">
                     <div class="mb-15">
                         <label class="form-label">环境名称：</label>
-                        <input type="text" id="newEnvironmentName" class="key-input full-width" placeholder="例如：开发环境、测试环境、生产环境" onkeypress="if(event.key==='Enter') addNewEnvironment()">
+                        <input type="text" id="newEnvironmentName" class="auth-input" placeholder="例如：开发环境、测试环境、生产环境" onkeypress="if(event.key==='Enter') addNewEnvironment()">
                     </div>
                     <div class="mb-15">
                         <label class="form-label">快速创建常用环境：</label>

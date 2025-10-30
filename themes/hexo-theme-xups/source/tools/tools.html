@@ -63,28 +63,29 @@
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             color: #333;
+            font-size: clamp(14px, 1.5vw, 16px);
         }
 
         .container {
-            max-width: 1200px;
+            max-width: min(1200px, 70vw);
             margin: 0 auto;
-            padding: 20px;
+            padding: clamp(15px, 2.5vw, 20px);
         }
 
         .header {
             text-align: center;
-            margin-bottom: 30px;
+            margin-bottom: clamp(20px, 3vw, 30px);
             color: white;
         }
 
         .header h1 {
-            font-size: 2.5rem;
-            margin-bottom: 10px;
+            font-size: clamp(1.8rem, 3.5vw, 2.5rem);
+            margin-bottom: clamp(8px, 1.5vw, 10px);
             text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
         }
 
         .header p {
-            font-size: 1.1rem;
+            font-size: clamp(0.95rem, 2vw, 1.1rem);
             opacity: 0.9;
         }
 
@@ -159,12 +160,41 @@
             background: #5a67d8;
         }
 
+        .home-btn {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.95);
+            color: #667eea;
+            border: 2px solid #667eea;
+            padding: 10px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            z-index: 1000;
+        }
+
+        .home-btn:hover {
+            background: #667eea;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+        }
+
         .icon {
             font-size: 1.5rem;
         }
 
         @media (max-width: 768px) {
             .container {
+                max-width: 100%;
                 padding: 10px;
             }
 
@@ -209,10 +239,18 @@
                 padding: 15px;
                 min-height: 400px;
             }
+
+            .home-btn {
+                top: 10px;
+                right: 10px;
+                padding: 8px 16px;
+                font-size: 0.9rem;
+            }
         }
 
         @media (max-width: 480px) {
             .container {
+                max-width: 100%;
                 padding: 8px;
             }
 
@@ -256,10 +294,23 @@
                 padding: 12px;
                 min-height: 350px;
             }
+
+            .home-btn {
+                top: 8px;
+                right: 8px;
+                padding: 6px 12px;
+                font-size: 0.85rem;
+                gap: 5px;
+            }
         }
     </style>
 </head>
 <body>
+    <a href="/" class="home-btn">
+        <span>🏠</span>
+        <span>返回主页</span>
+    </a>
+    
     <div class="container">
         <div class="header">
             <h1>🔧 多功能工具箱</h1>
@@ -276,6 +327,11 @@
             <div class="nav-card" onclick="showTool('api')">
                 <h3><span class="icon">🚀</span>API调试工具</h3>
                 <p>强大的HTTP API测试工具，支持多种请求方法、参数配置和历史记录</p>
+            </div>
+            
+            <div class="nav-card" onclick="showTool('exchange')">
+                <h3><span class="icon">💱</span>汇率转换工具</h3>
+                <p>实时汇率查询，支持多种货币之间的转换计算</p>
             </div>
 
             <div class="nav-card" onclick="showTool('loan')">
@@ -307,6 +363,7 @@
                 <h3><span class="icon">🔑</span>JWT解析工具</h3>
                 <p>解析和验证JSON Web Token，支持Header、Payload和Signature分析</p>
             </div>
+
 
             <div class="nav-card" onclick="showTool('unit')">
                 <h3><span class="icon">📏</span>单位转换工具</h3>
@@ -351,11 +408,6 @@
             <div class="nav-card" onclick="showTool('qrcode')">
                 <h3><span class="icon">📱</span>二维码与条形码工具</h3>
                 <p>快速生成二维码和多种格式的条形码，支持自定义样式和下载</p>
-            </div>
-
-            <div class="nav-card" onclick="showTool('exchange')">
-                <h3><span class="icon">💱</span>汇率转换工具</h3>
-                <p>实时汇率查询，支持多种货币之间的转换计算</p>
             </div>
 
         </div>

@@ -49,14 +49,15 @@
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
-            padding: 20px;
+            padding: clamp(10px, 2vw, 20px);
+            font-size: clamp(14px, 1.5vw, 16px);
         }
 
         .container {
-            max-width: 1400px;
+            max-width: min(1400px, 70vw);
             margin: 0 auto;
             background: white;
-            border-radius: 15px;
+            border-radius: clamp(12px, 2vw, 15px);
             box-shadow: 0 20px 40px rgba(0,0,0,0.1);
             overflow: hidden;
         }
@@ -64,23 +65,23 @@
         .header {
             background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
             color: white;
-            padding: 30px;
+            padding: clamp(20px, 4vw, 30px);
             text-align: center;
         }
 
         .header h1 {
-            font-size: 2.5em;
-            margin-bottom: 10px;
+            font-size: clamp(1.5em, 3.5vw, 2.5em);
+            margin-bottom: clamp(8px, 1.5vw, 10px);
             font-weight: 300;
         }
 
         .header p {
-            font-size: 1.1em;
+            font-size: clamp(0.9em, 2vw, 1.1em);
             opacity: 0.9;
         }
 
         .content {
-            padding: 40px;
+            padding: clamp(20px, 4vw, 40px);
         }
 
         .section {
@@ -565,7 +566,36 @@
         }
 
         /* 移动端优化 */
+        /* 超大屏幕优化 */
+        @media (min-width: 1920px) {
+            body {
+                font-size: 18px;
+            }
+            
+            .container {
+                max-width: 1400px;
+            }
+        }
+
+        /* 大屏幕优化 (桌面) */
+        @media (min-width: 1200px) and (max-width: 1919px) {
+            .container {
+                max-width: min(1200px, 70vw);
+            }
+        }
+
+        /* 平板横屏 */
+        @media (min-width: 769px) and (max-width: 1199px) {
+            .container {
+                max-width: min(1000px, 85vw);
+            }
+        }
+
+        /* 平板竖屏和移动端横屏 */
         @media (max-width: 768px) {
+            .container {
+                max-width: 100%;
+            }
             body {
                 padding: 10px;
             }
@@ -790,6 +820,57 @@
 
             .result-box, .history-list {
                 -webkit-overflow-scrolling: touch;
+            }
+        }
+
+        /* 横屏模式优化（移动设备） */
+        @media (max-width: 768px) and (orientation: landscape) {
+            body {
+                padding: 8px;
+            }
+            
+            .header {
+                padding: 15px;
+            }
+            
+            .header h1 {
+                font-size: 1.5em;
+                margin-bottom: 5px;
+            }
+            
+            .header p {
+                font-size: 0.85em;
+            }
+            
+            .content {
+                padding: 15px;
+            }
+        }
+
+        /* 打印样式优化 */
+        @media print {
+            body {
+                background: white;
+                padding: 0;
+            }
+            
+            .container {
+                box-shadow: none;
+                max-width: 100%;
+            }
+            
+            .header {
+                background: #4facfe !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+            
+            .btn, .button-group {
+                display: none;
+            }
+            
+            .section {
+                page-break-inside: avoid;
             }
         }
     </style>

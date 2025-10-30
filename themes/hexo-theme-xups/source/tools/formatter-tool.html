@@ -50,14 +50,15 @@
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
-            padding: 20px;
+            padding: clamp(10px, 2vw, 20px);
+            font-size: clamp(14px, 1.5vw, 16px);
         }
 
         .container {
-            max-width: 1400px;
+            max-width: min(1400px, 70vw);
             margin: 0 auto;
             background: white;
-            border-radius: 15px;
+            border-radius: clamp(12px, 2vw, 15px);
             box-shadow: 0 20px 40px rgba(0,0,0,0.1);
             overflow: hidden;
         }
@@ -65,23 +66,23 @@
         .header {
             background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
             color: white;
-            padding: 30px;
+            padding: clamp(20px, 4vw, 30px);
             text-align: center;
         }
 
         .header h1 {
-            font-size: 2.5em;
-            margin-bottom: 10px;
+            font-size: clamp(1.5em, 3.5vw, 2.5em);
+            margin-bottom: clamp(8px, 1.5vw, 10px);
             font-weight: 300;
         }
 
         .header p {
-            font-size: 1.1em;
+            font-size: clamp(0.9em, 2vw, 1.1em);
             opacity: 0.9;
         }
 
         .content {
-            padding: 40px;
+            padding: clamp(20px, 4vw, 40px);
         }
 
         .formatter-tabs {
@@ -480,6 +481,10 @@
         @media (max-width: 768px) {
             body {
                 padding: 10px;
+            }
+
+            .container {
+                max-width: 100%;
             }
 
             .content {

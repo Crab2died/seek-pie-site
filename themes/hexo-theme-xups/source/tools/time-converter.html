@@ -50,14 +50,15 @@
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
-            padding: 20px;
+            padding: clamp(10px, 2vw, 20px);
+            font-size: clamp(14px, 1.5vw, 16px);
         }
 
         .container {
-            max-width: 1200px;
+            max-width: min(1400px, 70vw);
             margin: 0 auto;
             background: white;
-            border-radius: 20px;
+            border-radius: clamp(15px, 2vw, 20px);
             box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
             overflow: hidden;
         }
@@ -65,50 +66,50 @@
         .header {
             background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
             color: white;
-            padding: 30px;
+            padding: clamp(20px, 4vw, 30px);
             text-align: center;
         }
 
         .header h1 {
-            font-size: 2.5em;
-            margin-bottom: 10px;
+            font-size: clamp(1.5em, 3.5vw, 2.5em);
+            margin-bottom: clamp(8px, 1.5vw, 10px);
             font-weight: 300;
         }
 
         .header p {
-            font-size: 1.1em;
+            font-size: clamp(0.9em, 2vw, 1.1em);
             opacity: 0.9;
         }
 
         .content {
-            padding: 40px;
+            padding: clamp(20px, 4vw, 40px);
         }
 
         .current-time-section {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border-radius: 15px;
-            padding: 20px;
-            margin-bottom: 30px;
+            border-radius: clamp(12px, 2vw, 15px);
+            padding: clamp(15px, 3vw, 20px);
+            margin-bottom: clamp(20px, 3vw, 30px);
             color: white;
         }
 
         .current-time-section h2 {
             color: white;
-            margin-bottom: 25px;
-            font-size: 1.5em;
+            margin-bottom: clamp(15px, 3vw, 25px);
+            font-size: clamp(1.2em, 2.5vw, 1.5em);
             text-align: center;
         }
 
         .current-time-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 20px;
+            grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr));
+            gap: clamp(15px, 2.5vw, 20px);
         }
 
         .current-time-item {
             background: rgba(255, 255, 255, 0.15);
-            padding: 20px;
-            border-radius: 12px;
+            padding: clamp(15px, 2.5vw, 20px);
+            border-radius: clamp(10px, 1.5vw, 12px);
             text-align: center;
             backdrop-filter: blur(10px);
             border: 1px solid rgba(255, 255, 255, 0.2);
@@ -116,66 +117,69 @@
 
         .current-time-item h4 {
             color: rgba(255, 255, 255, 0.9);
-            margin-bottom: 15px;
-            font-size: 1.2em;
+            margin-bottom: clamp(10px, 2vw, 15px);
+            font-size: clamp(1em, 2vw, 1.2em);
             font-weight: 600;
         }
 
         .current-time-value {
-            font-size: 1.8em;
+            font-size: clamp(1.2em, 2.5vw, 1.8em);
             font-weight: bold;
             color: white;
             font-family: 'Courier New', monospace;
-            margin-bottom: 10px;
+            margin-bottom: clamp(8px, 1.5vw, 10px);
             text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
         }
 
         .current-timestamp {
             background: rgba(255, 255, 255, 0.2);
-            padding: 8px 12px;
+            padding: clamp(6px, 1.5vw, 8px) clamp(10px, 2vw, 12px);
             border-radius: 6px;
-            font-size: 0.9em;
+            font-size: clamp(0.8em, 1.5vw, 0.9em);
             color: rgba(255, 255, 255, 0.9);
             font-family: 'Courier New', monospace;
         }
 
         .converter {
             background: #f8f9fa;
-            border-radius: 15px;
-            padding: 20px;
+            border-radius: clamp(12px, 2vw, 15px);
+            padding: clamp(15px, 3vw, 20px);
         }
 
         .converter h2 {
             color: #333;
-            margin-bottom: 30px;
-            font-size: 1.8em;
+            margin-bottom: clamp(20px, 3vw, 30px);
+            font-size: clamp(1.3em, 2.8vw, 1.8em);
             text-align: center;
         }
 
         .form-group {
-            margin-bottom: 25px;
+            margin-bottom: clamp(20px, 3vw, 25px);
         }
 
         .form-group label {
             display: block;
-            margin-bottom: 8px;
+            margin-bottom: clamp(6px, 1.5vw, 8px);
             font-weight: 600;
             color: #555;
+            font-size: clamp(14px, 1.5vw, 16px);
         }
 
         .form-row {
             display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
+            grid-template-columns: repeat(auto-fit, minmax(min(250px, 100%), 1fr));
+            gap: clamp(15px, 2.5vw, 20px);
         }
 
         .form-control {
             width: 100%;
-            padding: 12px 15px;
+            padding: clamp(10px, 1.5vw, 12px) clamp(12px, 2vw, 15px);
             border: 2px solid #e1e5e9;
-            border-radius: 8px;
-            font-size: 16px;
+            border-radius: clamp(6px, 1vw, 8px);
+            font-size: clamp(14px, 1.5vw, 16px);
             transition: all 0.3s ease;
+            /* 确保在移动设备上触摸目标足够大 */
+            min-height: 44px;
         }
 
         .form-control:focus {
@@ -211,13 +215,15 @@
             background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
             color: white;
             border: none;
-            padding: 12px 25px;
-            border-radius: 8px;
-            font-size: 16px;
+            padding: clamp(10px, 1.5vw, 12px) clamp(20px, 3vw, 25px);
+            border-radius: clamp(6px, 1vw, 8px);
+            font-size: clamp(14px, 1.5vw, 16px);
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s ease;
             white-space: nowrap;
+            /* 确保触摸目标足够大 */
+            min-height: 44px;
         }
 
         .btn:hover {
@@ -227,9 +233,9 @@
 
         .result {
             background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
-            border-radius: 15px;
-            padding: 20px;
-            margin-top: 20px;
+            border-radius: clamp(12px, 2vw, 15px);
+            padding: clamp(15px, 3vw, 20px);
+            margin-top: clamp(15px, 2.5vw, 20px);
             display: none;
         }
 
@@ -240,38 +246,44 @@
 
         /* 历史记录样式 */
         .history-section {
-            margin-top: 30px;
+            margin-top: clamp(20px, 3vw, 30px);
             background: #f8f9fa;
-            border-radius: 15px;
-            padding: 20px;
+            border-radius: clamp(12px, 2vw, 15px);
+            padding: clamp(15px, 3vw, 20px);
         }
 
         .history-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 15px;
+            margin-bottom: clamp(12px, 2vw, 15px);
+            flex-wrap: wrap;
+            gap: clamp(10px, 2vw, 15px);
         }
 
         .history-header h3 {
             color: #2c3e50;
             margin: 0;
+            font-size: clamp(1.1em, 2.2vw, 1.3em);
         }
 
         .history-controls {
             display: flex;
-            gap: 10px;
+            gap: clamp(8px, 1.5vw, 10px);
+            flex-wrap: wrap;
         }
 
         .clear-history-btn, .toggle-history-btn {
-            padding: 8px 16px;
+            padding: clamp(6px, 1.5vw, 8px) clamp(12px, 2vw, 16px);
             background: #dc3545;
             color: white;
             border: none;
-            border-radius: 8px;
+            border-radius: clamp(6px, 1vw, 8px);
             cursor: pointer;
-            font-size: 0.95em;
+            font-size: clamp(0.85em, 1.5vw, 0.95em);
             transition: all 0.3s ease;
+            /* 确保触摸目标足够大 */
+            min-height: 36px;
         }
 
         .toggle-history-btn {
@@ -402,31 +414,31 @@
 
         .result h3 {
             color: #333;
-            margin-bottom: 20px;
-            font-size: 1.5em;
+            margin-bottom: clamp(15px, 2.5vw, 20px);
+            font-size: clamp(1.2em, 2.5vw, 1.5em);
         }
 
         .result-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 20px;
+            grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr));
+            gap: clamp(15px, 2.5vw, 20px);
         }
 
         .result-item {
             background: rgba(255, 255, 255, 0.9);
-            padding: 20px;
-            border-radius: 10px;
+            padding: clamp(15px, 2.5vw, 20px);
+            border-radius: clamp(8px, 1.5vw, 10px);
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
         }
 
         .result-item h4 {
             color: #666;
-            margin-bottom: 10px;
-            font-size: 1.1em;
+            margin-bottom: clamp(8px, 1.5vw, 10px);
+            font-size: clamp(1em, 1.8vw, 1.1em);
         }
 
         .result-value {
-            font-size: 1.2em;
+            font-size: clamp(1em, 2vw, 1.2em);
             font-weight: bold;
             color: #333;
             font-family: 'Courier New', monospace;
@@ -435,22 +447,23 @@
 
         .timestamp {
             background: #f0f0f0;
-            padding: 10px;
-            border-radius: 5px;
-            margin-top: 5px;
+            padding: clamp(8px, 1.5vw, 10px);
+            border-radius: clamp(4px, 0.8vw, 5px);
+            margin-top: clamp(4px, 0.8vw, 5px);
+            font-size: clamp(0.9em, 1.5vw, 1em);
         }
 
         .timezone-info {
-            margin-top: 10px;
+            margin-top: clamp(8px, 1.5vw, 10px);
         }
 
         .dst-status {
             background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);
             color: #333;
-            padding: 8px 12px;
-            border-radius: 6px;
-            margin-top: 8px;
-            font-size: 14px;
+            padding: clamp(6px, 1.2vw, 8px) clamp(10px, 1.8vw, 12px);
+            border-radius: clamp(4px, 0.8vw, 6px);
+            margin-top: clamp(6px, 1.2vw, 8px);
+            font-size: clamp(12px, 1.5vw, 14px);
             font-weight: 600;
             text-align: center;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
@@ -517,254 +530,214 @@
             font-size: 16px;
         }
 
-        /* 平板和小屏幕 */
-        @media (max-width: 992px) {
-            .content {
-                padding: 30px;
+        /* 超大屏幕优化 */
+        @media (min-width: 1920px) {
+            body {
+                font-size: 18px;
             }
             
-            .converter h2 {
-                font-size: 1.5em;
+            .container {
+                max-width: 1400px;
             }
         }
 
-        /* 移动端优化 */
-        @media (max-width: 768px) {
-            body {
-                padding: 10px;
+        /* 大屏幕优化 (桌面) */
+        @media (min-width: 1200px) and (max-width: 1919px) {
+            .form-row {
+                grid-template-columns: 1fr 1fr;
             }
+        }
 
-            .container {
-                border-radius: 15px;
-            }
-
-            .header {
-                padding: 20px 15px;
-            }
-
-            .header h1 {
-                font-size: 1.8em;
-                margin-bottom: 8px;
-            }
-
-            .header p {
-                font-size: 0.95em;
-            }
-
-            .content {
-                padding: 20px 15px;
-            }
-
-            .current-time-section {
-                padding: 15px;
-                margin-bottom: 20px;
-            }
-
-            .current-time-section h2 {
-                font-size: 1.2em;
-                margin-bottom: 15px;
-            }
-
+        /* 平板横屏 */
+        @media (min-width: 769px) and (max-width: 1199px) {
             .current-time-grid {
-                grid-template-columns: 1fr;
-                gap: 15px;
-            }
-
-            .current-time-item {
-                padding: 15px;
-            }
-
-            .current-time-item h4 {
-                font-size: 1em;
-                margin-bottom: 10px;
-            }
-            
-            .current-time-value {
-                font-size: 1.3em;
-                margin-bottom: 8px;
-            }
-
-            .current-timestamp {
-                font-size: 0.85em;
-                padding: 6px 10px;
-            }
-
-            .converter {
-                padding: 15px;
-            }
-
-            .converter h2 {
-                font-size: 1.3em;
-                margin-bottom: 20px;
-            }
-
-            .form-group {
-                margin-bottom: 20px;
-            }
-
-            .form-group label {
-                font-size: 15px;
-                margin-bottom: 6px;
+                grid-template-columns: 1fr 1fr;
             }
             
             .form-row {
-                grid-template-columns: 1fr;
-                gap: 15px;
-            }
-
-            .form-control {
-                padding: 10px 12px;
-                font-size: 15px;
+                grid-template-columns: 1fr 1fr;
             }
             
+            .result-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        /* 平板竖屏和移动端横屏 */
+        @media (max-width: 768px) {
+            .container {
+                max-width: 100%;
+            }
+
+            /* 强制单列布局 */
+            .current-time-grid {
+                grid-template-columns: 1fr !important;
+            }
+            
+            .form-row {
+                grid-template-columns: 1fr !important;
+            }
+            
+            .result-grid {
+                grid-template-columns: 1fr !important;
+            }
+            
+            /* 日期时间输入垂直排列 */
             .datetime-input {
                 flex-direction: column;
-                gap: 8px;
                 align-items: stretch;
             }
 
             .datetime-input input[type="date"],
-            .datetime-input input[type="time"] {
+            .datetime-input input[type="time"],
+            .datetime-input input[type="number"] {
+                width: 100%;
                 min-width: 100%;
             }
 
-            .datetime-input input[type="number"] {
-                width: 100%;
-            }
-
+            /* 按钮全宽 */
             .btn {
-                padding: 10px 20px;
-                font-size: 15px;
                 width: 100%;
             }
 
-            .result {
-                padding: 15px;
-                margin-top: 15px;
-            }
-
-            .result h3 {
-                font-size: 1.2em;
-                margin-bottom: 15px;
-            }
-            
-            .result-grid {
-                grid-template-columns: 1fr;
-                gap: 15px;
-            }
-
-            .result-item {
-                padding: 15px;
-            }
-
-            .result-item h4 {
-                font-size: 1em;
-            }
-
-            .result-value {
-                font-size: 1.1em;
-            }
-
+            /* 历史记录垂直布局 */
             .history-section {
-                margin-top: 20px;
-                padding: 0;
+                padding: clamp(12px, 2vw, 15px);
             }
 
             .history-header {
                 flex-direction: column;
-                gap: 10px;
                 align-items: stretch;
             }
 
-            .history-header h3 {
-                font-size: 1.2em;
-                text-align: center;
-            }
-
             .history-controls {
-                justify-content: center;
-                flex-wrap: wrap;
+                justify-content: stretch;
             }
 
             .clear-history-btn, .toggle-history-btn {
                 flex: 1;
-                min-width: 120px;
-                padding: 8px 16px;
-                font-size: 0.95em;
             }
 
             .history-list {
-                max-height: 300px;
+                max-height: 400px;
             }
 
             .history-item {
                 flex-direction: column;
                 align-items: stretch;
-                gap: 10px;
-                padding: 12px;
-            }
-
-            .history-conversion {
-                font-size: 1em;
-            }
-
-            .history-details {
-                font-size: 0.85em;
+                gap: clamp(8px, 1.5vw, 10px);
             }
 
             .history-actions {
                 justify-content: center;
             }
 
-            .history-action-btn {
-                padding: 4px 10px;
-                font-size: 0.8em;
-            }
-
             .timestamp-info {
                 flex-direction: column;
                 align-items: flex-start;
-                gap: 2px;
-            }
-
-            .timestamp-value {
-                font-size: 0.75em;
-            }
-
-            .dst-status {
-                font-size: 13px;
-                padding: 6px 10px;
+                gap: 4px;
             }
         }
 
         /* 小屏手机优化 */
         @media (max-width: 480px) {
+            /* 针对小屏幕的最小字体大小 */
+            body {
+                font-size: 14px;
+            }
+            
+            /* 减小按钮内边距以适应小屏 */
+            .btn {
+                padding: 10px 15px;
+            }
+            
+            /* 历史记录项更紧凑 */
+            .history-item {
+                padding: 10px;
+            }
+            
+            .history-list {
+                max-height: 300px;
+            }
+        }
+
+        /* 超小屏幕优化 */
+        @media (max-width: 360px) {
+            body {
+                font-size: 13px;
+            }
+            
+            /* 进一步减小间距 */
+            .content {
+                padding: 15px;
+            }
+            
+            .btn {
+                padding: 8px 12px;
+                font-size: 13px;
+            }
+        }
+
+        /* 横屏模式优化（移动设备） */
+        @media (max-width: 768px) and (orientation: landscape) {
+            body {
+                padding: 10px;
+            }
+            
+            .header {
+                padding: 15px;
+            }
+            
             .header h1 {
                 font-size: 1.5em;
+                margin-bottom: 5px;
             }
-
+            
             .header p {
                 font-size: 0.9em;
             }
-
-            .current-time-value {
-                font-size: 1.2em;
+            
+            .content {
+                padding: 15px;
             }
-
-            .current-timestamp {
-                font-size: 0.8em;
+            
+            .current-time-grid {
+                grid-template-columns: 1fr 1fr;
             }
-
-            .converter h2 {
-                font-size: 1.2em;
+            
+            .form-row {
+                grid-template-columns: 1fr 1fr;
             }
-
-            .result h3 {
-                font-size: 1.1em;
+            
+            .result-grid {
+                grid-template-columns: 1fr 1fr;
             }
+            
+            .history-list {
+                max-height: 200px;
+            }
+        }
 
-            .result-value {
-                font-size: 1em;
+        /* 打印样式优化 */
+        @media print {
+            body {
+                background: white;
+                padding: 0;
+            }
+            
+            .container {
+                box-shadow: none;
+                max-width: 100%;
+            }
+            
+            .btn, .history-controls {
+                display: none;
+            }
+            
+            .result {
+                display: block !important;
+                background: white;
+                border: 1px solid #ddd;
             }
         }
     </style>
