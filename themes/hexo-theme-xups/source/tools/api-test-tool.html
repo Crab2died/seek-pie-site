@@ -364,6 +364,14 @@
             resize: vertical;
         }
 
+        /* Proto textarea 禁用自动换行 */
+        .proto-textarea {
+            white-space: pre;
+            overflow-x: auto;
+            word-wrap: normal;
+            overflow-wrap: normal;
+        }
+
         select,
         .auth-select,
         .proto-select {
@@ -538,6 +546,105 @@
             margin: 0;
             white-space: pre-wrap;
             word-wrap: break-word;
+        }
+
+        /* Proto格式化按钮 */
+        .proto-label-wrapper {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+
+        .proto-format-btn {
+            padding: 4px 12px;
+            background: #28a745;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.85em;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+        }
+
+        .proto-format-btn:hover {
+            background: #218838;
+            transform: scale(1.05);
+        }
+
+        .proto-format-btn:active {
+            transform: scale(0.95);
+        }
+
+        /* JWT Token信息显示 */
+        .jwt-info-box {
+            margin-top: 15px;
+            padding: 12px 15px;
+            background: #f8f9fa;
+            border-left: 4px solid #4facfe;
+            border-radius: 5px;
+            font-size: 0.9em;
+            display: none;
+        }
+
+        .jwt-info-box.show {
+            display: block;
+        }
+
+        .jwt-info-box.error {
+            background: #fff3cd;
+            border-left-color: #ffc107;
+        }
+
+        .jwt-info-box.expired {
+            background: #f8d7da;
+            border-left-color: #dc3545;
+        }
+
+        .jwt-info-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #333;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .jwt-info-content {
+            line-height: 1.8;
+            color: #555;
+        }
+
+        .jwt-info-item {
+            margin-bottom: 6px;
+        }
+
+        .jwt-info-item strong {
+            color: #333;
+            min-width: 80px;
+            display: inline-block;
+        }
+
+        .jwt-expire-time {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .jwt-expire-time.expired {
+            color: #dc3545;
+            font-weight: 600;
+        }
+
+        .jwt-expire-time.valid {
+            color: #28a745;
+            font-weight: 600;
+        }
+
+        .jwt-expire-time.warning {
+            color: #ffc107;
+            font-weight: 600;
         }
 
         .request-line {
@@ -2253,9 +2360,48 @@
                 max-height: none;
             }
         }
+
+        /* 返回工具箱按钮样式 */
+        .back-to-toolbox-btn {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.95);
+            color: #667eea;
+            border: 2px solid #667eea;
+            padding: 10px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            z-index: 10000;
+        }
+
+        .back-to-toolbox-btn:hover {
+            background: #667eea;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+        }
+
+        @media (max-width: 768px) {
+            .back-to-toolbox-btn {
+                display: none;
+            }
+        }
     </style>
 </head>
 <body>
+    <a href="tools.html" class="back-to-toolbox-btn">
+        <span>🔧</span>
+        <span>返回工具箱</span>
+    </a>
     <div class="container">
         <div class="header">
             <h1>🚀 API调试工具</h1>
@@ -2370,8 +2516,18 @@
                     <div id="authBearer" class="auth-content hidden">
                         <div class="auth-input-group">
                             <label>🎫 Token</label>
-                            <textarea id="bearerToken" class="auth-textarea" placeholder="请输入Bearer Token，例如：&#10;eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"></textarea>
+                            <textarea id="bearerToken" class="auth-textarea" placeholder="请输入Bearer Token，例如：&#10;eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c" oninput="parseJWTToken()"></textarea>
                         </div>
+                        
+                        <!-- JWT Token 解析信息显示 -->
+                        <div id="jwtInfo" class="jwt-info-box">
+                            <div class="jwt-info-title">
+                                <span id="jwtInfoIcon">🔍</span>
+                                <span id="jwtInfoTitle">JWT Token 信息</span>
+                            </div>
+                            <div class="jwt-info-content" id="jwtInfoContent"></div>
+                        </div>
+                        
                         <div class="auth-info-box">
                             <h4>📘 Bearer Token说明</h4>
                             <p>Bearer Token是最常见的API认证方式，通常用于JWT认证。Token将被自动添加到请求头：<br>
@@ -2464,11 +2620,11 @@
                 <!-- Body -->
                 <div id="body" class="tab-content">
                     <div class="body-type-select">
-                        <div class="body-type-option active" onclick="switchBodyType('none')">None</div>
-                        <div class="body-type-option" onclick="switchBodyType('json')">JSON</div>
-                        <div class="body-type-option" onclick="switchBodyType('form')">Form Data</div>
-                        <div class="body-type-option" onclick="switchBodyType('text')">Raw Text</div>
-                        <div class="body-type-option" onclick="switchBodyType('protobuf')">Protobuf</div>
+                        <div class="body-type-option active" onclick="switchBodyType('none', event)">None</div>
+                        <div class="body-type-option" onclick="switchBodyType('json', event)">JSON</div>
+                        <div class="body-type-option" onclick="switchBodyType('form', event)">Form Data</div>
+                        <div class="body-type-option" onclick="switchBodyType('text', event)">Raw Text</div>
+                        <div class="body-type-option" onclick="switchBodyType('protobuf', event)">Protobuf</div>
                     </div>
 
                     <div id="bodyNone" class="body-content active">
@@ -2495,9 +2651,14 @@
                         
                         <!-- Proto 定义 -->
                         <div class="form-group">
-                            <label class="proto-label">
-                                Proto 定义 (用于请求Body):
-                            </label>
+                            <div class="proto-label-wrapper">
+                                <label class="proto-label" style="margin-bottom: 0;">
+                                    Proto 定义 (用于请求Body):
+                                </label>
+                                <button class="proto-format-btn" onclick="formatProtoCode('requestProtoDefinition')" title="格式化Proto代码">
+                                    ✨ 格式化
+                                </button>
+                            </div>
                             <div id="requestProtoCacheStatus" class="warning-tip hidden">
                                 <span id="requestProtoCacheStatusText"></span>
                             </div>
@@ -2548,52 +2709,54 @@ message Request {
 
                 <!-- Response -->
                 <div id="response" class="tab-content">
-                    <div class="info-tip">
-                        <strong>💡 提示：</strong> 配置响应数据的解析方式，例如 Protocol Buffer 格式的响应解码。
+                    <div class="body-type-select">
+                        <div class="body-type-option active" onclick="switchResponseType('none', event)">None</div>
+                        <div class="body-type-option" onclick="switchResponseType('protobuf', event)">Protobuf</div>
                     </div>
 
-                    <!-- Protobuf配置区域 -->
-                    <div class="protobuf-config-wrapper">
-                        <div class="protobuf-config-header" onclick="toggleProtobufConfig()">
-                            <h3 class="protobuf-config-title">
-                                📦 Protocol Buffer 配置 
-                                <span class="protobuf-config-subtitle">(用于解析 protobuf 响应)</span>
-                            </h3>
-                            <span id="protobufToggleIcon" class="protobuf-toggle-icon">▼</span>
+                    <div id="responseNone" class="body-content active">
+                        <div class="alert alert-info">
+                            <strong>💡 提示：</strong> 响应数据将自动按照返回的Content-Type进行解析（JSON、Text等）。如需解析Protocol Buffer格式，请切换到Protobuf选项。
+                        </div>
+                    </div>
+
+                    <div id="responseProtobuf" class="body-content hidden">
+                        <div class="alert alert-info mb-15">
+                            <strong>💡 提示：</strong> 当API返回 <code>application/x-protobuf</code> 或 <code>application/protobuf</code> 格式的响应时，需要配置Proto定义才能自动解码。
                         </div>
                         
-                        <div id="protobufConfigContent" class="protobuf-config-content">
-                            <div class="info-tip">
-                                <strong>💡 提示：</strong> 当API返回 <code>application/x-protobuf</code> 或 <code>application/protobuf</code> 格式的响应时，需要配置Proto定义才能自动解码。
+                        <!-- Proto 定义 -->
+                        <div class="form-group">
+                            <div class="proto-label-wrapper">
+                                <label class="proto-label" style="margin-bottom: 0;">Proto 定义：</label>
+                                <button class="proto-format-btn" onclick="formatProtoCode('protoDefinition')" title="格式化Proto代码">
+                                    ✨ 格式化
+                                </button>
                             </div>
-                            
-                            <div class="form-group">
-                                <label class="proto-label">Proto 定义：</label>
-                                <textarea id="protoDefinition" rows="8" class="proto-textarea" placeholder='syntax = "proto3";
+                            <textarea id="protoDefinition" rows="8" class="proto-textarea" placeholder='syntax = "proto3";
 
 message Response {
   int32 code = 1;
   string message = 2;
   bytes data = 3;
 }'></textarea>
-                            </div>
-                            
-                            <div class="form-group proto-message-type-group" id="protobufMessageTypeGroup">
-                                <label class="proto-label">消息类型：</label>
-                                <select id="protobufMessageTypeSelect" class="proto-select">
-                                    <option value="">-- 请先解析 Proto --</option>
-                                </select>
-                            </div>
-                            
-                            <div class="button-group">
-                                <button class="btn btn-primary btn-small" onclick="parseProtoDefinition()">
-                                    🔍 解析 Proto
-                                </button>
-                                <button class="btn btn-secondary btn-small" onclick="clearProtoDefinition()">
-                                    🗑️ 清空
-                                </button>
-                                <span id="protobufStatus" class="protobuf-status"></span>
-                            </div>
+                        </div>
+                        
+                        <div class="button-group-mb">
+                            <button class="btn btn-primary btn-small" onclick="parseProtoDefinition()">
+                                🔍 解析 Proto
+                            </button>
+                            <button class="btn btn-secondary btn-small" onclick="clearProtoDefinition()">
+                                🗑️ 清空
+                            </button>
+                        </div>
+                        
+                        <div id="protobufMessageTypeGroup" class="proto-message-type-group">
+                            <label class="proto-label">消息类型：</label>
+                            <select id="protobufMessageTypeSelect" class="proto-select">
+                                <option value="">-- 请先解析 Proto --</option>
+                            </select>
+                            <span id="protobufStatus" class="protobuf-status"></span>
                         </div>
                     </div>
                 </div>
@@ -2730,6 +2893,7 @@ message Response {
 
     <script>
         let currentBodyType = 'none';
+        let currentResponseType = 'none';
         let paramsCount = 0;
         let pathVarsCount = 0;
         let headersCount = 0;
@@ -2743,6 +2907,10 @@ message Response {
         let globalVariables = {}; // 全局变量存储
         let currentEnvironment = 'default'; // 当前选中的环境
         let environments = {}; // 环境存储：{ envName: { variables: {...} } }
+        
+        // JWT Token 刷新定时器
+        let jwtRefreshTimer = null;
+        let currentJWTPayload = null; // 存储当前解析的JWT payload
 
         // 初始化
         document.addEventListener('DOMContentLoaded', function() {
@@ -2772,6 +2940,11 @@ message Response {
             });
             
             console.log('API测试工具初始化完成');
+        });
+        
+        // 页面卸载时清除JWT刷新定时器
+        window.addEventListener('beforeunload', function() {
+            clearJWTRefreshTimer();
         });
 
         // ==================== 全局变量管理 ====================
@@ -3356,7 +3529,13 @@ message Response {
                 
                 // 恢复各种认证方式的配置
                 const bearerTokenElement = document.getElementById('bearerToken');
-                if (bearerTokenElement) bearerTokenElement.value = authConfig.bearerToken || '';
+                if (bearerTokenElement) {
+                    bearerTokenElement.value = authConfig.bearerToken || '';
+                    // 如果有Bearer Token，解析JWT信息
+                    if (authConfig.bearerToken) {
+                        setTimeout(() => parseJWTToken(), 100);
+                    }
+                }
                 
                 const basicUsernameElement = document.getElementById('basicUsername');
                 if (basicUsernameElement) basicUsernameElement.value = authConfig.basicUsername || '';
@@ -3482,18 +3661,30 @@ message Response {
         }
 
         // 切换Body类型
-        function switchBodyType(type) {
+        function switchBodyType(type, evt) {
             currentBodyType = type;
             
-            document.querySelectorAll('.body-type-option').forEach(opt => {
-                opt.classList.remove('active');
-            });
-            event.target.classList.add('active');
+            // 获取Body标签页下的按钮
+            const bodyTab = document.getElementById('body');
+            if (bodyTab) {
+                bodyTab.querySelectorAll('.body-type-option').forEach(opt => {
+                    opt.classList.remove('active');
+                });
+                
+                // 设置当前按钮为active
+                if (evt && evt.target) {
+                    evt.target.classList.add('active');
+                }
+                
+                // 隐藏Body标签下的所有内容区域
+                bodyTab.querySelectorAll('.body-content').forEach(content => {
+                    content.style.display = 'none';
+                    content.classList.remove('active');
+                    content.classList.add('hidden');
+                });
+            }
 
-            document.querySelectorAll('.body-content').forEach(content => {
-                content.style.display = 'none';
-            });
-
+            // 显示选中的内容区域
             const contentMap = {
                 'none': 'bodyNone',
                 'json': 'bodyJson',
@@ -3502,12 +3693,66 @@ message Response {
                 'protobuf': 'bodyProtobuf'
             };
 
-            document.getElementById(contentMap[type]).style.display = 'block';
+            const targetContent = document.getElementById(contentMap[type]);
+            if (targetContent) {
+                targetContent.style.display = 'block';
+                targetContent.classList.remove('hidden');
+                targetContent.classList.add('active');
+            }
 
             // 如果是form类型且没有字段，添加一个
             if (type === 'form' && formDataCount === 0) {
                 addFormData();
             }
+            
+            console.log(`Body类型已切换为: ${type}`);
+        }
+
+        // 切换Response类型
+        function switchResponseType(type, evt) {
+            currentResponseType = type;
+            
+            // 获取Response标签页下的body-type-option按钮
+            const responseTab = document.getElementById('response');
+            if (responseTab) {
+                responseTab.querySelectorAll('.body-type-option').forEach(opt => {
+                    opt.classList.remove('active');
+                });
+                
+                // 设置当前按钮为active
+                if (evt && evt.target) {
+                    evt.target.classList.add('active');
+                }
+            }
+
+            // 隐藏所有Response内容区域
+            const responseNone = document.getElementById('responseNone');
+            const responseProtobuf = document.getElementById('responseProtobuf');
+            
+            if (responseNone) {
+                responseNone.classList.remove('active');
+                responseNone.classList.add('hidden');
+                responseNone.style.display = 'none';
+            }
+            
+            if (responseProtobuf) {
+                responseProtobuf.classList.remove('active');
+                responseProtobuf.classList.add('hidden');
+                responseProtobuf.style.display = 'none';
+            }
+
+            // 显示选中的内容区域
+            if (type === 'none' && responseNone) {
+                responseNone.classList.remove('hidden');
+                responseNone.classList.add('active');
+                responseNone.style.display = 'block';
+            } else if (type === 'protobuf' && responseProtobuf) {
+                responseProtobuf.classList.remove('hidden');
+                responseProtobuf.classList.add('active');
+                responseProtobuf.style.display = 'block';
+            }
+            
+            console.log(`Response类型已切换为: ${type}`);
         }
 
         // 添加Query参数
@@ -4829,7 +5074,8 @@ message Response {
             // 加载认证信息
             if (record.authData) {
                 document.getElementById('authType').value = record.authData.type || 'none';
-                document.getElementById('bearerToken').value = record.authData.bearerToken || '';
+                const bearerToken = record.authData.bearerToken || '';
+                document.getElementById('bearerToken').value = bearerToken;
                 document.getElementById('basicUsername').value = record.authData.basicUsername || '';
                 document.getElementById('basicPassword').value = record.authData.basicPassword || '';
                 document.getElementById('apiKeyName').value = record.authData.apiKeyName || 'X-API-Key';
@@ -4838,6 +5084,11 @@ message Response {
                 document.getElementById('oauth2Token').value = record.authData.oauth2Token || '';
                 document.getElementById('oauth2TokenType').value = record.authData.oauth2TokenType || 'Bearer';
                 switchAuthType();
+                
+                // 如果有Bearer Token，解析JWT信息
+                if (bearerToken && record.authData.type === 'bearer') {
+                    setTimeout(() => parseJWTToken(), 100);
+                }
             }
 
             // 加载Body数据
@@ -5002,11 +5253,10 @@ message Response {
                 // 显示成功提示
                 const historyCount = configuration.data.history.length;
                 const envCount = Object.keys(configuration.data.environments).length;
-                alert(`✅ 配置导出成功！\n\n包含：\n- ${envCount} 个环境配置\n- ${historyCount} 条历史记录\n- Authorization配置\n\n文件名：${filename}`);
+                console.log(`✅ 配置导出成功！包含：${envCount} 个环境配置、${historyCount} 条历史记录、Authorization配置。文件名：${filename}`);
                 
             } catch (error) {
                 console.error('导出配置失败:', error);
-                alert('❌ 导出配置失败：' + error.message);
             }
         }
         
@@ -5022,7 +5272,7 @@ message Response {
             
             // 验证文件类型
             if (!file.name.endsWith('.json')) {
-                alert('❌ 请选择有效的 JSON 配置文件');
+                console.error('❌ 请选择有效的 JSON 配置文件');
                 event.target.value = ''; // 清空选择
                 return;
             }
@@ -5037,24 +5287,18 @@ message Response {
                         throw new Error('配置文件格式无效');
                     }
                     
-                    // 显示导入确认
+                    // 记录导入信息
                     const historyCount = configuration.data.history?.length || 0;
                     const envCount = Object.keys(configuration.data.environments || {}).length;
                     const exportTime = configuration.exportTimeReadable || configuration.exportTime;
                     
-                    const confirmMessage = `确定要导入此配置吗？\n\n配置信息：\n- 导出时间：${exportTime}\n- 环境数量：${envCount} 个\n- 历史记录：${historyCount} 条\n\n⚠️ 注意：导入将会：\n1. 合并环境配置（同名环境将被覆盖）\n2. 合并历史记录（相同URL的请求将保留最新的）\n3. 覆盖Authorization配置`;
-                    
-                    if (!confirm(confirmMessage)) {
-                        event.target.value = ''; // 清空选择
-                        return;
-                    }
+                    console.log(`导入配置信息：导出时间：${exportTime}，环境数量：${envCount} 个，历史记录：${historyCount} 条`);
                     
                     // 执行导入
                     performImport(configuration);
                     
                 } catch (error) {
                     console.error('导入配置失败:', error);
-                    alert('❌ 导入配置失败：' + error.message);
                 }
                 
                 // 清空文件选择，允许重复导入同一文件
@@ -5062,7 +5306,7 @@ message Response {
             };
             
             reader.onerror = function() {
-                alert('❌ 读取文件失败');
+                console.error('❌ 读取文件失败');
                 event.target.value = '';
             };
             
@@ -5133,12 +5377,379 @@ message Response {
                 // 显示成功提示
                 const historyCount = configuration.data.history?.length || 0;
                 const envCount = Object.keys(configuration.data.environments || {}).length;
-                alert(`✅ 配置导入成功！\n\n已导入：\n- ${envCount} 个环境配置\n- ${historyCount} 条历史记录\n- Authorization配置\n\n页面配置已自动刷新。`);
+                console.log(`✅ 配置导入成功！已导入：${envCount} 个环境配置、${historyCount} 条历史记录、Authorization配置。页面配置已自动刷新。`);
                 
             } catch (error) {
                 console.error('执行导入失败:', error);
-                alert('❌ 导入过程中出现错误：' + error.message);
             }
+        }
+
+        // ==================== JWT Token 解析功能 ====================
+        
+        /**
+         * 解析JWT Token并显示信息
+         */
+        function parseJWTToken() {
+            const tokenInput = document.getElementById('bearerToken');
+            const jwtInfoBox = document.getElementById('jwtInfo');
+            const jwtInfoIcon = document.getElementById('jwtInfoIcon');
+            const jwtInfoTitle = document.getElementById('jwtInfoTitle');
+            const jwtInfoContent = document.getElementById('jwtInfoContent');
+            
+            if (!tokenInput || !jwtInfoBox) return;
+            
+            // 先替换全局变量，再解析token
+            const tokenWithVars = tokenInput.value.trim();
+            const token = replaceVariables(tokenWithVars);
+            
+            // 如果Token为空，隐藏信息框并清除定时器
+            if (!token) {
+                jwtInfoBox.classList.remove('show', 'error', 'expired');
+                clearJWTRefreshTimer();
+                return;
+            }
+            
+            try {
+                // 检查是否是JWT格式（三段用.分隔）
+                const parts = token.split('.');
+                if (parts.length !== 3) {
+                    showJWTError('Token格式不正确，JWT应包含三个部分（Header.Payload.Signature）');
+                    clearJWTRefreshTimer();
+                    return;
+                }
+                
+                // 解析Header
+                const header = JSON.parse(base64UrlDecode(parts[0]));
+                
+                // 解析Payload
+                const payload = JSON.parse(base64UrlDecode(parts[1]));
+                
+                // 存储当前payload用于定时刷新
+                currentJWTPayload = { header, payload };
+                
+                // 显示解析后的信息
+                displayJWTInfo(header, payload);
+                
+                // 启动定时刷新（每秒更新一次）
+                startJWTRefreshTimer();
+                
+            } catch (error) {
+                console.error('JWT解析错误:', error);
+                showJWTError('Token解析失败，请确保输入的是有效的JWT Token');
+                clearJWTRefreshTimer();
+            }
+        }
+        
+        /**
+         * 启动JWT刷新定时器
+         */
+        function startJWTRefreshTimer() {
+            // 先清除旧的定时器（但不清空payload数据）
+            stopJWTRefreshTimer();
+            
+            // 确保有payload和过期时间
+            if (!currentJWTPayload || !currentJWTPayload.payload.exp) {
+                return;
+            }
+            
+            // 启动新的定时器，每秒刷新一次
+            jwtRefreshTimer = setInterval(() => {
+                if (currentJWTPayload && currentJWTPayload.payload.exp) {
+                    // 只刷新显示，不重新解析
+                    displayJWTInfo(currentJWTPayload.header, currentJWTPayload.payload);
+                }
+            }, 1000);
+            
+            console.log('JWT刷新定时器已启动');
+        }
+        
+        /**
+         * 停止JWT刷新定时器（不清空payload）
+         */
+        function stopJWTRefreshTimer() {
+            if (jwtRefreshTimer) {
+                clearInterval(jwtRefreshTimer);
+                jwtRefreshTimer = null;
+            }
+        }
+        
+        /**
+         * 清除JWT刷新定时器（同时清空payload）
+         */
+        function clearJWTRefreshTimer() {
+            stopJWTRefreshTimer();
+            currentJWTPayload = null;
+        }
+        
+        /**
+         * Base64 URL解码
+         * @param {string} str - Base64 URL编码的字符串
+         * @returns {string} 解码后的字符串
+         */
+        function base64UrlDecode(str) {
+            // 将Base64 URL转换为标准Base64
+            let base64 = str.replace(/-/g, '+').replace(/_/g, '/');
+            
+            // 补齐padding
+            const pad = base64.length % 4;
+            if (pad) {
+                if (pad === 1) {
+                    throw new Error('Invalid Base64 string');
+                }
+                base64 += '='.repeat(4 - pad);
+            }
+            
+            // 解码Base64
+            try {
+                return decodeURIComponent(escape(atob(base64)));
+            } catch (e) {
+                throw new Error('Invalid Base64 encoding');
+            }
+        }
+        
+        /**
+         * 显示JWT信息
+         * @param {object} header - JWT Header
+         * @param {object} payload - JWT Payload
+         */
+        function displayJWTInfo(header, payload) {
+            const jwtInfoBox = document.getElementById('jwtInfo');
+            const jwtInfoIcon = document.getElementById('jwtInfoIcon');
+            const jwtInfoTitle = document.getElementById('jwtInfoTitle');
+            const jwtInfoContent = document.getElementById('jwtInfoContent');
+            
+            // 重置样式
+            jwtInfoBox.classList.remove('error', 'expired');
+            jwtInfoBox.classList.add('show');
+            
+            let infoHTML = '';
+            
+            // 显示算法
+            if (header.alg) {
+                infoHTML += `<div class="jwt-info-item"><strong>算法：</strong>${escapeHtml(header.alg)}</div>`;
+            }
+            
+            // 显示签发时间
+            if (payload.iat) {
+                const iatDate = new Date(payload.iat * 1000);
+                infoHTML += `<div class="jwt-info-item"><strong>签发时间：</strong>${iatDate.toLocaleString('zh-CN')}</div>`;
+            }
+            
+            // 显示过期时间及状态
+            if (payload.exp) {
+                const expDate = new Date(payload.exp * 1000);
+                const now = new Date();
+                const isExpired = expDate < now;
+                const timeUntilExpiry = expDate - now;
+                const hoursUntilExpiry = Math.floor(timeUntilExpiry / (1000 * 60 * 60));
+                
+                let expireClass = 'valid';
+                let expireIcon = '✅';
+                let expireStatus = '有效';
+                
+                if (isExpired) {
+                    expireClass = 'expired';
+                    expireIcon = '❌';
+                    expireStatus = '已过期';
+                    jwtInfoBox.classList.add('expired');
+                    jwtInfoIcon.textContent = '⚠️';
+                    jwtInfoTitle.textContent = 'JWT Token 已过期';
+                } else if (hoursUntilExpiry < 24) {
+                    expireClass = 'warning';
+                    expireIcon = '⚠️';
+                    expireStatus = '即将过期';
+                    jwtInfoIcon.textContent = '⚠️';
+                } else {
+                    jwtInfoIcon.textContent = '✅';
+                    jwtInfoTitle.textContent = 'JWT Token 有效';
+                }
+                
+                infoHTML += `<div class="jwt-info-item">
+                    <strong>过期时间：</strong>
+                    <span class="jwt-expire-time ${expireClass}">
+                        ${expireIcon} ${expDate.toLocaleString('zh-CN')} (${expireStatus})
+                    </span>
+                </div>`;
+                
+                // 显示剩余时间或已过期时间
+                if (isExpired) {
+                    const expiredTime = -timeUntilExpiry;
+                    const expiredDays = Math.floor(expiredTime / (1000 * 60 * 60 * 24));
+                    const expiredHours = Math.floor((expiredTime % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                    const expiredMinutes = Math.floor((expiredTime % (1000 * 60 * 60)) / (1000 * 60));
+                    const expiredSeconds = Math.floor((expiredTime % (1000 * 60)) / 1000);
+                    
+                    let expiredTimeStr = '';
+                    if (expiredDays > 0) expiredTimeStr += expiredDays + '天';
+                    if (expiredHours > 0 || expiredDays > 0) expiredTimeStr += expiredHours + '小时';
+                    if (expiredMinutes > 0 || expiredHours > 0 || expiredDays > 0) expiredTimeStr += expiredMinutes + '分钟';
+                    expiredTimeStr += expiredSeconds + '秒';
+                    
+                    infoHTML += `<div class="jwt-info-item" style="color: #dc3545;">
+                        <strong>已过期：</strong>${expiredTimeStr}
+                    </div>`;
+                } else {
+                    const daysLeft = Math.floor(timeUntilExpiry / (1000 * 60 * 60 * 24));
+                    const hoursLeft = Math.floor((timeUntilExpiry % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                    const minutesLeft = Math.floor((timeUntilExpiry % (1000 * 60 * 60)) / (1000 * 60));
+                    const secondsLeft = Math.floor((timeUntilExpiry % (1000 * 60)) / 1000);
+                    
+                    let remainingTimeStr = '';
+                    if (daysLeft > 0) remainingTimeStr += daysLeft + '天';
+                    if (hoursLeft > 0 || daysLeft > 0) remainingTimeStr += hoursLeft + '小时';
+                    if (minutesLeft > 0 || hoursLeft > 0 || daysLeft > 0) remainingTimeStr += minutesLeft + '分钟';
+                    remainingTimeStr += secondsLeft + '秒';
+                    
+                    const color = hoursUntilExpiry < 24 ? '#ffc107' : '#28a745';
+                    infoHTML += `<div class="jwt-info-item" style="color: ${color};">
+                        <strong>剩余时间：</strong>${remainingTimeStr}
+                    </div>`;
+                }
+            }
+            
+            // 显示主题/用户
+            if (payload.sub) {
+                infoHTML += `<div class="jwt-info-item"><strong>主题(sub)：</strong>${escapeHtml(payload.sub)}</div>`;
+            }
+            
+            // 显示用户名
+            if (payload.name) {
+                infoHTML += `<div class="jwt-info-item"><strong>用户名：</strong>${escapeHtml(payload.name)}</div>`;
+            }
+            
+            // 显示用户ID
+            if (payload.userId || payload.user_id || payload.uid) {
+                const userId = payload.userId || payload.user_id || payload.uid;
+                infoHTML += `<div class="jwt-info-item"><strong>用户ID：</strong>${escapeHtml(String(userId))}</div>`;
+            }
+            
+            // 显示角色
+            if (payload.role || payload.roles) {
+                const roles = payload.role || payload.roles;
+                const rolesStr = Array.isArray(roles) ? roles.join(', ') : roles;
+                infoHTML += `<div class="jwt-info-item"><strong>角色：</strong>${escapeHtml(String(rolesStr))}</div>`;
+            }
+            
+            // 显示发行者
+            if (payload.iss) {
+                infoHTML += `<div class="jwt-info-item"><strong>发行者(iss)：</strong>${escapeHtml(payload.iss)}</div>`;
+            }
+            
+            // 显示受众
+            if (payload.aud) {
+                const audStr = Array.isArray(payload.aud) ? payload.aud.join(', ') : payload.aud;
+                infoHTML += `<div class="jwt-info-item"><strong>受众(aud)：</strong>${escapeHtml(audStr)}</div>`;
+            }
+            
+            jwtInfoContent.innerHTML = infoHTML;
+        }
+        
+        /**
+         * 显示JWT错误信息
+         * @param {string} message - 错误消息
+         */
+        function showJWTError(message) {
+            const jwtInfoBox = document.getElementById('jwtInfo');
+            const jwtInfoIcon = document.getElementById('jwtInfoIcon');
+            const jwtInfoTitle = document.getElementById('jwtInfoTitle');
+            const jwtInfoContent = document.getElementById('jwtInfoContent');
+            
+            jwtInfoBox.classList.remove('expired');
+            jwtInfoBox.classList.add('show', 'error');
+            jwtInfoIcon.textContent = '⚠️';
+            jwtInfoTitle.textContent = 'Token解析错误';
+            jwtInfoContent.innerHTML = `<div class="jwt-info-item" style="color: #856404;">${escapeHtml(message)}</div>`;
+        }
+
+        // ==================== Proto格式化功能 ====================
+        
+        /**
+         * 格式化Proto代码
+         * @param {string} textareaId - textarea元素的ID
+         */
+        function formatProtoCode(textareaId) {
+            const textarea = document.getElementById(textareaId);
+            if (!textarea) {
+                console.error('找不到元素:', textareaId);
+                return;
+            }
+            
+            const code = textarea.value.trim();
+            
+            if (!code) {
+                alert('⚠️ 请先输入Proto定义代码');
+                return;
+            }
+            
+            try {
+                const formatted = formatProto(code);
+                textarea.value = formatted;
+                
+                // 显示成功提示
+                const btn = event.target;
+                const originalText = btn.textContent;
+                btn.textContent = '✅ 已格式化';
+                btn.style.background = '#28a745';
+                
+                setTimeout(() => {
+                    btn.textContent = originalText;
+                    btn.style.background = '';
+                }, 2000);
+                
+                console.log('✅ Proto代码已格式化');
+                
+            } catch (error) {
+                console.error('格式化失败:', error);
+                alert('❌ 格式化失败: ' + error.message);
+            }
+        }
+        
+        /**
+         * Proto代码格式化核心函数
+         * @param {string} code - 待格式化的Proto代码
+         * @returns {string} 格式化后的代码
+         */
+        function formatProto(code) {
+            if (!code || !code.trim()) return '';
+            
+            const lines = code.split('\n');
+            const formatted = [];
+            let indentLevel = 0;
+            const indentSize = 2; // 使用2个空格缩进
+            
+            for (let line of lines) {
+                // 移除前后空白
+                const trimmed = line.trim();
+                
+                // 保留空行
+                if (!trimmed) {
+                    formatted.push('');
+                    continue;
+                }
+                
+                // 处理注释行（保持原样）
+                if (trimmed.startsWith('//') || trimmed.startsWith('/*') || trimmed.startsWith('*')) {
+                    const indent = ' '.repeat(indentLevel * indentSize);
+                    formatted.push(indent + trimmed);
+                    continue;
+                }
+                
+                // 检查是否需要减少缩进（闭合括号）
+                if (trimmed.startsWith('}')) {
+                    indentLevel = Math.max(0, indentLevel - 1);
+                }
+                
+                // 添加缩进
+                const indent = ' '.repeat(indentLevel * indentSize);
+                formatted.push(indent + trimmed);
+                
+                // 检查是否需要增加缩进（开放括号）
+                if (trimmed.endsWith('{')) {
+                    indentLevel++;
+                }
+            }
+            
+            return formatted.join('\n');
         }
 
         function escapeHtml(text) {
