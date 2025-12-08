@@ -1,0 +1,1969 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>福利彩票开奖查询 - 工具箱</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: clamp(10px, 2vw, 20px);
+            font-size: clamp(14px, 1.5vw, 16px);
+        }
+
+        .container {
+            max-width: min(1400px, 70vw);
+            margin: 0 auto;
+            background: white;
+            border-radius: clamp(15px, 2vw, 20px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+            color: white;
+            padding: clamp(20px, 4vw, 30px);
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: clamp(1.5em, 3.5vw, 2.5em);
+            margin-bottom: clamp(8px, 1.5vw, 10px);
+            font-weight: 300;
+        }
+
+        .header p {
+            font-size: clamp(0.9em, 2vw, 1.1em);
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: clamp(15px, 4vw, 40px);
+        }
+
+        /* 返回工具箱按钮 */
+        .back-to-toolbox-btn {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.95);
+            color: #667eea;
+            border: 2px solid #667eea;
+            padding: 10px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            z-index: 10000;
+        }
+
+        .back-to-toolbox-btn:hover {
+            background: #667eea;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+        }
+
+        /* 彩票类型选择标签 */
+        .lottery-tabs {
+            display: flex;
+            gap: clamp(8px, 2vw, 15px);
+            margin-bottom: clamp(15px, 3vw, 25px);
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .tab-btn {
+            background: #f8f9fa;
+            color: #333;
+            border: 2px solid #e1e5e9;
+            padding: clamp(10px, 2vw, 15px) clamp(15px, 3vw, 30px);
+            border-radius: clamp(8px, 1.5vw, 12px);
+            cursor: pointer;
+            font-size: clamp(0.9rem, 1.8vw, 1rem);
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: clamp(6px, 1vw, 10px);
+            min-height: 44px;
+        }
+
+        .tab-btn:hover {
+            border-color: #e74c3c;
+            transform: translateY(-2px);
+        }
+
+        .tab-btn.active {
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+            color: white;
+            border-color: #e74c3c;
+            box-shadow: 0 4px 15px rgba(231, 76, 60, 0.4);
+        }
+
+        .tab-icon {
+            font-size: clamp(1.2rem, 2.5vw, 1.5rem);
+        }
+
+        /* 主内容区布局 */
+        .main-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(min(350px, 100%), 1fr));
+            gap: clamp(15px, 3vw, 25px);
+        }
+
+        /* 卡片样式 */
+        .card {
+            background: #f8f9fa;
+            border-radius: clamp(10px, 2vw, 15px);
+            padding: clamp(15px, 3vw, 25px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        }
+
+        .card-title {
+            font-size: clamp(1rem, 2vw, 1.2rem);
+            margin-bottom: clamp(15px, 2.5vw, 20px);
+            padding-bottom: clamp(10px, 2vw, 15px);
+            border-bottom: 2px solid #e1e5e9;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #333;
+            font-weight: 600;
+        }
+
+        /* 控制区域 */
+        .controls {
+            display: flex;
+            gap: clamp(10px, 2vw, 15px);
+            margin-bottom: clamp(15px, 2.5vw, 20px);
+            flex-wrap: wrap;
+        }
+
+        .control-group {
+            flex: 1;
+            min-width: min(150px, 100%);
+        }
+
+        .control-group label {
+            display: block;
+            margin-bottom: clamp(6px, 1vw, 8px);
+            color: #555;
+            font-size: clamp(0.85rem, 1.5vw, 0.9rem);
+            font-weight: 600;
+        }
+
+        .control-group input,
+        .control-group select {
+            width: 100%;
+            padding: clamp(10px, 1.5vw, 12px) clamp(12px, 2vw, 15px);
+            border: 2px solid #e1e5e9;
+            border-radius: clamp(6px, 1vw, 8px);
+            font-size: clamp(14px, 1.5vw, 16px);
+            transition: all 0.3s ease;
+            min-height: 44px;
+            background: white;
+        }
+
+        .control-group input:focus,
+        .control-group select:focus {
+            outline: none;
+            border-color: #e74c3c;
+            box-shadow: 0 0 0 3px rgba(231, 76, 60, 0.1);
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+            color: white;
+            border: none;
+            padding: clamp(10px, 1.5vw, 12px) clamp(20px, 3vw, 25px);
+            border-radius: clamp(6px, 1vw, 8px);
+            font-size: clamp(14px, 1.5vw, 16px);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+            min-height: 44px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(231, 76, 60, 0.4);
+        }
+
+        .btn-secondary {
+            background: white;
+            color: #666;
+            border: 2px solid #e1e5e9;
+        }
+
+        .btn-secondary:hover {
+            border-color: #e74c3c;
+            color: #e74c3c;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        /* 最新开奖结果 */
+        .latest-result {
+            text-align: center;
+            padding: clamp(15px, 3vw, 20px) 0;
+        }
+
+        .issue-info {
+            font-size: clamp(1rem, 2vw, 1.1rem);
+            color: #666;
+            margin-bottom: clamp(10px, 2vw, 15px);
+        }
+
+        .issue-number {
+            color: #e74c3c;
+            font-weight: 700;
+        }
+
+        .balls-container {
+            display: flex;
+            justify-content: center;
+            gap: clamp(8px, 1.5vw, 12px);
+            flex-wrap: wrap;
+            margin: clamp(15px, 3vw, 25px) 0;
+        }
+
+        .ball {
+            width: clamp(38px, 7vw, 50px);
+            height: clamp(38px, 7vw, 50px);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: clamp(1rem, 2vw, 1.3rem);
+            font-weight: bold;
+            color: white;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3), inset 0 -3px 10px rgba(0,0,0,0.2);
+            animation: ballPop 0.5s ease-out;
+            position: relative;
+        }
+
+        .ball::before {
+            content: '';
+            position: absolute;
+            top: 6px;
+            left: 10px;
+            width: 10px;
+            height: 6px;
+            background: rgba(255,255,255,0.4);
+            border-radius: 50%;
+            transform: rotate(-30deg);
+        }
+
+        .ball.red {
+            background: linear-gradient(135deg, #ff6b6b 0%, #e74c3c 50%, #c0392b 100%);
+        }
+
+        .ball.blue {
+            background: linear-gradient(135deg, #74b9ff 0%, #3498db 50%, #2980b9 100%);
+        }
+
+        .ball.green {
+            background: linear-gradient(135deg, #55efc4 0%, #27ae60 50%, #1e8449 100%);
+        }
+
+        @keyframes ballPop {
+            0% { transform: scale(0); opacity: 0; }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .plus-sign {
+            font-size: clamp(1.5rem, 3vw, 2rem);
+            color: #999;
+            display: flex;
+            align-items: center;
+        }
+
+        /* 奖金信息 */
+        .prize-info {
+            margin-top: clamp(15px, 3vw, 25px);
+            background: white;
+            border-radius: clamp(8px, 1.5vw, 12px);
+            padding: clamp(12px, 2vw, 20px);
+            border: 2px solid #e1e5e9;
+        }
+
+        .prize-row {
+            display: flex;
+            justify-content: space-between;
+            padding: clamp(8px, 1.5vw, 10px) 0;
+            border-bottom: 1px solid #f0f0f0;
+            font-size: clamp(0.85rem, 1.5vw, 0.95rem);
+        }
+
+        .prize-row:last-child {
+            border-bottom: none;
+        }
+
+        .prize-level {
+            color: #e74c3c;
+            font-weight: 600;
+        }
+
+        .prize-amount {
+            color: #333;
+        }
+
+        .draw-time {
+            margin-top: clamp(10px, 2vw, 15px);
+            color: #888;
+            font-size: clamp(0.8rem, 1.5vw, 0.9rem);
+        }
+
+        /* 历史记录 */
+        .history-section {
+            max-height: 385px;
+            overflow-y: auto;
+        }
+
+        .history-section::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .history-section::-webkit-scrollbar-track {
+            background: #f0f0f0;
+            border-radius: 3px;
+        }
+
+        .history-section::-webkit-scrollbar-thumb {
+            background: #ccc;
+            border-radius: 3px;
+        }
+
+        .history-section::-webkit-scrollbar-thumb:hover {
+            background: #e74c3c;
+        }
+
+        .history-item {
+            background: white;
+            border: 2px solid #e1e5e9;
+            border-radius: clamp(8px, 1.5vw, 10px);
+            padding: clamp(10px, 2vw, 15px);
+            margin-bottom: clamp(8px, 1.5vw, 12px);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .history-item:hover {
+            border-color: #e74c3c;
+            box-shadow: 0 4px 12px rgba(231, 76, 60, 0.15);
+        }
+
+        .history-issue {
+            font-size: clamp(0.75rem, 1.3vw, 0.85rem);
+            color: #888;
+            margin-bottom: clamp(6px, 1vw, 8px);
+        }
+
+        .history-balls {
+            display: flex;
+            gap: clamp(4px, 0.8vw, 6px);
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .history-ball {
+            width: clamp(28px, 4vw, 32px);
+            height: clamp(28px, 4vw, 32px);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: clamp(0.65rem, 1.2vw, 0.75rem);
+            font-weight: bold;
+            color: white;
+        }
+
+        .history-ball.red {
+            background: #e74c3c;
+        }
+
+        .history-ball.blue {
+            background: #3498db;
+        }
+
+        .history-ball.green {
+            background: #27ae60;
+        }
+
+        .history-plus {
+            color: #999;
+            display: flex;
+            align-items: center;
+            font-size: clamp(0.7rem, 1.2vw, 0.8rem);
+        }
+
+        /* 号码统计热度 */
+        .hot-numbers {
+            margin-top: clamp(15px, 2.5vw, 20px);
+        }
+
+        .hot-number-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: clamp(5px, 1vw, 8px);
+            margin-top: clamp(10px, 2vw, 15px);
+        }
+
+        .hot-number {
+            width: clamp(30px, 5vw, 36px);
+            height: clamp(30px, 5vw, 36px);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: clamp(0.75rem, 1.3vw, 0.85rem);
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .hot-number.hot {
+            background: linear-gradient(135deg, #ff6b6b 0%, #e74c3c 100%);
+            color: white;
+        }
+
+        .hot-number.warm {
+            background: linear-gradient(135deg, #feca57 0%, #f39c12 100%);
+            color: #333;
+        }
+
+        .hot-number.cold {
+            background: #e1e5e9;
+            color: #888;
+        }
+
+        .hot-number:hover {
+            transform: scale(1.15);
+        }
+
+        .hot-legend {
+            display: flex;
+            gap: clamp(12px, 2vw, 20px);
+            margin-top: clamp(10px, 2vw, 15px);
+            font-size: clamp(0.75rem, 1.3vw, 0.85rem);
+            color: #666;
+            flex-wrap: wrap;
+        }
+
+        .hot-legend span {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .legend-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .legend-dot.hot { background: #e74c3c; }
+        .legend-dot.warm { background: #f39c12; }
+        .legend-dot.cold { background: #e1e5e9; }
+
+        /* 号码推荐区域 */
+        .recommend-section {
+            margin-top: clamp(15px, 3vw, 25px);
+        }
+
+        .recommend-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: clamp(10px, 2vw, 15px);
+            margin-bottom: clamp(15px, 2.5vw, 20px);
+        }
+
+        .recommend-header h3 {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: clamp(1rem, 2vw, 1.2rem);
+            color: #333;
+            margin: 0;
+        }
+
+        .recommend-btn {
+            background: linear-gradient(135deg, #27ae60 0%, #1e8449 100%);
+            color: white;
+            border: none;
+            padding: clamp(8px, 1.5vw, 12px) clamp(15px, 2.5vw, 25px);
+            border-radius: clamp(6px, 1vw, 8px);
+            font-size: clamp(0.85rem, 1.5vw, 0.95rem);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            min-height: 40px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .recommend-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(39, 174, 96, 0.4);
+        }
+
+        .recommend-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .recommend-list {
+            display: flex;
+            flex-direction: column;
+            gap: clamp(10px, 2vw, 15px);
+        }
+
+        .recommend-item {
+            background: white;
+            border: 2px solid #e1e5e9;
+            border-radius: clamp(8px, 1.5vw, 12px);
+            padding: clamp(12px, 2vw, 18px);
+            transition: all 0.3s ease;
+            animation: slideIn 0.4s ease-out;
+        }
+
+        .recommend-item:hover {
+            border-color: #27ae60;
+            box-shadow: 0 4px 15px rgba(39, 174, 96, 0.15);
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .recommend-item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: clamp(8px, 1.5vw, 12px);
+        }
+
+        .recommend-label {
+            font-size: clamp(0.8rem, 1.4vw, 0.9rem);
+            color: #27ae60;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .recommend-strategy {
+            font-size: clamp(0.7rem, 1.2vw, 0.8rem);
+            color: #888;
+            background: #f0f0f0;
+            padding: 4px 10px;
+            border-radius: 12px;
+        }
+
+        .recommend-balls {
+            display: flex;
+            gap: clamp(6px, 1.2vw, 10px);
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .recommend-ball {
+            width: clamp(32px, 5.5vw, 40px);
+            height: clamp(32px, 5.5vw, 40px);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: clamp(0.85rem, 1.5vw, 1rem);
+            font-weight: bold;
+            color: white;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.2), inset 0 -2px 6px rgba(0,0,0,0.15);
+            position: relative;
+        }
+
+        .recommend-ball::before {
+            content: '';
+            position: absolute;
+            top: 5px;
+            left: 8px;
+            width: 8px;
+            height: 5px;
+            background: rgba(255,255,255,0.35);
+            border-radius: 50%;
+            transform: rotate(-30deg);
+        }
+
+        .recommend-ball.red {
+            background: linear-gradient(135deg, #ff6b6b 0%, #e74c3c 50%, #c0392b 100%);
+        }
+
+        .recommend-ball.blue {
+            background: linear-gradient(135deg, #74b9ff 0%, #3498db 50%, #2980b9 100%);
+        }
+
+        .recommend-ball.green {
+            background: linear-gradient(135deg, #55efc4 0%, #27ae60 50%, #1e8449 100%);
+        }
+
+        .recommend-plus {
+            font-size: clamp(1.2rem, 2vw, 1.5rem);
+            color: #999;
+            display: flex;
+            align-items: center;
+        }
+
+        .recommend-empty {
+            text-align: center;
+            padding: clamp(25px, 4vw, 40px);
+            color: #888;
+        }
+
+        .recommend-empty-icon {
+            font-size: clamp(2.5rem, 5vw, 3.5rem);
+            margin-bottom: clamp(10px, 2vw, 15px);
+            opacity: 0.5;
+        }
+
+        .recommend-empty-text {
+            font-size: clamp(0.85rem, 1.5vw, 0.95rem);
+            line-height: 1.6;
+        }
+
+        .recommend-tip {
+            margin-top: clamp(12px, 2vw, 18px);
+            padding: clamp(10px, 2vw, 15px);
+            background: linear-gradient(135deg, #fff3cd 0%, #ffeeba 100%);
+            border: 1px solid #ffc107;
+            border-radius: clamp(6px, 1vw, 8px);
+            font-size: clamp(0.75rem, 1.3vw, 0.85rem);
+            color: #856404;
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+        }
+
+        .recommend-tip-icon {
+            font-size: clamp(1rem, 1.8vw, 1.2rem);
+            flex-shrink: 0;
+        }
+
+        /* 规则说明 */
+        .rules-section {
+            margin-top: clamp(15px, 2.5vw, 20px);
+        }
+
+        .rule-item {
+            display: flex;
+            gap: 10px;
+            padding: clamp(8px, 1.5vw, 10px) 0;
+            border-bottom: 1px solid #e1e5e9;
+        }
+
+        .rule-item:last-child {
+            border-bottom: none;
+        }
+
+        .rule-icon {
+            color: #e74c3c;
+            font-size: clamp(1rem, 1.8vw, 1.2rem);
+        }
+
+        .rule-text {
+            font-size: clamp(0.8rem, 1.5vw, 0.9rem);
+            color: #666;
+            line-height: 1.5;
+        }
+
+        /* 加载动画 */
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: clamp(30px, 5vw, 40px);
+        }
+
+        .loading-spinner {
+            width: clamp(30px, 5vw, 40px);
+            height: clamp(30px, 5vw, 40px);
+            border: 4px solid #e1e5e9;
+            border-top-color: #e74c3c;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* 错误提示 */
+        .error-msg {
+            background: rgba(231, 76, 60, 0.1);
+            border: 2px solid #e74c3c;
+            border-radius: clamp(8px, 1.5vw, 10px);
+            padding: clamp(12px, 2vw, 15px);
+            text-align: center;
+            color: #c0392b;
+        }
+
+        /* 七乐彩特殊样式 */
+        .qlc-balls .ball {
+            width: clamp(35px, 6vw, 45px);
+            height: clamp(35px, 6vw, 45px);
+            font-size: clamp(0.9rem, 1.8vw, 1.1rem);
+        }
+
+        /* 3D特殊样式 */
+        .fc3d-balls .ball {
+            width: clamp(45px, 8vw, 55px);
+            height: clamp(45px, 8vw, 55px);
+            font-size: clamp(1.2rem, 2.5vw, 1.5rem);
+        }
+
+        /* 响应式布局 */
+        @media (max-width: 768px) {
+            .container {
+                max-width: 100%;
+            }
+
+            .back-to-toolbox-btn {
+                display: none;
+            }
+
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+
+            .controls {
+                flex-direction: column;
+            }
+
+            .control-group {
+                min-width: 100%;
+            }
+
+            .btn {
+                width: 100%;
+            }
+
+            .history-section {
+                max-height: 300px;
+            }
+
+            .recommend-header {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .recommend-header h3 {
+                justify-content: center;
+            }
+
+            .recommend-btn {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .recommend-balls {
+                flex-wrap: nowrap;
+                justify-content: center;
+                gap: 4px;
+            }
+
+            .recommend-ball {
+                width: 32px;
+                height: 32px;
+                font-size: 0.75rem;
+            }
+
+            .recommend-ball::before {
+                top: 4px;
+                left: 6px;
+                width: 6px;
+                height: 4px;
+            }
+
+            .recommend-plus {
+                font-size: 1rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 8px;
+            }
+
+            .header {
+                padding: 15px;
+            }
+
+            .header h1 {
+                font-size: 1.3rem;
+            }
+
+            .content {
+                padding: 12px;
+            }
+
+            .lottery-tabs {
+                gap: 8px;
+            }
+
+            .tab-btn {
+                padding: 10px 15px;
+                font-size: 0.75rem;
+                flex: 1;
+                justify-content: center;
+            }
+
+            .ball {
+                width: 32px;
+                height: 32px;
+                font-size: 0.95rem;
+            }
+
+            .history-ball {
+                width: 28px;
+                height: 28px;
+                font-size: 0.6rem;
+            }
+
+            .hot-number {
+                width: 28px;
+                height: 28px;
+                font-size: 0.7rem;
+            }
+
+            .recommend-balls {
+                gap: 3px;
+            }
+
+            .recommend-ball {
+                width: 28px;
+                height: 28px;
+                font-size: 0.65rem;
+            }
+
+            .recommend-ball::before {
+                top: 3px;
+                left: 5px;
+                width: 5px;
+                height: 3px;
+            }
+
+            .recommend-plus {
+                font-size: 0.85rem;
+            }
+        }
+
+        /* 横屏模式优化 */
+        @media (max-width: 768px) and (orientation: landscape) {
+            body {
+                padding: 10px;
+            }
+
+            .header {
+                padding: 15px;
+            }
+
+            .main-content {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .history-section {
+                max-height: 200px;
+            }
+        }
+
+        /* 打印样式 */
+        @media print {
+            body {
+                background: white;
+                padding: 0;
+            }
+
+            .container {
+                box-shadow: none;
+                max-width: 100%;
+            }
+
+            .btn, .back-to-toolbox-btn, .controls {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <a href="tools.html" class="back-to-toolbox-btn">
+        <span>🔧</span>
+        <span>返回工具箱</span>
+    </a>
+
+    <div class="container">
+        <div class="header">
+            <h1>🎰 中国福利彩票开奖查询</h1>
+            <p>查询最新开奖结果及历史记录，理性购彩，快乐生活</p>
+        </div>
+
+        <div class="content">
+            <div class="lottery-tabs">
+                <button class="tab-btn active" onclick="switchLottery('ssq')" data-type="ssq">
+                    <span class="tab-icon">🔴</span>
+                    <span>双色球</span>
+                </button>
+                <button class="tab-btn" onclick="switchLottery('fc3d')" data-type="fc3d">
+                    <span class="tab-icon">🎲</span>
+                    <span>福彩3D</span>
+                </button>
+                <button class="tab-btn" onclick="switchLottery('qlc')" data-type="qlc">
+                    <span class="tab-icon">🌈</span>
+                    <span>七乐彩</span>
+                </button>
+            </div>
+
+            <div class="main-content">
+                <div class="left-section">
+                    <div class="card">
+                        <div class="card-title">
+                            <span>🎯</span>
+                            <span id="resultTitle">最新开奖结果</span>
+                        </div>
+                        
+                        <div class="controls">
+                            <div class="control-group">
+                                <label>期号查询</label>
+                                <input type="text" id="issueInput" placeholder="输入期号，如：2024145">
+                            </div>
+                            <div class="control-group">
+                                <label>查询期数</label>
+                                <select id="countSelect">
+                                    <option value="10">最近10期</option>
+                                    <option value="20">最近20期</option>
+                                    <option value="50">最近50期</option>
+                                    <option value="100">最近100期</option>
+                                    <option value="200">最近200期</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="controls">
+                            <button class="btn" onclick="queryByIssue()">🔍 查询</button>
+                            <button class="btn btn-secondary" onclick="refreshData()">🔄 刷新</button>
+                        </div>
+                        
+                        <div id="dataSourceTip" style="font-size: 0.8rem; text-align: center; margin-bottom: 10px; color: #888;"></div>
+
+                        <div id="latestResult" class="latest-result">
+                            <div class="loading">
+                                <div class="loading-spinner"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 号码统计 -->
+                    <div class="card" style="margin-top: clamp(15px, 3vw, 25px);">
+                        <div class="card-title">
+                            <span>📊</span>
+                            <span>号码出现频率</span>
+                        </div>
+                        <div id="hotNumbers" class="hot-numbers">
+                            <div class="loading">
+                                <div class="loading-spinner"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    
+                    <div class="card" style="margin-top: clamp(15px, 3vw, 25px);">
+                        <div class="card-title">
+                            <span>📖</span>
+                            <span id="rulesTitle">玩法规则</span>
+                        </div>
+                        <div id="rulesContent" class="rules-section">
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="right-section">
+                    <div class="card">
+                        <div class="card-title">
+                            <span>📜</span>
+                            <span>历史开奖记录</span>
+                        </div>
+                        <div id="historyList" class="history-section">
+                            <div class="loading">
+                                <div class="loading-spinner"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                <!-- 智能推荐 -->
+                <div class="card" style="margin-top: clamp(15px, 3vw, 25px);">
+                    <div class="card-title">
+                        <span>🎯</span>
+                        <span>智能号码推荐</span>
+                    </div>
+                    <div class="recommend-section">
+                        <div class="recommend-header">
+                            <h3>
+                                <span>💡</span>
+                                <span>基于历史数据分析推荐</span>
+                            </h3>
+                            <button class="recommend-btn" onclick="generateRecommendations()" id="recommendBtn">
+                                <span>🎲</span>
+                                <span>生成推荐号码</span>
+                            </button>
+                        </div>
+                        <div id="recommendList" class="recommend-list">
+                            <div class="recommend-empty">
+                                <div class="recommend-empty-icon">🎱</div>
+                                <div class="recommend-empty-text">
+                                    点击上方按钮生成5组推荐号码<br>
+                                    基于历史开奖数据智能分析
+                                </div>
+                            </div>
+                        </div>
+                        <div class="recommend-tip">
+                            <span class="recommend-tip-icon">⚠️</span>
+                            <span>温馨提示：推荐号码仅供参考，不构成投注建议。彩票有风险，投注需谨慎，理性购彩。</span>
+                        </div>
+                    </div>
+                </div>
+
+                </div>
+                
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentLottery = 'ssq';
+        let historyData = [];
+
+        // 彩票配置信息
+        const lotteryConfig = {
+            ssq: {
+                name: '双色球',
+                redCount: 6,
+                redMax: 33,
+                blueCount: 1,
+                blueMax: 16,
+                drawDays: [2, 4, 7], // 周二、周四、周日
+                rules: [
+                    { icon: '🔴', text: '红球：从01-33中选6个号码' },
+                    { icon: '🔵', text: '蓝球：从01-16中选1个号码' },
+                    { icon: '💰', text: '一等奖：6红+1蓝，奖金浮动' },
+                    { icon: '🎁', text: '二等奖：6红，奖金浮动' },
+                    { icon: '⏰', text: '开奖时间：每周二、四、日21:15' }
+                ]
+            },
+            fc3d: {
+                name: '福彩3D',
+                digitCount: 3,
+                digitMax: 9,
+                drawDays: [1, 2, 3, 4, 5, 6, 7], // 每天
+                rules: [
+                    { icon: '🎲', text: '从0-9中选3个数字' },
+                    { icon: '📍', text: '直选：号码和位置都对' },
+                    { icon: '🔄', text: '组选3：两同一不同' },
+                    { icon: '🔀', text: '组选6：三个号码各不同' },
+                    { icon: '⏰', text: '开奖时间：每天21:15' }
+                ]
+            },
+            qlc: {
+                name: '七乐彩',
+                mainCount: 7,
+                mainMax: 30,
+                specialCount: 1,
+                drawDays: [1, 3, 5], // 周一、三、五
+                rules: [
+                    { icon: '🌈', text: '从01-30中选7个基本号码' },
+                    { icon: '⭐', text: '额外产生1个特别号码' },
+                    { icon: '💰', text: '一等奖：7个基本号全中' },
+                    { icon: '🎁', text: '二等奖：6基本+1特别' },
+                    { icon: '⏰', text: '开奖时间：每周一、三、五21:15' }
+                ]
+            }
+        };
+
+        // 初始化
+        document.addEventListener('DOMContentLoaded', () => {
+            loadLotteryData();
+        });
+
+        // 切换彩票类型
+        function switchLottery(type) {
+            currentLottery = type;
+            
+            // 更新标签状态
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.dataset.type === type) {
+                    btn.classList.add('active');
+                }
+            });
+
+            // 更新规则
+            updateRules();
+            
+            // 加载数据
+            loadLotteryData();
+        }
+
+        // 更新规则显示
+        function updateRules() {
+            const config = lotteryConfig[currentLottery];
+            const rulesContent = document.getElementById('rulesContent');
+            document.getElementById('rulesTitle').textContent = `${config.name}玩法规则`;
+            
+            rulesContent.innerHTML = config.rules.map(rule => `
+                <div class="rule-item">
+                    <span class="rule-icon">${rule.icon}</span>
+                    <span class="rule-text">${rule.text}</span>
+                </div>
+            `).join('');
+        }
+
+        // 加载彩票数据
+        async function loadLotteryData() {
+            showLoading();
+            
+            const count = document.getElementById('countSelect').value;
+            
+            // 首先尝试从localStorage获取缓存数据
+            const cacheKey = `lottery_${currentLottery}_${count}`;
+            const cachedData = localStorage.getItem(cacheKey);
+            const cacheTime = localStorage.getItem(cacheKey + '_time');
+            const now = Date.now();
+            
+            // 缓存有效期1小时
+            if (cachedData && cacheTime && (now - parseInt(cacheTime)) < 3600000) {
+                try {
+                    const data = JSON.parse(cachedData);
+                    historyData = data;
+                    renderLatestResult(historyData[0]);
+                    renderHistoryList(historyData);
+                    renderHotNumbers(historyData);
+                    updateDataSourceTip(true);
+                    return;
+                } catch (e) {
+                    console.log('缓存数据解析失败');
+                }
+            }
+            
+            // 尝试获取API数据
+            try {
+                const data = await fetchLotteryData(currentLottery, count);
+                historyData = data;
+                
+                // 缓存数据
+                try {
+                    localStorage.setItem(cacheKey, JSON.stringify(historyData));
+                    localStorage.setItem(cacheKey + '_time', now.toString());
+                } catch (e) {
+                    console.log('缓存保存失败');
+                }
+                
+                renderLatestResult(data[0]);
+                renderHistoryList(data);
+                renderHotNumbers(data);
+                updateDataSourceTip(true);
+            } catch (error) {
+                console.error('加载数据失败:', error);
+                showError(error.message || '数据加载失败，请稍后重试');
+                updateDataSourceTip(false);
+            }
+        }
+
+        // 显示错误信息
+        function showError(message) {
+            const errorHtml = `
+                <div class="error-msg">
+                    <div style="font-size: 2rem; margin-bottom: 10px;">😞</div>
+                    <div>${message}</div>
+                    <button class="btn" style="margin-top: 15px;" onclick="refreshData()">🔄 重新加载</button>
+                </div>
+            `;
+            document.getElementById('latestResult').innerHTML = errorHtml;
+            document.getElementById('historyList').innerHTML = '<div class="error-msg">暂无数据</div>';
+            document.getElementById('hotNumbers').innerHTML = '<div style="color: #888; text-align: center; padding: 20px;">暂无数据</div>';
+        }
+
+        // 更新数据来源提示
+        function updateDataSourceTip(success) {
+            const tipElement = document.getElementById('dataSourceTip');
+            if (tipElement) {
+                if (success) {
+                    tipElement.innerHTML = '<span style="color: #27ae60;">✓ 数据来源：在线接口</span>';
+                } else {
+                    tipElement.innerHTML = '<span style="color: #e74c3c;">✗ 数据加载失败</span>';
+                }
+            }
+        }
+
+        // 获取彩票数据API
+        async function fetchLotteryData(type, count) {
+            const apiUrls = {
+                ssq: `http://api.huiniao.top/interface/home/lotteryHistory?type=ssq&page=1&limit=${count}`,
+                fc3d: `http://api.huiniao.top/interface/home/lotteryHistory?type=fcsd&page=1&limit=${count}`,
+                qlc: `http://api.huiniao.top/interface/home/lotteryHistory?type=qlc&page=1&limit=${count}`
+            };
+            
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 10000);
+            
+            try {
+                const response = await fetch(apiUrls[type], {
+                    signal: controller.signal
+                });
+                clearTimeout(timeoutId);
+                
+                if (!response.ok) {
+                    throw new Error(`服务器响应错误: ${response.status}`);
+                }
+                
+                const json = await response.json();
+                
+                // API返回格式: { code: 1, info: "成功", data: { data: { list: [...] } } }
+                if (json.code === 1 && json.data && json.data.data && json.data.data.list && json.data.data.list.length > 0) {
+                    return json.data.data.list.map(item => parseApiData(type, item));
+                } else {
+                    throw new Error(json.info || '接口返回数据为空');
+                }
+            } catch (e) {
+                clearTimeout(timeoutId);
+                if (e.name === 'AbortError') {
+                    throw new Error('请求超时，请检查网络连接');
+                }
+                throw new Error(e.message || '网络请求失败');
+            }
+        }
+
+        // 解析API返回的数据 (api.huiniao.top格式)
+        // 双色球: { code, day, one-six(红球), seven(蓝球), open_time }
+        // 福彩3D: { code, day, one-three(数字，注意是number类型), open_time }
+        // 七乐彩: { code, day, one-seven(基本号), eight(特别号), open_time }
+        function parseApiData(type, item) {
+            const issue = item.code || '';
+            const date = item.day || '';
+            
+            if (type === 'ssq') {
+                // 双色球: one-six 是红球, seven 是蓝球
+                const red = [
+                    String(item.one).padStart(2, '0'),
+                    String(item.two).padStart(2, '0'),
+                    String(item.three).padStart(2, '0'),
+                    String(item.four).padStart(2, '0'),
+                    String(item.five).padStart(2, '0'),
+                    String(item.six).padStart(2, '0')
+                ];
+                const blue = String(item.seven).padStart(2, '0');
+                
+                return {
+                    issue: issue,
+                    red: red,
+                    blue: blue,
+                    date: date,
+                    sales: item.sales || 0,
+                    pool: item.pool || 0,
+                    prizes: item.prizes || []
+                };
+                
+            } else if (type === 'fc3d') {
+                // 福彩3D: one, two, three (注意API返回的是数字类型)
+                const numbers = [
+                    String(item.one),
+                    String(item.two),
+                    String(item.three)
+                ];
+                
+                return {
+                    issue: issue,
+                    numbers: numbers,
+                    date: date,
+                    sales: item.sales || 0,
+                    prizes: item.prizes || []
+                };
+                
+            } else if (type === 'qlc') {
+                // 七乐彩: one-seven 是基本号, eight 是特别号
+                const main = [
+                    String(item.one).padStart(2, '0'),
+                    String(item.two).padStart(2, '0'),
+                    String(item.three).padStart(2, '0'),
+                    String(item.four).padStart(2, '0'),
+                    String(item.five).padStart(2, '0'),
+                    String(item.six).padStart(2, '0'),
+                    String(item.seven).padStart(2, '0')
+                ];
+                const special = String(item.eight).padStart(2, '0');
+                
+                return {
+                    issue: issue,
+                    main: main,
+                    special: special,
+                    date: date,
+                    sales: item.sales || 0,
+                    pool: item.pool || 0,
+                    prizes: item.prizes || []
+                };
+            }
+            
+            return null;
+        }
+
+        // 生成模拟数据（使用种子随机数保证一致性）
+        function generateMockData(type, count) {
+            const data = [];
+            const today = new Date();
+            const year = today.getFullYear();
+            
+            // 计算当前期号基准
+            const dayOfYear = Math.floor((today - new Date(year, 0, 0)) / 86400000);
+            
+            // 根据彩票类型计算开奖周期
+            let issueBase, interval;
+            if (type === 'ssq') {
+                // 双色球每周开3期
+                issueBase = Math.floor(dayOfYear / 7 * 3) + 1;
+                interval = 2; // 约2-3天一期
+            } else if (type === 'fc3d') {
+                // 福彩3D每天一期
+                issueBase = dayOfYear;
+                interval = 1;
+            } else if (type === 'qlc') {
+                // 七乐彩每周开3期
+                issueBase = Math.floor(dayOfYear / 7 * 3) + 1;
+                interval = 2;
+            }
+            
+            for (let i = 0; i < count; i++) {
+                const date = new Date(today);
+                date.setDate(date.getDate() - i * interval);
+                const issueNum = issueBase - i;
+                const issueStr = `${year}${String(Math.max(1, issueNum)).padStart(3, '0')}`;
+                
+                // 使用期号作为随机种子，保证同一期号生成相同号码
+                const seed = parseInt(issueStr);
+                const seededRandom = createSeededRandom(seed);
+                
+                if (type === 'ssq') {
+                    data.push({
+                        issue: issueStr,
+                        red: generateSeededUniqueNumbers(seededRandom, 6, 1, 33).sort((a, b) => a - b).map(n => String(n).padStart(2, '0')),
+                        blue: String(Math.floor(seededRandom() * 16) + 1).padStart(2, '0'),
+                        date: formatDate(date),
+                        sales: Math.floor(seededRandom() * 200000000 + 300000000),
+                        pool: Math.floor(seededRandom() * 500000000 + 1000000000),
+                        prizes: [
+                            { type: '一等奖', count: Math.floor(seededRandom() * 10) + 1, money: Math.floor(seededRandom() * 5000000 + 5000000) },
+                            { type: '二等奖', count: Math.floor(seededRandom() * 100) + 10, money: Math.floor(seededRandom() * 100000 + 100000) }
+                        ]
+                    });
+                } else if (type === 'fc3d') {
+                    data.push({
+                        issue: issueStr,
+                        numbers: [
+                            String(Math.floor(seededRandom() * 10)),
+                            String(Math.floor(seededRandom() * 10)),
+                            String(Math.floor(seededRandom() * 10))
+                        ],
+                        date: formatDate(date),
+                        sales: Math.floor(seededRandom() * 50000000 + 30000000),
+                        prizes: [
+                            { type: '直选', count: Math.floor(seededRandom() * 1000) + 100, money: 1040 },
+                            { type: '组选3', count: Math.floor(seededRandom() * 2000) + 500, money: 346 },
+                            { type: '组选6', count: Math.floor(seededRandom() * 3000) + 1000, money: 173 }
+                        ]
+                    });
+                } else if (type === 'qlc') {
+                    data.push({
+                        issue: issueStr,
+                        main: generateSeededUniqueNumbers(seededRandom, 7, 1, 30).sort((a, b) => a - b).map(n => String(n).padStart(2, '0')),
+                        special: String(Math.floor(seededRandom() * 30) + 1).padStart(2, '0'),
+                        date: formatDate(date),
+                        sales: Math.floor(seededRandom() * 100000000 + 50000000),
+                        pool: Math.floor(seededRandom() * 100000000 + 50000000),
+                        prizes: [
+                            { type: '一等奖', count: Math.floor(seededRandom() * 5) + 1, money: Math.floor(seededRandom() * 3000000 + 2000000) },
+                            { type: '二等奖', count: Math.floor(seededRandom() * 20) + 5, money: Math.floor(seededRandom() * 50000 + 30000) }
+                        ]
+                    });
+                }
+            }
+            
+            return data;
+        }
+
+        // 创建种子随机数生成器（保证相同种子生成相同序列）
+        function createSeededRandom(seed) {
+            return function() {
+                seed = (seed * 9301 + 49297) % 233280;
+                return seed / 233280;
+            };
+        }
+
+        // 使用种子随机数生成不重复数字
+        function generateSeededUniqueNumbers(seededRandom, count, min, max) {
+            const numbers = new Set();
+            while (numbers.size < count) {
+                numbers.add(Math.floor(seededRandom() * (max - min + 1)) + min);
+            }
+            return Array.from(numbers);
+        }
+
+        // 生成不重复的随机数
+        function generateUniqueNumbers(count, min, max) {
+            const numbers = new Set();
+            while (numbers.size < count) {
+                numbers.add(Math.floor(Math.random() * (max - min + 1)) + min);
+            }
+            return Array.from(numbers);
+        }
+
+        // 格式化日期
+        function formatDate(date) {
+            return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+        }
+
+        // 渲染最新结果
+        function renderLatestResult(data) {
+            const container = document.getElementById('latestResult');
+            
+            if (!data) {
+                container.innerHTML = '<div class="error-msg">暂无开奖数据</div>';
+                return;
+            }
+
+            let ballsHtml = '';
+            let extraInfo = '';
+
+            if (currentLottery === 'ssq') {
+                ballsHtml = `
+                    <div class="balls-container">
+                        ${data.red.map((num, i) => `<div class="ball red" style="animation-delay: ${i * 0.1}s">${num}</div>`).join('')}
+                        <span class="plus-sign">+</span>
+                        <div class="ball blue" style="animation-delay: 0.7s">${data.blue}</div>
+                    </div>
+                `;
+            } else if (currentLottery === 'fc3d') {
+                ballsHtml = `
+                    <div class="balls-container fc3d-balls">
+                        ${data.numbers.map((num, i) => `<div class="ball red" style="animation-delay: ${i * 0.15}s">${num}</div>`).join('')}
+                    </div>
+                `;
+            } else if (currentLottery === 'qlc') {
+                ballsHtml = `
+                    <div class="balls-container qlc-balls">
+                        ${data.main.map((num, i) => `<div class="ball red" style="animation-delay: ${i * 0.1}s">${num}</div>`).join('')}
+                        <span class="plus-sign">+</span>
+                        <div class="ball green" style="animation-delay: 0.8s">${data.special}</div>
+                    </div>
+                `;
+            }
+
+            // 奖金信息
+            if (data.prizes && data.prizes.length > 0) {
+                extraInfo = `
+                    <div class="prize-info">
+                        ${data.prizes.slice(0, 3).map(prize => `
+                            <div class="prize-row">
+                                <span class="prize-level">${prize.type}</span>
+                                <span class="prize-amount">${prize.count}注 · ${formatMoney(prize.money)}元</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            }
+
+            container.innerHTML = `
+                <div class="issue-info">
+                    第 <span class="issue-number">${data.issue}</span> 期
+                </div>
+                ${ballsHtml}
+                <div class="draw-time">
+                    开奖日期：${data.date}
+                    ${data.sales ? ` · 销售额：${formatMoney(data.sales)}元` : ''}
+                </div>
+                ${extraInfo}
+                ${data.pool ? `<div class="draw-time">奖池金额：${formatMoney(data.pool)}元</div>` : ''}
+            `;
+        }
+
+        // 渲染历史记录
+        function renderHistoryList(data) {
+            const container = document.getElementById('historyList');
+            
+            if (!data || data.length === 0) {
+                container.innerHTML = '<div class="error-msg">暂无历史数据</div>';
+                return;
+            }
+
+            container.innerHTML = data.map(item => {
+                let ballsHtml = '';
+                
+                if (currentLottery === 'ssq') {
+                    ballsHtml = `
+                        ${item.red.map(num => `<span class="history-ball red">${num}</span>`).join('')}
+                        <span class="history-plus">+</span>
+                        <span class="history-ball blue">${item.blue}</span>
+                    `;
+                } else if (currentLottery === 'fc3d') {
+                    ballsHtml = item.numbers.map(num => `<span class="history-ball red">${num}</span>`).join('');
+                } else if (currentLottery === 'qlc') {
+                    ballsHtml = `
+                        ${item.main.map(num => `<span class="history-ball red">${num}</span>`).join('')}
+                        <span class="history-plus">+</span>
+                        <span class="history-ball green">${item.special}</span>
+                    `;
+                }
+
+                return `
+                    <div class="history-item" onclick="showDetail('${item.issue}')">
+                        <div class="history-issue">第${item.issue}期 · ${item.date}</div>
+                        <div class="history-balls">${ballsHtml}</div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // 渲染热号统计
+        function renderHotNumbers(data) {
+            const container = document.getElementById('hotNumbers');
+            
+            if (!data || data.length < 10) {
+                container.innerHTML = '<div style="color: #888; text-align: center; padding: 20px;">数据不足，无法统计</div>';
+                return;
+            }
+
+            // 统计号码出现次数
+            const frequency = {};
+            const config = lotteryConfig[currentLottery];
+            
+            if (currentLottery === 'ssq') {
+                // 统计红球
+                for (let i = 1; i <= 33; i++) {
+                    frequency[i] = 0;
+                }
+                data.forEach(item => {
+                    item.red.forEach(num => {
+                        frequency[parseInt(num)]++;
+                    });
+                });
+            } else if (currentLottery === 'fc3d') {
+                for (let i = 0; i <= 9; i++) {
+                    frequency[i] = 0;
+                }
+                data.forEach(item => {
+                    item.numbers.forEach(num => {
+                        frequency[parseInt(num)]++;
+                    });
+                });
+            } else if (currentLottery === 'qlc') {
+                for (let i = 1; i <= 30; i++) {
+                    frequency[i] = 0;
+                }
+                data.forEach(item => {
+                    item.main.forEach(num => {
+                        frequency[parseInt(num)]++;
+                    });
+                });
+            }
+
+            // 计算热度等级
+            const values = Object.values(frequency);
+            const maxFreq = Math.max(...values);
+            const minFreq = Math.min(...values);
+            const range = maxFreq - minFreq;
+            const hotThreshold = minFreq + range * 0.66;
+            const warmThreshold = minFreq + range * 0.33;
+
+            const numbersHtml = Object.entries(frequency).map(([num, count]) => {
+                let level = 'cold';
+                if (count >= hotThreshold) level = 'hot';
+                else if (count >= warmThreshold) level = 'warm';
+                
+                return `<div class="hot-number ${level}" title="出现${count}次">${String(num).padStart(currentLottery === 'fc3d' ? 1 : 2, '0')}</div>`;
+            }).join('');
+
+            container.innerHTML = `
+                <div class="hot-number-grid">${numbersHtml}</div>
+                <div class="hot-legend">
+                    <span><span class="legend-dot hot"></span>热号（高频）</span>
+                    <span><span class="legend-dot warm"></span>温号（中频）</span>
+                    <span><span class="legend-dot cold"></span>冷号（低频）</span>
+                </div>
+            `;
+        }
+
+        // 显示详情
+        function showDetail(issue) {
+            const item = historyData.find(d => d.issue === issue);
+            if (item) {
+                renderLatestResult(item);
+                document.getElementById('issueInput').value = issue;
+            }
+        }
+
+        // 按期号查询
+        function queryByIssue() {
+            const issue = document.getElementById('issueInput').value.trim();
+            if (issue) {
+                const item = historyData.find(d => d.issue === issue || d.issue.endsWith(issue));
+                if (item) {
+                    renderLatestResult(item);
+                } else {
+                    alert('未找到该期号的开奖记录');
+                }
+            } else {
+                loadLotteryData();
+            }
+        }
+
+        // 刷新数据
+        function refreshData() {
+            loadLotteryData();
+        }
+
+        // 显示加载状态
+        function showLoading() {
+            const loadingHtml = '<div class="loading"><div class="loading-spinner"></div></div>';
+            document.getElementById('latestResult').innerHTML = loadingHtml;
+            document.getElementById('historyList').innerHTML = loadingHtml;
+            document.getElementById('hotNumbers').innerHTML = loadingHtml;
+        }
+
+        // 格式化金额
+        function formatMoney(amount) {
+            if (!amount) return '0';
+            if (amount >= 100000000) {
+                return (amount / 100000000).toFixed(2) + '亿';
+            } else if (amount >= 10000) {
+                return (amount / 10000).toFixed(2) + '万';
+            }
+            return amount.toLocaleString();
+        }
+
+        // 初始化规则
+        updateRules();
+
+        // ==================== 智能推荐功能 ====================
+
+        // 获取历史开奖号码集合（用于排除）
+        function getHistoryNumberSets() {
+            const sets = new Set();
+            
+            if (currentLottery === 'ssq') {
+                historyData.forEach(item => {
+                    // 将红球+蓝球组合成唯一字符串
+                    const key = item.red.sort().join(',') + '+' + item.blue;
+                    sets.add(key);
+                });
+            } else if (currentLottery === 'fc3d') {
+                historyData.forEach(item => {
+                    const key = item.numbers.join(',');
+                    sets.add(key);
+                });
+            } else if (currentLottery === 'qlc') {
+                historyData.forEach(item => {
+                    const key = item.main.sort().join(',') + '+' + item.special;
+                    sets.add(key);
+                });
+            }
+            
+            return sets;
+        }
+
+        // 计算号码权重（基于历史出现频率）
+        function calculateWeights() {
+            const frequency = {};
+            const blueFrequency = {};
+            
+            if (currentLottery === 'ssq') {
+                // 初始化红球权重
+                for (let i = 1; i <= 33; i++) frequency[i] = 0;
+                for (let i = 1; i <= 16; i++) blueFrequency[i] = 0;
+                
+                historyData.forEach(item => {
+                    item.red.forEach(num => frequency[parseInt(num)]++);
+                    blueFrequency[parseInt(item.blue)]++;
+                });
+            } else if (currentLottery === 'fc3d') {
+                for (let i = 0; i <= 9; i++) frequency[i] = 0;
+                historyData.forEach(item => {
+                    item.numbers.forEach(num => frequency[parseInt(num)]++);
+                });
+            } else if (currentLottery === 'qlc') {
+                for (let i = 1; i <= 30; i++) frequency[i] = 0;
+                historyData.forEach(item => {
+                    item.main.forEach(num => frequency[parseInt(num)]++);
+                });
+            }
+            
+            return { frequency, blueFrequency };
+        }
+
+        // 基于权重的随机选择
+        function weightedRandomSelect(numbers, weights, count, strategy) {
+            const selected = new Set();
+            const availableNumbers = [...numbers];
+            
+            while (selected.size < count && availableNumbers.length > 0) {
+                let totalWeight = 0;
+                const weightedNumbers = availableNumbers.map(num => {
+                    let weight;
+                    if (strategy === 'hot') {
+                        // 热号策略：高频号权重大
+                        weight = weights[num] + 1;
+                    } else if (strategy === 'cold') {
+                        // 冷号策略：低频号权重大
+                        const maxWeight = Math.max(...Object.values(weights));
+                        weight = maxWeight - weights[num] + 1;
+                    } else if (strategy === 'balanced') {
+                        // 均衡策略：所有号码等权重
+                        weight = 1;
+                    } else if (strategy === 'mixed') {
+                        // 混合策略：热号和冷号各半
+                        const values = Object.values(weights);
+                        const avgWeight = values.reduce((a, b) => a + b, 0) / values.length;
+                        weight = Math.abs(weights[num] - avgWeight) + 1;
+                    } else {
+                        weight = 1;
+                    }
+                    totalWeight += weight;
+                    return { num, weight, cumWeight: totalWeight };
+                });
+                
+                const rand = Math.random() * totalWeight;
+                const selectedItem = weightedNumbers.find(item => rand <= item.cumWeight);
+                
+                if (selectedItem) {
+                    selected.add(selectedItem.num);
+                    const index = availableNumbers.indexOf(selectedItem.num);
+                    if (index > -1) availableNumbers.splice(index, 1);
+                }
+            }
+            
+            return Array.from(selected);
+        }
+
+        // 生成一组推荐号码
+        function generateOneSet(weights, strategy, usedSets) {
+            const maxAttempts = 100;
+            let attempts = 0;
+            
+            while (attempts < maxAttempts) {
+                let result = null;
+                let key = '';
+                
+                if (currentLottery === 'ssq') {
+                    const redNumbers = Array.from({length: 33}, (_, i) => i + 1);
+                    const blueNumbers = Array.from({length: 16}, (_, i) => i + 1);
+                    
+                    const red = weightedRandomSelect(redNumbers, weights.frequency, 6, strategy)
+                        .sort((a, b) => a - b)
+                        .map(n => String(n).padStart(2, '0'));
+                    
+                    const blue = weightedRandomSelect(blueNumbers, weights.blueFrequency, 1, strategy)
+                        .map(n => String(n).padStart(2, '0'))[0];
+                    
+                    key = red.join(',') + '+' + blue;
+                    result = { red, blue };
+                    
+                } else if (currentLottery === 'fc3d') {
+                    // 福彩3D可以有重复数字
+                    const numbers = [];
+                    for (let i = 0; i < 3; i++) {
+                        const allNumbers = Array.from({length: 10}, (_, j) => j);
+                        const selected = weightedRandomSelect(allNumbers, weights.frequency, 1, strategy);
+                        numbers.push(String(selected[0]));
+                    }
+                    key = numbers.join(',');
+                    result = { numbers };
+                    
+                } else if (currentLottery === 'qlc') {
+                    const mainNumbers = Array.from({length: 30}, (_, i) => i + 1);
+                    
+                    const main = weightedRandomSelect(mainNumbers, weights.frequency, 7, strategy)
+                        .sort((a, b) => a - b)
+                        .map(n => String(n).padStart(2, '0'));
+                    
+                    // 特别号从剩余号码中选
+                    const remainingNumbers = mainNumbers.filter(n => !main.includes(String(n).padStart(2, '0')));
+                    const special = weightedRandomSelect(remainingNumbers, weights.frequency, 1, 'balanced')
+                        .map(n => String(n).padStart(2, '0'))[0];
+                    
+                    key = main.join(',') + '+' + special;
+                    result = { main, special };
+                }
+                
+                // 检查是否与历史或已生成的重复
+                if (!usedSets.has(key)) {
+                    usedSets.add(key);
+                    return { result, key };
+                }
+                
+                attempts++;
+            }
+            
+            return null;
+        }
+
+        // 生成5组推荐号码
+        function generateRecommendations() {
+            if (!historyData || historyData.length < 10) {
+                alert('历史数据不足，请先加载更多数据！');
+                return;
+            }
+            
+            const btn = document.getElementById('recommendBtn');
+            btn.disabled = true;
+            btn.innerHTML = '<span>⏳</span><span>生成中...</span>';
+            
+            setTimeout(() => {
+                try {
+                    const historySets = getHistoryNumberSets();
+                    const usedSets = new Set([...historySets]);
+                    const weights = calculateWeights();
+                    
+                    // 5种不同策略
+                    const strategies = [
+                        { name: 'hot', label: '热号优先', icon: '🔥' },
+                        { name: 'cold', label: '冷号补位', icon: '❄️' },
+                        { name: 'balanced', label: '均衡随机', icon: '⚖️' },
+                        { name: 'mixed', label: '冷热混合', icon: '🎯' },
+                        { name: 'balanced', label: '机选号码', icon: '🎲' }
+                    ];
+                    
+                    const recommendations = [];
+                    
+                    for (let i = 0; i < 5; i++) {
+                        const strategy = strategies[i];
+                        const generated = generateOneSet(weights, strategy.name, usedSets);
+                        
+                        if (generated) {
+                            recommendations.push({
+                                index: i + 1,
+                                strategy: strategy,
+                                data: generated.result
+                            });
+                        }
+                    }
+                    
+                    renderRecommendations(recommendations);
+                    
+                } catch (error) {
+                    console.error('生成推荐失败:', error);
+                    alert('生成推荐失败，请重试！');
+                }
+                
+                btn.disabled = false;
+                btn.innerHTML = '<span>🎲</span><span>重新生成</span>';
+            }, 500);
+        }
+
+        // 渲染推荐结果
+        function renderRecommendations(recommendations) {
+            const container = document.getElementById('recommendList');
+            
+            if (!recommendations || recommendations.length === 0) {
+                container.innerHTML = `
+                    <div class="recommend-empty">
+                        <div class="recommend-empty-icon">😅</div>
+                        <div class="recommend-empty-text">
+                            生成失败，可能是因为历史数据中已包含大部分组合<br>
+                            请尝试加载更多历史数据后重试
+                        </div>
+                    </div>
+                `;
+                return;
+            }
+            
+            container.innerHTML = recommendations.map((item, index) => {
+                let ballsHtml = '';
+                
+                if (currentLottery === 'ssq') {
+                    ballsHtml = `
+                        ${item.data.red.map(num => `<span class="recommend-ball red">${num}</span>`).join('')}
+                        <span class="recommend-plus">+</span>
+                        <span class="recommend-ball blue">${item.data.blue}</span>
+                    `;
+                } else if (currentLottery === 'fc3d') {
+                    ballsHtml = item.data.numbers.map(num => `<span class="recommend-ball red">${num}</span>`).join('');
+                } else if (currentLottery === 'qlc') {
+                    ballsHtml = `
+                        ${item.data.main.map(num => `<span class="recommend-ball red">${num}</span>`).join('')}
+                        <span class="recommend-plus">+</span>
+                        <span class="recommend-ball green">${item.data.special}</span>
+                    `;
+                }
+                
+                return `
+                    <div class="recommend-item" style="animation-delay: ${index * 0.1}s">
+                        <div class="recommend-item-header">
+                            <span class="recommend-label">
+                                <span>${item.strategy.icon}</span>
+                                <span>第 ${item.index} 组</span>
+                            </span>
+                            <span class="recommend-strategy">${item.strategy.label}</span>
+                        </div>
+                        <div class="recommend-balls">${ballsHtml}</div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // 切换彩票类型时清空推荐
+        const originalSwitchLottery = switchLottery;
+        switchLottery = function(type) {
+            originalSwitchLottery(type);
+            // 清空推荐列表
+            const container = document.getElementById('recommendList');
+            if (container) {
+                container.innerHTML = `
+                    <div class="recommend-empty">
+                        <div class="recommend-empty-icon">🎱</div>
+                        <div class="recommend-empty-text">
+                            点击上方按钮生成5组推荐号码<br>
+                            基于历史开奖数据智能分析
+                        </div>
+                    </div>
+                `;
+            }
+            // 重置按钮文字
+            const btn = document.getElementById('recommendBtn');
+            if (btn) {
+                btn.innerHTML = '<span>🎲</span><span>生成推荐号码</span>';
+            }
+        };
+    </script>
+</body>
+</html>
